@@ -1,5 +1,5 @@
-/* Contact page. Scoped with :has(.contact-page) so it works on any Cargo
-   page ID and matches the index page's type, colours and layout. */
+/* Contact page: George Domm Power's layout, with the index page's
+   type, colours and column. */
 
 body:has(.contact-page) {
   background: #000000 !important;
@@ -12,135 +12,51 @@ body:has(.contact-page) {
   max-width: 100%;
   padding: 0;
   background: transparent !important;
-  color: #ffffff !important;
 }
 
 .page:has(.contact-page) .page-content {
-  --site-type-size: 11px;
-  position: relative;
   box-sizing: border-box;
   width: min(72%, 72rem);
   max-width: 72rem;
-  min-width: 0;
   margin: 0 auto;
   padding: clamp(7rem, 16vh, 12rem) 0 4rem !important;
   text-align: left;
   background: transparent !important;
+}
+
+.contact-page,
+.contact-page p,
+.contact-page a {
   color: #ffffff !important;
   font-family: ui-monospace, "SFMono-Regular", Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace !important;
-  font-size: var(--site-type-size) !important;
+  font-size: 11px !important;
   font-weight: 400;
   line-height: 1.65;
   -webkit-text-size-adjust: 100%;
   text-size-adjust: 100%;
 }
 
-.contact-page,
-.contact-page a {
-  color: #ffffff !important;
-  font-family: ui-monospace, "SFMono-Regular", Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace !important;
-  font-size: var(--site-type-size, 11px) !important;
-  font-weight: 400;
-  line-height: 1.65;
-  text-decoration: none !important;
-}
-
-/* Heading, identical to the index */
-
 .contact-page .index-heading {
   margin: 0 0 2rem;
-  font-size: var(--site-type-size, 11px) !important;
-  line-height: 1.65 !important;
 }
 
 .contact-page .contact-back {
+  text-decoration: none !important;
+}
+
+.contact-page p {
+  margin: 0 0 1.65em;
+}
+
+.contact-page a {
+  text-decoration: underline !important;
+  text-decoration-thickness: 1px !important;
+  text-underline-offset: 0.2em;
   transition: color 800ms ease;
 }
 
-.contact-page .contact-back:hover {
+.contact-page a:hover {
   color: #8f8f8f !important;
-}
-
-/* Contact rows, styled like the project list */
-
-.contact-page .contact-list {
-  width: 100%;
-}
-
-.contact-page .contact-row {
-  display: flex;
-  align-items: baseline;
-  box-sizing: border-box;
-  width: 100%;
-  padding: 0.35rem 0 0.3rem;
-  transition: color 800ms ease;
-}
-
-
-.contact-page .contact-label {
-  flex: 0 0 auto;
-}
-
-.contact-page .contact-leader {
-  flex: 1 1 auto;
-  min-width: 2rem;
-  margin: 0 0.8ch 0.32em;
-  border-bottom: 1px dotted rgba(255, 255, 255, 0.72);
-}
-
-.contact-page .contact-value {
-  flex: 0 1 auto;
-  min-width: 0;
-  color: #8f8f8f;
-  text-align: right;
-  overflow-wrap: anywhere;
-  transition: color 240ms ease;
-}
-
-.contact-page .contact-row:hover {
-  color: #8f8f8f !important;
-}
-
-.contact-page .contact-row:hover .contact-value {
-  color: #ffffff;
-}
-
-.contact-page .contact-row:focus-visible {
-  outline: 1px dotted currentColor;
-  outline-offset: 3px;
-}
-
-/* Mobile: label and value stacked, dotted rule underneath */
-
-.mobile .page:has(.contact-page) .page-content {
-  width: 100%;
-  max-width: 100%;
-  margin: 0;
-  padding: 3rem 1.25rem !important;
-}
-
-.mobile .contact-page .contact-row {
-  position: relative;
-  display: grid;
-  grid-template-columns: minmax(0, 1fr);
-}
-
-
-.mobile .contact-page .contact-row::after {
-  position: absolute;
-  right: 0;
-  bottom: 0;
-  left: 0;
-  border-bottom: 1px dotted rgba(255, 255, 255, 0.72);
-  content: "";
-}
-
-.mobile .contact-page .contact-leader {
-  display: none;
-}
-
-.mobile .contact-page .contact-value {
-  text-align: left;
 }
 
 @media (max-width: 767px) {
@@ -150,28 +66,11 @@ body:has(.contact-page) {
     margin: 0;
     padding: 3rem 1.25rem !important;
   }
+}
 
-  .contact-page .contact-row {
-    position: relative;
-    display: grid;
-    grid-template-columns: minmax(0, 1fr);
-  }
-
-
-  .contact-page .contact-row::after {
-    position: absolute;
-    right: 0;
-    bottom: 0;
-    left: 0;
-    border-bottom: 1px dotted rgba(255, 255, 255, 0.72);
-    content: "";
-  }
-
-  .contact-page .contact-leader {
-    display: none;
-  }
-
-  .contact-page .contact-value {
-    text-align: left;
-  }
+.mobile .page:has(.contact-page) .page-content {
+  width: 100%;
+  max-width: 100%;
+  margin: 0;
+  padding: 3rem 1.25rem !important;
 }
