@@ -1052,7 +1052,8 @@
    });
  });
 
- /* Keyboard: ← / → skip the current video back / forward 3 seconds. */
+ /* Keyboard: ← / → skip the current video back / forward 3 seconds;
+    F toggles fullscreen. */
  var SEEK_STEP = 3;
 
  function keyboardVideo() {
@@ -1073,8 +1074,10 @@
    window.removeEventListener("keydown", window._elliotArrowKeys, true);
  }
  window._elliotArrowKeys = function (event) {
-   if (event.key !== "ArrowLeft" && event.key !== "ArrowRight") return;
-   if (event.altKey || event.ctrlKey || event.metaKey || event.shiftKey) return;
+   var isFullscreenKey = event.key === "f" || event.key === "F";
+   if (event.key !== "ArrowLeft" && event.key !== "ArrowRight" && !isFullscreenKey) return;
+   if (event.altKey || event.ctrlKey || event.metaKey) return;
+   if (!isFullscreenKey && event.shiftKey) return;
 
    /* Leave typing fields alone; the progress bar is ours to handle. */
    var target = event.target;
@@ -1082,6 +1085,20 @@
      var isProgress = target.classList && target.classList.contains("video-progress");
      if (!isProgress && (target.isContentEditable ||
          /^(INPUT|TEXTAREA|SELECT)$/.test(target.tagName))) return;
+   }
+
+   /* F: toggle fullscreen on the current (or open project's) video. */
+   if (isFullscreenKey) {
+     var fullscreenTarget = keyboardVideo() ||
+       (page && page.querySelector("details.project-item[open] video.project-video"));
+     var fullscreenWrap = fullscreenTarget && fullscreenTarget.closest(".video-wrap");
+     var fullscreenButton = fullscreenWrap &&
+       fullscreenWrap.querySelector(".video-fullscreen-toggle");
+     if (!fullscreenButton) return;
+     event.preventDefault();
+     event.stopImmediatePropagation();
+     fullscreenButton.click();
+     return;
    }
 
    event.preventDefault();
