@@ -225,21 +225,24 @@
        var slide = el("div", "project-slide");
        var wrap = el("div", "video-wrap");
        var stage = el("div", "video-stage is-paused");
-       stage.style.setProperty("--video-ratio", clip.ratio);
+       stage.style.setProperty("--video-ratio", clip.ratio || "16 / 9");
 
        var video = el("video", "project-video");
        video.setAttribute("playsinline", "");
        video.setAttribute("preload", "none");
        video.setAttribute("data-deferred-src", clip.src);
-       video.setAttribute("data-deferred-poster", clip.poster);
+       /* With no poster given, the player looks the thumbnail up on Vimeo. */
+       if (clip.poster) video.setAttribute("data-deferred-poster", clip.poster);
        stage.appendChild(video);
 
        var controls = el("div", "video-controls");
-       controls.appendChild(el("span", "video-time", clip.time));
+       /* Running time and ratio are optional: they fill in from the video
+          itself once its project is opened. */
+       controls.appendChild(el("span", "video-time", clip.time || ""));
        var progress = el("input", "video-progress");
        progress.type = "range";
        progress.min = "0";
-       progress.max = String(clip.duration);
+       progress.max = String(clip.duration || 100);
        progress.step = "0.01";
        progress.value = "0";
        progress.setAttribute("aria-label", "Video progress");
