@@ -225,7 +225,7 @@ body:has([id="X1134136285"]) {
 [id="X1134136285"] .page-background::after {
   position: absolute;
   inset: 0;
-  background: rgba(0, 0, 0, 0.5);
+  background: rgba(0, 0, 0, 0.62);
   content: "";
 }
 
