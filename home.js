@@ -925,7 +925,6 @@
      var directionLine = document.createElement("span");
      var arrow = document.createElement("span");
      var label = document.createElement("span");
-     var title = document.createElement("span");
      var isPrevious = direction === "previous";
 
      button.type = "button";
@@ -935,9 +934,7 @@
      arrow.className = "project-navigation-arrow";
      arrow.textContent = isPrevious ? "←" : "→";
      label.className = "project-navigation-label";
-     label.textContent = isPrevious ? "Previous Project" : "Next Project";
-     title.className = "project-navigation-title";
-     title.textContent = projectTitle(target);
+     label.textContent = isPrevious ? "Previous" : "Next";
 
      if (isPrevious) {
        directionLine.appendChild(arrow);
@@ -948,7 +945,6 @@
      }
 
      button.appendChild(directionLine);
-     button.appendChild(title);
      button.addEventListener("click", function (event) {
        event.preventDefault();
        event.stopPropagation();
