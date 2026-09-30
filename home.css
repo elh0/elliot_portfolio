@@ -572,6 +572,19 @@ body:has([id="X1134136285"]) {
   color: #8f8f8f;
 }
 
+/* Same thin underline as the "Contact" link in the heading */
+[id="X1134136285"] .site-footer a {
+  color: #ffffff !important;
+  text-decoration: none !important;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.55) !important;
+  padding-bottom: 1px;
+}
+
+[id="X1134136285"] .site-footer a:hover {
+  color: #8f8f8f !important;
+  border-bottom-color: #8f8f8f !important;
+}
+
 .mobile [id="X1134136285"] .site-footer {
   display: flex;
 }
@@ -588,6 +601,11 @@ body:has([id="X1134136285"]) {
 
 [id="X1134136285"].is-light-theme .site-footer-label {
   color: rgba(0, 0, 0, 0.62);
+}
+
+[id="X1134136285"].is-light-theme .site-footer a {
+  color: #000000 !important;
+  border-bottom-color: rgba(0, 0, 0, 0.42) !important;
 }
 
 /* Cargo mobile mode */
