@@ -1,19 +1,24 @@
 (function () {
-  /* Change these to swap the landing video or where it leads. */
+  /* Change these to swap the landing video or where its links lead. */
   var LANDING = {
     video: "https://player.vimeo.com/progressive_redirect/playback/1071786882/rendition/1080p/file.mp4%20%281080p%29.mp4?loc=external&log_user=0&signature=bb427ec363ba3c6895452e43799399e366b81c94201c7b7d02769f76461fe59d",
     poster: "",
-    indexUrl: "/home"
+    indexUrl: "/home",
+    contactUrl: "/contact"
   };
+
+  /* The index plays the same reel as an intro; skip it after the landing page. */
+  try {
+    window.sessionStorage.setItem("elliotIntroSeen", "1");
+  } catch (error) {}
 
   document.querySelectorAll(".landing").forEach(function (landing) {
     /* Cargo can re-run page scripts; rebuild from scratch each time. */
     landing.innerHTML = "";
 
-    var link = document.createElement("a");
-    link.className = "landing-link";
-    link.href = LANDING.indexUrl;
-    link.setAttribute("aria-label", "Enter the index");
+    var stage = document.createElement("div");
+    stage.className = "landing-stage";
+    stage.setAttribute("aria-hidden", "true");
 
     var video = document.createElement("video");
     video.className = "landing-video";
@@ -28,17 +33,29 @@
     video.setAttribute("muted", "");
     video.setAttribute("playsinline", "");
     video.setAttribute("webkit-playsinline", "");
-    video.setAttribute("aria-hidden", "true");
+    stage.appendChild(video);
+
+    /* Clicking anywhere on the footage goes through to the index. */
+    stage.addEventListener("click", function () {
+      window.location.href = LANDING.indexUrl;
+    });
 
     var overlay = document.createElement("div");
     overlay.className = "landing-overlay";
     overlay.innerHTML =
-      '<div class="landing-heading">Elliot Holbrow, Cinematographer<br>London, UK</div>' +
-      '<div class="landing-enter"><span>Index</span><span class="landing-arrow">→</span></div>';
+      '<nav class="landing-nav" aria-label="Site navigation">' +
+        '<div class="landing-name">Elliot Holbrow, Cinematographer<br>London, UK</div>' +
+        '<div class="landing-links">' +
+          '<a href="' + LANDING.indexUrl + '">Index</a>' +
+          '<a href="' + LANDING.contactUrl + '">Contact</a>' +
+        '</div>' +
+      '</nav>' +
+      '<a class="landing-enter" href="' + LANDING.indexUrl + '">' +
+        '<span>Index</span><span class="landing-arrow">→</span>' +
+      '</a>';
 
-    link.appendChild(video);
-    link.appendChild(overlay);
-    landing.appendChild(link);
+    landing.appendChild(stage);
+    landing.appendChild(overlay);
 
     /* With no poster set, borrow Vimeo's thumbnail so there's a frame
        on screen before the video starts. */

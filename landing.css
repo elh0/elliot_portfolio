@@ -1,20 +1,16 @@
-/* Landing page: full-screen muted video, heading in the index's position. */
+/* Landing page: full-screen muted video with a top nav and an Index link,
+   set in the index page's type and column. */
 
 body:has(.landing) {
   background: #000000 !important;
   overflow: hidden;
 }
 
-.landing .landing-link,
-.landing .landing-link:hover,
-.landing .landing-link:active {
+.landing .landing-stage {
   position: fixed;
   z-index: 10;
   inset: 0;
-  display: block;
-  border: 0 !important;
-  opacity: 1 !important;
-  text-decoration: none !important;
+  background: #000000;
   cursor: pointer;
 }
 
@@ -24,30 +20,32 @@ body:has(.landing) {
   width: 100%;
   height: 100%;
   object-fit: cover;
-  background: #000000;
   pointer-events: none;
 }
 
-/* Slight dim so the white type stays legible over bright footage */
-.landing .landing-link::after {
+/* Dim so the white type stays legible over bright footage */
+.landing .landing-stage::after {
   position: absolute;
   inset: 0;
-  background: rgba(0, 0, 0, 0.18);
+  background: rgba(0, 0, 0, 0.4);
   content: "";
   pointer-events: none;
 }
 
 .landing .landing-overlay {
-  position: absolute;
-  z-index: 1;
-  inset: 0;
+  position: fixed;
+  z-index: 11;
+  top: 0;
+  bottom: 0;
+  left: 50%;
   box-sizing: border-box;
   display: flex;
   flex-direction: column;
   justify-content: space-between;
   width: min(72%, 72rem);
-  margin: 0 auto;
   padding: clamp(7rem, 16vh, 12rem) 0 3rem;
+  transform: translateX(-50%);
+  pointer-events: none;
 }
 
 .landing .landing-overlay,
@@ -60,15 +58,38 @@ body:has(.landing) {
   letter-spacing: 0 !important;
 }
 
+.landing .landing-nav {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 2rem;
+}
+
+.landing .landing-links {
+  display: flex;
+  gap: 2ch;
+}
+
+/* Links: strip Cargo's underline, fade to grey on hover like the index */
+.landing .landing-overlay a,
+.landing .landing-overlay a:hover,
+.landing .landing-overlay a:active {
+  border: 0 !important;
+  opacity: 1 !important;
+  text-decoration: none !important;
+  pointer-events: auto;
+  transition: color 500ms ease;
+}
+
+.landing .landing-overlay a:hover,
+.landing .landing-overlay a:hover * {
+  color: #8f8f8f !important;
+}
+
 .landing .landing-enter {
   display: inline-flex;
   gap: 0.6ch;
   align-self: flex-start;
-  transition: opacity 500ms ease;
-}
-
-.landing .landing-link:hover .landing-enter {
-  opacity: 0.6;
 }
 
 @media (max-width: 767px) {
