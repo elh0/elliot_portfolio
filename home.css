@@ -376,7 +376,6 @@ body:has([id="X1134136285"]) {
   backface-visibility: hidden;
   -webkit-transform: translate3d(0, 0, 0);
   transform: translate3d(0, 0, 0);
-  will-change: transform, opacity;
 }
 
 [id="X1134136285"] .video-mute-toggle {

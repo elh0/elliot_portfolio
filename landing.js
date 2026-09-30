@@ -18,6 +18,17 @@
   }
   style.textContent = STYLES;
 
+  /* Fetch the project list's styling and script in the background so
+     clicking through doesn't wait on them. */
+  ["https://elh0.github.io/elliot_portfolio/home.css",
+   "https://elh0.github.io/elliot_portfolio/home.js"].forEach(function (href) {
+    if (document.querySelector('link[rel="prefetch"][href="' + href + '"]')) return;
+    var hint = document.createElement("link");
+    hint.rel = "prefetch";
+    hint.href = href;
+    document.head.appendChild(hint);
+  });
+
   /* The index plays the same reel as an intro; skip it after the landing page. */
   try {
     window.sessionStorage.setItem("elliotIntroSeen", "1");

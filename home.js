@@ -117,9 +117,12 @@
         var project = summary.closest(".project-item");
         var video = project && project.querySelector("video.project-video");
 
-        if (!video || !video.poster) return;
+        var poster = video &&
+          (video.getAttribute("poster") || video.getAttribute("data-deferred-poster"));
 
-     hoverPreviewImage.src = highQualityPoster(video.poster);
+        if (!poster) return;
+
+     hoverPreviewImage.src = highQualityPoster(poster);
 
      if (page.classList.contains("is-light-theme")) {
        page.classList.add("restore-light-after-preview");
@@ -270,6 +273,22 @@
     updateBackgroundVideo();
   }
 
+  /* Restore a deferred video's source so it can load and play. */
+  function activateVideo(video) {
+    var deferred = video.getAttribute("data-deferred-src");
+    if (!deferred) return;
+
+    var deferredPoster = video.getAttribute("data-deferred-poster");
+    if (deferredPoster) {
+      video.setAttribute("poster", deferredPoster);
+      video.removeAttribute("data-deferred-poster");
+    }
+
+    video.removeAttribute("data-deferred-src");
+    video.preload = "metadata";
+    video.src = deferred;
+  }
+
   function formatTime(seconds) {
     if (!Number.isFinite(seconds)) return "0:00";
 
@@ -288,6 +307,21 @@
    video.controls = false;
    video.setAttribute("playsinline", "");
    video.setAttribute("webkit-playsinline", "");
+
+   /* Don't fetch videos for closed projects: 19 videos requesting metadata
+      at once clog mobile Safari's connections and slow every page change.
+      The source is restored when the project opens (activateVideo). */
+   var parentProject = video.closest("details.project-item");
+   if (video.getAttribute("src") && parentProject && !parentProject.open) {
+     video.setAttribute("data-deferred-src", video.getAttribute("src"));
+     video.removeAttribute("src");
+     if (video.getAttribute("poster")) {
+       video.setAttribute("data-deferred-poster", video.getAttribute("poster"));
+       video.removeAttribute("poster");
+     }
+     video.preload = "none";
+     video.load();
+   }
 
     var wrap = video.closest(".video-wrap");
     var stage = video.closest(".video-stage");
@@ -333,8 +367,13 @@
    video._refreshElliotFrame = refreshVideoFrame;
 
     function loadVimeoPoster() {
-      var match = video.currentSrc.match(/playback\/(\d+)\//) ||
-        video.src.match(/playback\/(\d+)\//);
+      /* The poster is already in the page markup; only look it up if not. */
+      if (video.getAttribute("poster") ||
+          video.getAttribute("data-deferred-poster")) return;
+
+      var source = video.getAttribute("data-deferred-src") ||
+        video.currentSrc || video.src || "";
+      var match = source.match(/playback\/(\d+)\//);
 
       if (!match) return;
 
@@ -417,9 +456,12 @@
       var duration = video.duration || 0;
       var hasStarted = !video.paused || video.currentTime > 0;
 
-      time.textContent = formatTime(
-        hasStarted ? video.currentTime : duration
-      );
+      /* Before metadata loads, keep the duration written in the markup. */
+      if (hasStarted || duration) {
+        time.textContent = formatTime(
+          hasStarted ? video.currentTime : duration
+        );
+      }
 
       progress.max = duration || 100;
       if (!isScrubbing) {
@@ -448,6 +490,8 @@
     }
 
     function togglePlayback() {
+      activateVideo(video);
+
       if (video.paused) {
         var playAttempt = video.play();
 
@@ -563,6 +607,8 @@
      hideProjectPreview();
 
      if (project.open) {
+       project.querySelectorAll("video.project-video").forEach(activateVideo);
+
        window.requestAnimationFrame(function () {
          window.requestAnimationFrame(function () {
            project.querySelectorAll("video.project-video").forEach(function (video) {
