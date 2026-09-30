@@ -816,6 +816,56 @@
        reliably dispatch taps to a <video> element without native controls. */
     stage.addEventListener("click", togglePlayback);
 
+    /* Fullscreen: the whole player (picture + playbar) where the browser
+       allows it; iPhone Safari only allows the native video player. */
+    var fullscreenButton = controls.querySelector(".video-fullscreen-toggle");
+
+    if (!fullscreenButton) {
+      fullscreenButton = document.createElement("button");
+      fullscreenButton.className = "video-fullscreen-toggle";
+      fullscreenButton.type = "button";
+      fullscreenButton.textContent = "Full";
+      fullscreenButton.setAttribute("aria-label", "Enter fullscreen");
+      controls.insertBefore(
+        fullscreenButton,
+        controls.querySelector(".video-theme-toggle")
+      );
+    }
+
+    function fullscreenElement() {
+      return document.fullscreenElement || document.webkitFullscreenElement;
+    }
+
+    fullscreenButton.addEventListener("click", function (event) {
+      event.preventDefault();
+      event.stopPropagation();
+
+      if (fullscreenElement() === wrap) {
+        (document.exitFullscreen || document.webkitExitFullscreen).call(document);
+        return;
+      }
+
+      var enter = wrap.requestFullscreen || wrap.webkitRequestFullscreen;
+      if (enter) {
+        enter.call(wrap);
+      } else if (typeof video.webkitEnterFullscreen === "function") {
+        activateVideo(video);
+        video.webkitEnterFullscreen();
+      }
+    });
+
+    function syncFullscreenButton() {
+      var isFull = fullscreenElement() === wrap;
+      fullscreenButton.textContent = isFull ? "Exit" : "Full";
+      fullscreenButton.setAttribute(
+        "aria-label",
+        isFull ? "Exit fullscreen" : "Enter fullscreen"
+      );
+    }
+
+    document.addEventListener("fullscreenchange", syncFullscreenButton);
+    document.addEventListener("webkitfullscreenchange", syncFullscreenButton);
+
     muteButton.addEventListener("click", function () {
       video.muted = !video.muted;
       updateControls();
