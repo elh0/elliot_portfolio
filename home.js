@@ -3,11 +3,11 @@
 
  /* Speaker icons: with sound waves while playing sound, crossed when muted. */
  var SOUND_ON_ICON =
-   '<svg viewBox="0 0 12 12" aria-hidden="true" focusable="false">' +
+   '<svg viewBox="0 0 12 12" width="11" height="11" aria-hidden="true" focusable="false">' +
    '<path class="icon-fill" d="M1 4.25h2L6 1.75v8.5L3 7.75H1z"/>' +
    '<path d="M8 4.25a2.5 2.5 0 0 1 0 3.5M9.5 2.75a4.6 4.6 0 0 1 0 6.5"/></svg>';
  var SOUND_OFF_ICON =
-   '<svg viewBox="0 0 12 12" aria-hidden="true" focusable="false">' +
+   '<svg viewBox="0 0 12 12" width="11" height="11" aria-hidden="true" focusable="false">' +
    '<path class="icon-fill" d="M1 4.25h2L6 1.75v8.5L3 7.75H1z"/>' +
    '<path d="M8 4.5l3 3M11 4.5l-3 3"/></svg>';
 
@@ -328,8 +328,24 @@
 
  /* Light/dark toggle icon: a half-filled circle. */
  var THEME_ICON =
-   '<svg viewBox="0 0 12 12" aria-hidden="true" focusable="false">' +
+   '<svg viewBox="0 0 12 12" width="11" height="11" aria-hidden="true" focusable="false">' +
    '<circle cx="6" cy="6" r="4.75"/><path d="M6 1.25a4.75 4.75 0 0 1 0 9.5z"/></svg>';
+
+ /* Keep the playbar on one row even if the browser holds an older cached
+    stylesheet: set the essential layout inline. */
+ function lockControlsLayout(controls) {
+   controls.style.display = "flex";
+   controls.style.flexWrap = "nowrap";
+   controls.style.alignItems = "center";
+   Array.prototype.forEach.call(controls.children, function (child) {
+     if (child.classList.contains("video-progress")) {
+       child.style.flex = "1 1 auto";
+       child.style.minWidth = "0";
+     } else {
+       child.style.flex = "0 0 auto";
+     }
+   });
+ }
 
  function rebuildProjectThemeControls() {
    if (!page) return;
@@ -364,6 +380,7 @@
        );
      });
      controls.appendChild(button);
+     lockControlsLayout(controls);
    });
  }
 
@@ -847,10 +864,10 @@
 
     /* Diagonal-arrow icons: pointing out to enter, in to exit. */
     var ENTER_FULLSCREEN_ICON =
-      '<svg viewBox="0 0 12 12" aria-hidden="true" focusable="false">' +
+      '<svg viewBox="0 0 12 12" width="11" height="11" aria-hidden="true" focusable="false">' +
       '<path d="M7 1h4v4M11 1L7 5M5 11H1V7M1 11l4-4"/></svg>';
     var EXIT_FULLSCREEN_ICON =
-      '<svg viewBox="0 0 12 12" aria-hidden="true" focusable="false">' +
+      '<svg viewBox="0 0 12 12" width="11" height="11" aria-hidden="true" focusable="false">' +
       '<path d="M10.5 5H7V1.5M11 1L7 5M1.5 7H5v3.5M1 11l4-4"/></svg>';
 
     if (!fullscreenButton) {
@@ -878,11 +895,20 @@
         return;
       }
 
+      /* Going fullscreen also starts the video (inside the same tap, so
+         phones allow it to play). */
+      activateVideo(video);
+      if (video.paused) {
+        var fullscreenPlay = video.play();
+        if (fullscreenPlay && typeof fullscreenPlay.catch === "function") {
+          fullscreenPlay.catch(function () {});
+        }
+      }
+
       var enter = wrap.requestFullscreen || wrap.webkitRequestFullscreen;
       if (enter) {
         enter.call(wrap);
       } else if (typeof video.webkitEnterFullscreen === "function") {
-        activateVideo(video);
         video.webkitEnterFullscreen();
       }
     });
@@ -898,6 +924,8 @@
 
     document.addEventListener("fullscreenchange", syncFullscreenButton);
     document.addEventListener("webkitfullscreenchange", syncFullscreenButton);
+
+    lockControlsLayout(controls);
 
     muteButton.addEventListener("click", function () {
       video.muted = !video.muted;
