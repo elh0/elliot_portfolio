@@ -6,7 +6,20 @@ body:has(.contact-page) {
   color: #ffffff !important;
 }
 
+/* Pin content to the top, like the index, instead of Cargo's vertical centring */
+
+.page:has(.contact-page) {
+  min-height: auto !important;
+}
+
+.page-layout:has(.contact-page) {
+  align-items: flex-start !important;
+  align-content: flex-start !important;
+  justify-content: flex-start !important;
+}
+
 .page-content:has(.contact-page) {
+  align-self: flex-start !important;
   box-sizing: border-box !important;
   width: min(72%, 72rem) !important;
   max-width: 72rem !important;
