@@ -27,6 +27,15 @@
       ]
     },
     {
+      title: "Joe James - Papercuts",
+      category: "Music",
+      director: "Uncanny",
+      format: "S35, Digital",
+      videos: [
+      { src: "https://player.vimeo.com/progressive_redirect/playback/1231798890/rendition/1080p/file.mp4%20%281080p%29.mp4?loc=external&log_user=0&signature=c617a62fc6f2ab5a215be8a055a2ebd0437f25e361183ad1d8eb425047de42ac" }
+      ]
+    },
+    {
       title: "T Magazine",
       category: "Fashion",
       director: "Jess Madavo",
