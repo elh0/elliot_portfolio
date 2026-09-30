@@ -87,6 +87,15 @@
       ]
     },
     {
+      title: "Bladee - Blondie",
+      category: "Music",
+      director: "Joe Ward",
+      format: "Anamorphic, S35, Digital",
+      videos: [
+      { src: "https://player.vimeo.com/progressive_redirect/playback/1231805582/rendition/1080p/file.mp4%20%281080p%29.mp4?loc=external&log_user=0&signature=5a08487628cc392908949636cd0e3784e1490ffb5678b91af9426da75584cc1a" }
+      ]
+    },
+    {
       title: "Art of Movement",
       category: "Short",
       director: "Tayler Prince-Fraser",
