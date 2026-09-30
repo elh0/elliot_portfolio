@@ -46,10 +46,6 @@ html body .contact-page a:active {
   margin: 0 0 2rem;
 }
 
-.contact-page .contact-back:hover {
-  color: #8f8f8f !important;
-}
-
 /* Contact rows, styled like the project list */
 
 .contact-page .contact-row {
