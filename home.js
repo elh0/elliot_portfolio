@@ -820,13 +820,13 @@
        allows it; iPhone Safari only allows the native video player. */
     var fullscreenButton = controls.querySelector(".video-fullscreen-toggle");
 
-    /* Corner-bracket icons: outward to enter, inward to exit. */
+    /* Diagonal-arrow icons: pointing out to enter, in to exit. */
     var ENTER_FULLSCREEN_ICON =
       '<svg viewBox="0 0 12 12" aria-hidden="true" focusable="false">' +
-      '<path d="M1 4.5V1h3.5M7.5 1H11v3.5M11 7.5V11H7.5M4.5 11H1V7.5"/></svg>';
+      '<path d="M7 1h4v4M11 1L7 5M5 11H1V7M1 11l4-4"/></svg>';
     var EXIT_FULLSCREEN_ICON =
       '<svg viewBox="0 0 12 12" aria-hidden="true" focusable="false">' +
-      '<path d="M4.5 1v3.5H1M11 4.5H7.5V1M7.5 11V7.5H11M1 7.5h3.5V11"/></svg>';
+      '<path d="M10.5 5H7V1.5M11 1L7 5M1.5 7H5v3.5M1 11l4-4"/></svg>';
 
     if (!fullscreenButton) {
       fullscreenButton = document.createElement("button");
