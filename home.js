@@ -1,5 +1,6 @@
 (function () {
  var page = document.querySelector('[id="X1134136285"]');
+ var lastActiveVideo = null;
 
  /* Speaker icons: with sound waves while playing sound, crossed when muted. */
  var SOUND_ON_ICON =
@@ -992,7 +993,13 @@
     video.addEventListener("pause", updateControls);
     video.addEventListener("ended", updateControls);
 
+   /* Remember the video last played or touched, for keyboard seeking. */
+   wrap.addEventListener("pointerdown", function () {
+     lastActiveVideo = video;
+   });
+
    video.addEventListener("play", function () {
+     lastActiveVideo = video;
  document.querySelectorAll(
         '[id="X1134136285"] video.project-video'
       ).forEach(function (otherVideo) {
@@ -1043,6 +1050,43 @@
       }
 
    });
+ });
+
+ /* Keyboard: ← / → skip the current video back / forward 5 seconds. */
+ var SEEK_STEP = 5;
+
+ function keyboardVideo() {
+   if (!page) return null;
+   if (lastActiveVideo && page.contains(lastActiveVideo) &&
+       lastActiveVideo.getAttribute("src")) {
+     var project = lastActiveVideo.closest("details.project-item");
+     if (!project || project.open) return lastActiveVideo;
+   }
+   var open = page.querySelector("details.project-item[open] video.project-video[src]");
+   return open || null;
+ }
+
+ document.addEventListener("keydown", function (event) {
+   if (event.key !== "ArrowLeft" && event.key !== "ArrowRight") return;
+   if (event.altKey || event.ctrlKey || event.metaKey || event.shiftKey) return;
+
+   /* Leave typing fields alone; the progress bar is ours to handle. */
+   var target = event.target;
+   if (target && target !== document.body) {
+     var isProgress = target.classList && target.classList.contains("video-progress");
+     if (!isProgress && (target.isContentEditable ||
+         /^(INPUT|TEXTAREA|SELECT)$/.test(target.tagName))) return;
+   }
+
+   var video = keyboardVideo();
+   if (!video || !Number.isFinite(video.duration)) return;
+
+   event.preventDefault();
+   var step = event.key === "ArrowRight" ? SEEK_STEP : -SEEK_STEP;
+   video.currentTime = Math.min(
+     Math.max(0, video.currentTime + step),
+     Math.max(0, video.duration - 0.05)
+   );
  });
 
  /* Desktop-only previous/next navigation. */
