@@ -1,8 +1,8 @@
 (function () {
   /* Change these to swap the landing video or where it leads. */
   var LANDING = {
-    video: "https://player.vimeo.com/progressive_redirect/playback/1040453005/rendition/1080p/file.mp4%20%281080p%29.mp4?loc=external&log_user=0&signature=d7bb8e0abc51de4abec416624d4363cbd1383cc82939a29cbba1f42927e5d7e6",
-    poster: "https://i.vimeocdn.com/video/1963352200-b51179485e9c29a3f35948459b6d7d0589ed682ca53c598383f2cd018546414f-d_1280?region=us&mw=1920&q=90",
+    video: "https://player.vimeo.com/progressive_redirect/playback/1071786882/rendition/1080p/file.mp4%20%281080p%29.mp4?loc=external&log_user=0&signature=bb427ec363ba3c6895452e43799399e366b81c94201c7b7d02769f76461fe59d",
+    poster: "",
     indexUrl: "/index"
   };
 
@@ -18,7 +18,7 @@
     var video = document.createElement("video");
     video.className = "landing-video";
     video.src = LANDING.video;
-    video.poster = LANDING.poster;
+    if (LANDING.poster) video.poster = LANDING.poster;
     video.muted = true;
     video.defaultMuted = true;
     video.loop = true;
@@ -39,6 +39,26 @@
     link.appendChild(video);
     link.appendChild(overlay);
     landing.appendChild(link);
+
+    /* With no poster set, borrow Vimeo's thumbnail so there's a frame
+       on screen before the video starts. */
+    var match = !LANDING.poster && LANDING.video.match(/playback\/(\d+)\//);
+    if (match) {
+      fetch("https://vimeo.com/api/oembed.json?url=" +
+        encodeURIComponent("https://vimeo.com/" + match[1]) + "&maxwidth=1920")
+        .then(function (response) {
+          if (!response.ok) throw new Error("No thumbnail");
+          return response.json();
+        })
+        .then(function (data) {
+          if (!data.thumbnail_url || video.getAttribute("poster")) return;
+          var thumbnail = new URL(data.thumbnail_url);
+          thumbnail.searchParams.set("mw", "1920");
+          thumbnail.searchParams.set("q", "90");
+          video.setAttribute("poster", thumbnail.toString());
+        })
+        .catch(function () {});
+    }
 
     var playAttempt = video.play();
     if (playAttempt && typeof playAttempt.catch === "function") {
