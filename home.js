@@ -238,6 +238,20 @@
         .catch(function () {});
     }
 
+    /* The reel is footage only: switch off any caption track embedded in the
+       file, which Safari/iOS otherwise shows when device captions are on. */
+    var introVideo = backgroundVideo;
+    function hideIntroCaptions() {
+      for (var i = 0; i < introVideo.textTracks.length; i++) {
+        introVideo.textTracks[i].mode = "disabled";
+      }
+    }
+    if (introVideo.textTracks) {
+      introVideo.textTracks.addEventListener("addtrack", hideIntroCaptions);
+      introVideo.addEventListener("loadedmetadata", hideIntroCaptions);
+      hideIntroCaptions();
+    }
+
     background.appendChild(backgroundVideo);
     page.insertBefore(background, page.firstChild);
 

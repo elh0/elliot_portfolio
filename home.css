@@ -214,6 +214,17 @@ body:has([id="X1134136285"]) {
   transition: opacity 800ms ease;
 }
 
+/* Backup: never draw caption text over the intro reel */
+[id="X1134136285"] .page-background video::cue {
+  visibility: hidden;
+  color: transparent;
+  background: transparent;
+}
+
+[id="X1134136285"] .page-background video::-webkit-media-text-track-container {
+  display: none !important;
+}
+
 [id="X1134136285"] .page-background video {
   display: block;
   width: 100%;

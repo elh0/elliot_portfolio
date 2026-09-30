@@ -8,7 +8,7 @@
 
   /* Styles ship inside this script so a cached stylesheet can never be out
      of step with it. */
-  var STYLES = "/* Landing page: full-screen muted video with the name top-left and an\n   Index link bottom-left, pinned to the screen edges. */\n\nbody:has(.landing-root) {\n  background: #000000 !important;\n  overflow: hidden;\n}\n\n.landing-root .landing-stage {\n  position: fixed;\n  z-index: 10;\n  inset: 0;\n  background: #000000;\n  cursor: pointer;\n}\n\n.landing-root .landing-video {\n  position: absolute;\n  inset: 0;\n  width: 100%;\n  height: 100%;\n  object-fit: cover;\n  pointer-events: none;\n}\n\n/* Dim so the white type stays legible over bright footage */\n.landing-root .landing-stage::after {\n  position: absolute;\n  inset: 0;\n  background: rgba(0, 0, 0, 0.4);\n  content: \"\";\n  pointer-events: none;\n}\n\n.landing-root .landing-overlay {\n  position: fixed;\n  z-index: 11;\n  inset: 0;\n  box-sizing: border-box;\n  display: flex;\n  flex-direction: column;\n  justify-content: space-between;\n  padding: 1.5rem 2rem;\n  pointer-events: none;\n}\n\n.landing-root .landing-overlay,\n.landing-root .landing-overlay * {\n  color: #ffffff !important;\n  font-family: ui-monospace, \"SFMono-Regular\", Menlo, Monaco, Consolas, \"Liberation Mono\", \"Courier New\", monospace !important;\n  font-size: 11px !important;\n  font-weight: 400 !important;\n  line-height: 1.65 !important;\n  letter-spacing: 0 !important;\n}\n\n.landing-root .landing-nav {\n  display: flex;\n  align-items: flex-start;\n  justify-content: space-between;\n  gap: 2rem;\n}\n\n/* Links: strip Cargo's underline, fade to grey on hover like the index */\n.landing-root .landing-overlay a,\n.landing-root .landing-overlay a:hover,\n.landing-root .landing-overlay a:active {\n  border: 0 !important;\n  opacity: 1 !important;\n  text-decoration: none !important;\n  pointer-events: auto;\n  transition: color 500ms ease;\n}\n\n.landing-root .landing-overlay a:hover,\n.landing-root .landing-overlay a:hover * {\n  color: #8f8f8f !important;\n}\n\n.landing-root .landing-enter {\n  display: inline-flex;\n  gap: 0.6ch;\n  align-self: flex-start;\n}\n\n@media (max-width: 767px) {\n  .landing-root .landing-overlay {\n    padding: 1.25rem;\n  }\n}\n\n.mobile .landing-root .landing-overlay {\n  padding: 1.25rem;\n}\n";
+  var STYLES = "/* Landing page: full-screen muted video with the name top-left and an\n   Index link bottom-left, pinned to the screen edges. */\n\nbody:has(.landing-root) {\n  background: #000000 !important;\n  overflow: hidden;\n}\n\n.landing-root .landing-stage {\n  position: fixed;\n  z-index: 10;\n  inset: 0;\n  background: #000000;\n  cursor: pointer;\n}\n\n.landing-root .landing-video {\n  position: absolute;\n  inset: 0;\n  width: 100%;\n  height: 100%;\n  object-fit: cover;\n  pointer-events: none;\n}\n\n/* Dim so the white type stays legible over bright footage */\n.landing-root .landing-stage::after {\n  position: absolute;\n  inset: 0;\n  background: rgba(0, 0, 0, 0.4);\n  content: \"\";\n  pointer-events: none;\n}\n\n.landing-root .landing-overlay {\n  position: fixed;\n  z-index: 11;\n  inset: 0;\n  box-sizing: border-box;\n  display: flex;\n  flex-direction: column;\n  justify-content: space-between;\n  padding: 1.5rem 2rem;\n  pointer-events: none;\n}\n\n.landing-root .landing-overlay,\n.landing-root .landing-overlay * {\n  color: #ffffff !important;\n  font-family: ui-monospace, \"SFMono-Regular\", Menlo, Monaco, Consolas, \"Liberation Mono\", \"Courier New\", monospace !important;\n  font-size: 11px !important;\n  font-weight: 400 !important;\n  line-height: 1.65 !important;\n  letter-spacing: 0 !important;\n}\n\n.landing-root .landing-nav {\n  display: flex;\n  align-items: flex-start;\n  justify-content: space-between;\n  gap: 2rem;\n}\n\n/* Links: strip Cargo's underline, fade to grey on hover like the index */\n.landing-root .landing-overlay a,\n.landing-root .landing-overlay a:hover,\n.landing-root .landing-overlay a:active {\n  border: 0 !important;\n  opacity: 1 !important;\n  text-decoration: none !important;\n  pointer-events: auto;\n  transition: color 500ms ease;\n}\n\n.landing-root .landing-overlay a:hover,\n.landing-root .landing-overlay a:hover * {\n  color: #8f8f8f !important;\n}\n\n.landing-root .landing-enter {\n  display: inline-flex;\n  gap: 0.6ch;\n  align-self: flex-start;\n}\n\n@media (max-width: 767px) {\n  .landing-root .landing-overlay {\n    padding: 1.25rem;\n  }\n}\n\n.mobile .landing-root .landing-overlay {\n  padding: 1.25rem;\n}\n\n/* Backup: never draw caption text over the reel */\n.landing-root .landing-video::cue {\n  visibility: hidden;\n  color: transparent;\n  background: transparent;\n}\n\n.landing-root .landing-video::-webkit-media-text-track-container {\n  display: none !important;\n}\n";
 
   var style = document.getElementById("landing-styles");
   if (!style) {
@@ -57,6 +57,19 @@
     video.setAttribute("playsinline", "");
     video.setAttribute("webkit-playsinline", "");
     stage.appendChild(video);
+
+    /* The reel is footage only: switch off any caption track embedded in the
+       file, which Safari/iOS otherwise shows when device captions are on. */
+    function hideCaptions() {
+      for (var i = 0; i < video.textTracks.length; i++) {
+        video.textTracks[i].mode = "disabled";
+      }
+    }
+    if (video.textTracks) {
+      video.textTracks.addEventListener("addtrack", hideCaptions);
+      video.addEventListener("loadedmetadata", hideCaptions);
+      hideCaptions();
+    }
 
     /* Clicking anywhere on the footage goes through to the index. */
     stage.addEventListener("click", function () {
