@@ -905,3 +905,8 @@ body:has([id="X1134136285"].is-light-theme) {
 [id="X1134136285"].is-light-theme .video-theme-divider {
   color: rgba(0, 0, 0, 0.42);
 }
+
+/* TEST: remove once live updates are confirmed */
+[id="X1134136285"] .project-item summary::before {
+  color: #ff0000 !important;
+}
