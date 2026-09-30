@@ -202,7 +202,7 @@ body:has([id="X1134136285"]) {
   image-rendering: auto;
 }
 
-/* Showreel behind the project list; fades out while a project is open */
+/* Intro showreel behind the project list; fades out for good on first hover or open */
 
 [id="X1134136285"] .page-background {
   position: fixed;
@@ -229,7 +229,7 @@ body:has([id="X1134136285"]) {
   content: "";
 }
 
-[id="X1134136285"].has-open-project .page-background,
+[id="X1134136285"].intro-dismissed .page-background,
 [id="X1134136285"].is-light-theme .page-background {
   opacity: 0;
 }

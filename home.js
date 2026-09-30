@@ -138,30 +138,55 @@
     window.addEventListener("blur", hideProjectPreview);
   }
 
-  /* Showreel playing full-screen behind the project list. It pauses and
-     fades out while a project is open, and in light mode. */
+  /* Intro showreel: plays full-screen behind the project list on the first
+     load of a visit. The first time someone hovers a project title (desktop)
+     or opens a project, it fades out for good and the hover thumbnails take
+     over. */
   var BACKGROUND_VIDEO = "https://player.vimeo.com/progressive_redirect/playback/1071786882/rendition/1080p/file.mp4%20%281080p%29.mp4?loc=external&log_user=0&signature=bb427ec363ba3c6895452e43799399e366b81c94201c7b7d02769f76461fe59d";
+  var INTRO_SEEN_KEY = "elliotIntroSeen";
   var backgroundVideo = null;
 
+  function introAlreadySeen() {
+    try {
+      return window.sessionStorage.getItem(INTRO_SEEN_KEY) === "1";
+    } catch (error) {
+      return false;
+    }
+  }
+
+  function dismissIntro() {
+    if (!page || !backgroundVideo) return;
+
+    var background = backgroundVideo.parentNode;
+    var video = backgroundVideo;
+    backgroundVideo = null;
+
+    try {
+      window.sessionStorage.setItem(INTRO_SEEN_KEY, "1");
+    } catch (error) {}
+
+    page.classList.add("intro-dismissed");
+    window.setTimeout(function () {
+      video.pause();
+      video.removeAttribute("src");
+      video.load();
+      if (background) background.remove();
+    }, 900);
+  }
+
+  /* Pause while light mode is on, in case it's switched before the intro ends. */
   function updateBackgroundVideo() {
     if (!page || !backgroundVideo) return;
 
-    var projectOpen = !!page.querySelector("details.project-item[open]");
-    var isLight = page.classList.contains("is-light-theme");
-    var reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-    var shouldPlay = !projectOpen && !isLight && !reduceMotion;
-
-    page.classList.toggle("has-open-project", projectOpen);
-
-    if (shouldPlay && backgroundVideo.paused) {
+    if (page.classList.contains("is-light-theme")) {
+      backgroundVideo.pause();
+    } else if (backgroundVideo.paused) {
       var playAttempt = backgroundVideo.play();
       if (playAttempt && typeof playAttempt.catch === "function") {
         playAttempt.catch(function () {
           /* Autoplay blocked (e.g. Low Power Mode): the poster still shows. */
         });
       }
-    } else if (!shouldPlay && !backgroundVideo.paused) {
-      backgroundVideo.pause();
     }
   }
 
@@ -169,7 +194,14 @@
     page.querySelectorAll(".page-background").forEach(function (old) {
       old.remove();
     });
+    page.classList.remove("intro-dismissed");
+  }
 
+  if (
+    page &&
+    !introAlreadySeen() &&
+    !window.matchMedia("(prefers-reduced-motion: reduce)").matches
+  ) {
     var background = document.createElement("div");
     background.className = "page-background";
     background.setAttribute("aria-hidden", "true");
@@ -197,7 +229,7 @@
           return response.json();
         })
         .then(function (data) {
-          if (!data.thumbnail_url) return;
+          if (!data.thumbnail_url || !backgroundVideo) return;
           var thumbnail = new URL(data.thumbnail_url);
           thumbnail.searchParams.set("mw", "1920");
           thumbnail.searchParams.set("q", "90");
@@ -209,8 +241,16 @@
     background.appendChild(backgroundVideo);
     page.insertBefore(background, page.firstChild);
 
+    page.querySelectorAll(".project-item > summary").forEach(function (summary) {
+      summary.addEventListener("mouseenter", function () {
+        if (supportsProjectPreview()) dismissIntro();
+      });
+    });
+
     page.querySelectorAll("details.project-item").forEach(function (project) {
-      project.addEventListener("toggle", updateBackgroundVideo);
+      project.addEventListener("toggle", function () {
+        if (project.open) dismissIntro();
+      });
     });
 
     updateBackgroundVideo();
