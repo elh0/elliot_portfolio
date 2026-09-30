@@ -1,76 +1,154 @@
-/* Contact page: George Domm Power's layout, with the index page's
-   type, colours and column. */
+/* Contact page. Scoped to .contact-page so it works on any Cargo page ID,
+   with the same type, colours and column as the index page. */
 
 body:has(.contact-page) {
   background: #000000 !important;
   color: #ffffff !important;
 }
 
-.page:has(.contact-page),
-.page:has(.contact-page) .page-layout {
-  width: 100%;
-  max-width: 100%;
-  padding: 0;
-  background: transparent !important;
-}
-
-.page:has(.contact-page) .page-content {
-  box-sizing: border-box;
-  width: min(72%, 72rem);
-  max-width: 72rem;
-  margin: 0 auto;
+.page-content:has(.contact-page) {
+  box-sizing: border-box !important;
+  width: min(72%, 72rem) !important;
+  max-width: 72rem !important;
+  margin: 0 auto !important;
   padding: clamp(7rem, 16vh, 12rem) 0 4rem !important;
-  text-align: left;
+  text-align: left !important;
   background: transparent !important;
 }
 
-.contact-page,
-.contact-page p,
-.contact-page a {
-  color: #ffffff !important;
+/* Same type as the homepage: 11px monospace, everywhere on the page */
+
+html body .contact-page,
+html body .contact-page * {
+  color: #ffffff;
   font-family: ui-monospace, "SFMono-Regular", Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace !important;
   font-size: 11px !important;
-  font-weight: 400;
-  line-height: 1.65;
+  font-weight: 400 !important;
+  font-style: normal !important;
+  line-height: 1.65 !important;
+  letter-spacing: 0 !important;
   -webkit-text-size-adjust: 100%;
   text-size-adjust: 100%;
+}
+
+/* Strip Cargo's link styling (underline / grey rule under each link) */
+
+html body .contact-page a,
+html body .contact-page a:hover,
+html body .contact-page a:active {
+  border: 0 !important;
+  box-shadow: none !important;
+  background: none !important;
+  text-decoration: none !important;
 }
 
 .contact-page .index-heading {
   margin: 0 0 2rem;
 }
 
-.contact-page .contact-back {
-  text-decoration: none !important;
-}
-
-.contact-page p {
-  margin: 0 0 1.65em;
-}
-
-.contact-page a {
-  text-decoration: underline !important;
-  text-decoration-thickness: 1px !important;
-  text-underline-offset: 0.2em;
-  transition: color 800ms ease;
-}
-
-.contact-page a:hover {
+.contact-page .contact-back:hover {
   color: #8f8f8f !important;
 }
 
+/* Contact rows, styled like the project list */
+
+.contact-page .contact-row {
+  display: flex !important;
+  align-items: baseline;
+  box-sizing: border-box;
+  width: 100%;
+  padding: 0.35rem 0 0.3rem !important;
+  color: #ffffff !important;
+  transition: color 800ms ease;
+}
+
+.contact-page .contact-label {
+  flex: 0 0 auto;
+}
+
+html body .contact-page .contact-leader {
+  flex: 1 1 auto;
+  min-width: 2rem;
+  margin: 0 0.8ch 0.32em;
+  border: 0 !important;
+  border-bottom: 1px dotted rgba(255, 255, 255, 0.72) !important;
+}
+
+.contact-page .contact-value {
+  flex: 0 1 auto;
+  min-width: 0;
+  color: #8f8f8f !important;
+  text-align: right;
+  overflow-wrap: anywhere;
+  transition: color 240ms ease;
+}
+
+.contact-page .contact-row:hover {
+  color: #8f8f8f !important;
+}
+
+.contact-page .contact-row:hover .contact-value {
+  color: #ffffff !important;
+}
+
+/* Mobile: label and value stacked, dotted rule underneath */
+
 @media (max-width: 767px) {
-  .page:has(.contact-page) .page-content {
-    width: 100%;
-    max-width: 100%;
-    margin: 0;
+  .page-content:has(.contact-page) {
+    width: 100% !important;
+    max-width: 100% !important;
     padding: 3rem 1.25rem !important;
+  }
+
+  .contact-page .contact-row {
+    position: relative;
+    display: grid !important;
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .contact-page .contact-row::after {
+    position: absolute;
+    right: 0;
+    bottom: 0;
+    left: 0;
+    border-bottom: 1px dotted rgba(255, 255, 255, 0.72);
+    content: "";
+  }
+
+  .contact-page .contact-leader {
+    display: none;
+  }
+
+  .contact-page .contact-value {
+    text-align: left;
   }
 }
 
-.mobile .page:has(.contact-page) .page-content {
-  width: 100%;
-  max-width: 100%;
-  margin: 0;
+.mobile .page-content:has(.contact-page) {
+  width: 100% !important;
+  max-width: 100% !important;
   padding: 3rem 1.25rem !important;
+}
+
+.mobile .contact-page .contact-row {
+  position: relative;
+  display: grid !important;
+  grid-template-columns: minmax(0, 1fr);
+}
+
+.mobile .contact-page .contact-row::after {
+  position: absolute;
+  right: 0;
+  bottom: 0;
+  left: 0;
+  border-bottom: 1px dotted rgba(255, 255, 255, 0.72);
+  content: "";
+}
+
+.mobile .contact-page .contact-leader {
+  display: none;
+}
+
+.mobile .contact-page .contact-value {
+  text-align: left;
 }
