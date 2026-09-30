@@ -91,6 +91,50 @@ html body .contact-page .contact-leader {
   color: #ffffff !important;
 }
 
+/* Back to index, styled like the index's previous/next project links */
+
+.contact-page .contact-nav {
+  margin-top: 1.5rem;
+}
+
+.contact-page .contact-nav-link {
+  display: inline-flex !important;
+  flex-direction: column;
+  gap: 0.2rem;
+  line-height: 1.35 !important;
+}
+
+.contact-page .contact-nav-link * {
+  line-height: 1.35 !important;
+}
+
+.contact-page .contact-nav-direction {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.6ch;
+}
+
+.contact-page .contact-nav-arrow {
+  color: #ffffff !important;
+  transition: color 500ms ease;
+}
+
+.contact-page .contact-nav-label {
+  color: rgba(255, 255, 255, 0.45) !important;
+  transition: color 500ms ease;
+}
+
+.contact-page .contact-nav-title {
+  color: rgba(255, 255, 255, 0.7) !important;
+  transition: color 500ms ease;
+}
+
+.contact-page .contact-nav-link:hover .contact-nav-arrow,
+.contact-page .contact-nav-link:hover .contact-nav-label,
+.contact-page .contact-nav-link:hover .contact-nav-title {
+  color: #8f8f8f !important;
+}
+
 /* Mobile: label and value stacked, dotted rule underneath */
 
 @media (max-width: 767px) {
