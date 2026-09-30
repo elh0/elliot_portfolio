@@ -11,9 +11,21 @@
     window.sessionStorage.setItem("elliotIntroSeen", "1");
   } catch (error) {}
 
+  /* Cargo wraps page content in containers that stop position: fixed from
+     covering the screen, so the landing layer lives directly on <body>. */
+  document.querySelectorAll(".landing-root").forEach(function (old) {
+    old.remove();
+  });
+
+  function goTo(url) {
+    /* Full page load, so Cargo's in-page navigation can't leave the
+       landing layer sitting over the next page. */
+    window.location.href = url;
+  }
+
   document.querySelectorAll(".landing").forEach(function (landing) {
-    /* Cargo can re-run page scripts; rebuild from scratch each time. */
-    landing.innerHTML = "";
+    var root = document.createElement("div");
+    root.className = "landing-root";
 
     var stage = document.createElement("div");
     stage.className = "landing-stage";
@@ -36,7 +48,7 @@
 
     /* Clicking anywhere on the footage goes through to the index. */
     stage.addEventListener("click", function () {
-      window.location.href = LANDING.indexUrl;
+      goTo(LANDING.indexUrl);
     });
 
     var overlay = document.createElement("div");
@@ -49,8 +61,27 @@
         '<span>Index</span><span class="landing-arrow">→</span>' +
       '</a>';
 
-    landing.appendChild(stage);
-    landing.appendChild(overlay);
+    overlay.querySelectorAll("a").forEach(function (link) {
+      link.addEventListener("click", function (event) {
+        event.preventDefault();
+        event.stopPropagation();
+        goTo(link.getAttribute("href"));
+      });
+    });
+
+    root.appendChild(stage);
+    root.appendChild(overlay);
+    document.body.appendChild(root);
+
+    /* If Cargo swaps the page out without a reload, take the layer with it. */
+    var observer = new MutationObserver(function () {
+      if (!document.body.contains(landing)) {
+        video.pause();
+        root.remove();
+        observer.disconnect();
+      }
+    });
+    observer.observe(document.body, { childList: true, subtree: true });
 
     /* With no poster set, borrow Vimeo's thumbnail so there's a frame
        on screen before the video starts. */

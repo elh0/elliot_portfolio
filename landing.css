@@ -1,12 +1,12 @@
 /* Landing page: full-screen muted video with the name and an Index link,
    set in the index page's type and column. */
 
-body:has(.landing) {
+body:has(.landing-root) {
   background: #000000 !important;
   overflow: hidden;
 }
 
-.landing .landing-stage {
+.landing-root .landing-stage {
   position: fixed;
   z-index: 10;
   inset: 0;
@@ -14,7 +14,7 @@ body:has(.landing) {
   cursor: pointer;
 }
 
-.landing .landing-video {
+.landing-root .landing-video {
   position: absolute;
   inset: 0;
   width: 100%;
@@ -24,7 +24,7 @@ body:has(.landing) {
 }
 
 /* Dim so the white type stays legible over bright footage */
-.landing .landing-stage::after {
+.landing-root .landing-stage::after {
   position: absolute;
   inset: 0;
   background: rgba(0, 0, 0, 0.4);
@@ -32,7 +32,7 @@ body:has(.landing) {
   pointer-events: none;
 }
 
-.landing .landing-overlay {
+.landing-root .landing-overlay {
   position: fixed;
   z-index: 11;
   top: 0;
@@ -48,8 +48,8 @@ body:has(.landing) {
   pointer-events: none;
 }
 
-.landing .landing-overlay,
-.landing .landing-overlay * {
+.landing-root .landing-overlay,
+.landing-root .landing-overlay * {
   color: #ffffff !important;
   font-family: ui-monospace, "SFMono-Regular", Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace !important;
   font-size: 11px !important;
@@ -58,7 +58,7 @@ body:has(.landing) {
   letter-spacing: 0 !important;
 }
 
-.landing .landing-nav {
+.landing-root .landing-nav {
   display: flex;
   align-items: flex-start;
   justify-content: space-between;
@@ -66,9 +66,9 @@ body:has(.landing) {
 }
 
 /* Links: strip Cargo's underline, fade to grey on hover like the index */
-.landing .landing-overlay a,
-.landing .landing-overlay a:hover,
-.landing .landing-overlay a:active {
+.landing-root .landing-overlay a,
+.landing-root .landing-overlay a:hover,
+.landing-root .landing-overlay a:active {
   border: 0 !important;
   opacity: 1 !important;
   text-decoration: none !important;
@@ -76,25 +76,25 @@ body:has(.landing) {
   transition: color 500ms ease;
 }
 
-.landing .landing-overlay a:hover,
-.landing .landing-overlay a:hover * {
+.landing-root .landing-overlay a:hover,
+.landing-root .landing-overlay a:hover * {
   color: #8f8f8f !important;
 }
 
-.landing .landing-enter {
+.landing-root .landing-enter {
   display: inline-flex;
   gap: 0.6ch;
   align-self: flex-start;
 }
 
 @media (max-width: 767px) {
-  .landing .landing-overlay {
+  .landing-root .landing-overlay {
     width: 100%;
     padding: 3rem 1.25rem;
   }
 }
 
-.mobile .landing .landing-overlay {
+.mobile .landing-root .landing-overlay {
   width: 100%;
   padding: 3rem 1.25rem;
 }
