@@ -1052,8 +1052,8 @@
    });
  });
 
- /* Keyboard: ← / → skip the current video back / forward 5 seconds. */
- var SEEK_STEP = 5;
+ /* Keyboard: ← / → skip the current video back / forward 3 seconds. */
+ var SEEK_STEP = 3;
 
  function keyboardVideo() {
    if (!page) return null;
