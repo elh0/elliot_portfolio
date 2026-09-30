@@ -3,8 +3,7 @@
   var LANDING = {
     video: "https://player.vimeo.com/progressive_redirect/playback/1071786882/rendition/1080p/file.mp4%20%281080p%29.mp4?loc=external&log_user=0&signature=bb427ec363ba3c6895452e43799399e366b81c94201c7b7d02769f76461fe59d",
     poster: "",
-    indexUrl: "/home",
-    contactUrl: "/contact"
+    indexUrl: "/home"
   };
 
   /* The index plays the same reel as an intro; skip it after the landing page. */
@@ -45,10 +44,6 @@
     overlay.innerHTML =
       '<nav class="landing-nav" aria-label="Site navigation">' +
         '<div class="landing-name">Elliot Holbrow, Cinematographer<br>London, UK</div>' +
-        '<div class="landing-links">' +
-          '<a href="' + LANDING.indexUrl + '">Index</a>' +
-          '<a href="' + LANDING.contactUrl + '">Contact</a>' +
-        '</div>' +
       '</nav>' +
       '<a class="landing-enter" href="' + LANDING.indexUrl + '">' +
         '<span>Index</span><span class="landing-arrow">→</span>' +

@@ -1,4 +1,4 @@
-/* Landing page: full-screen muted video with a top nav and an Index link,
+/* Landing page: full-screen muted video with the name and an Index link,
    set in the index page's type and column. */
 
 body:has(.landing) {
@@ -63,11 +63,6 @@ body:has(.landing) {
   align-items: flex-start;
   justify-content: space-between;
   gap: 2rem;
-}
-
-.landing .landing-links {
-  display: flex;
-  gap: 2ch;
 }
 
 /* Links: strip Cargo's underline, fade to grey on hover like the index */
