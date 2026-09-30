@@ -202,6 +202,38 @@ body:has([id="X1134136285"]) {
   image-rendering: auto;
 }
 
+/* Showreel behind the project list; fades out while a project is open */
+
+[id="X1134136285"] .page-background {
+  position: fixed;
+  z-index: 0;
+  inset: 0;
+  overflow: hidden;
+  background: #000000;
+  pointer-events: none;
+  transition: opacity 800ms ease;
+}
+
+[id="X1134136285"] .page-background video {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+/* Dim so the white type stays legible over bright footage */
+[id="X1134136285"] .page-background::after {
+  position: absolute;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.5);
+  content: "";
+}
+
+[id="X1134136285"].has-open-project .page-background,
+[id="X1134136285"].is-light-theme .page-background {
+  opacity: 0;
+}
+
 /* Open project: exactly the same width as its menu row */
 
 [id="X1134136285"] .project-content {

@@ -58,6 +58,8 @@
        isLight ? "Switch to dark mode" : "Switch to light mode"
      );
    });
+
+   updateBackgroundVideo();
  }
 
  rebuildProjectThemeControls();
@@ -134,6 +136,84 @@
 
     window.addEventListener("scroll", hideProjectPreview, { passive: true });
     window.addEventListener("blur", hideProjectPreview);
+  }
+
+  /* Showreel playing full-screen behind the project list. It pauses and
+     fades out while a project is open, and in light mode. */
+  var BACKGROUND_VIDEO = "https://player.vimeo.com/progressive_redirect/playback/1071786882/rendition/1080p/file.mp4%20%281080p%29.mp4?loc=external&log_user=0&signature=bb427ec363ba3c6895452e43799399e366b81c94201c7b7d02769f76461fe59d";
+  var backgroundVideo = null;
+
+  function updateBackgroundVideo() {
+    if (!page || !backgroundVideo) return;
+
+    var projectOpen = !!page.querySelector("details.project-item[open]");
+    var isLight = page.classList.contains("is-light-theme");
+    var reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    var shouldPlay = !projectOpen && !isLight && !reduceMotion;
+
+    page.classList.toggle("has-open-project", projectOpen);
+
+    if (shouldPlay && backgroundVideo.paused) {
+      var playAttempt = backgroundVideo.play();
+      if (playAttempt && typeof playAttempt.catch === "function") {
+        playAttempt.catch(function () {
+          /* Autoplay blocked (e.g. Low Power Mode): the poster still shows. */
+        });
+      }
+    } else if (!shouldPlay && !backgroundVideo.paused) {
+      backgroundVideo.pause();
+    }
+  }
+
+  if (page) {
+    page.querySelectorAll(".page-background").forEach(function (old) {
+      old.remove();
+    });
+
+    var background = document.createElement("div");
+    background.className = "page-background";
+    background.setAttribute("aria-hidden", "true");
+
+    backgroundVideo = document.createElement("video");
+    backgroundVideo.src = BACKGROUND_VIDEO;
+    backgroundVideo.muted = true;
+    backgroundVideo.defaultMuted = true;
+    backgroundVideo.loop = true;
+    backgroundVideo.playsInline = true;
+    backgroundVideo.preload = "auto";
+    backgroundVideo.setAttribute("muted", "");
+    backgroundVideo.setAttribute("playsinline", "");
+    backgroundVideo.setAttribute("webkit-playsinline", "");
+
+    var backgroundMatch = BACKGROUND_VIDEO.match(/playback\/(\d+)\//);
+    if (backgroundMatch) {
+      fetch(
+        "https://vimeo.com/api/oembed.json?url=" +
+        encodeURIComponent("https://vimeo.com/" + backgroundMatch[1]) +
+        "&maxwidth=1920"
+      )
+        .then(function (response) {
+          if (!response.ok) throw new Error("Vimeo thumbnail unavailable");
+          return response.json();
+        })
+        .then(function (data) {
+          if (!data.thumbnail_url) return;
+          var thumbnail = new URL(data.thumbnail_url);
+          thumbnail.searchParams.set("mw", "1920");
+          thumbnail.searchParams.set("q", "90");
+          backgroundVideo.setAttribute("poster", thumbnail.toString());
+        })
+        .catch(function () {});
+    }
+
+    background.appendChild(backgroundVideo);
+    page.insertBefore(background, page.firstChild);
+
+    page.querySelectorAll("details.project-item").forEach(function (project) {
+      project.addEventListener("toggle", updateBackgroundVideo);
+    });
+
+    updateBackgroundVideo();
   }
 
   function formatTime(seconds) {
