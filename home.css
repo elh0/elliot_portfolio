@@ -572,6 +572,18 @@ body:has([id="X1134136285"]) {
   color: #8f8f8f;
 }
 
+/* Match the project list type exactly, whatever Cargo applies to the footer */
+[id="X1134136285"] .site-footer,
+[id="X1134136285"] .site-footer *,
+.mobile [id="X1134136285"] .site-footer,
+.mobile [id="X1134136285"] .site-footer * {
+  font-family: ui-monospace, "SFMono-Regular", Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace !important;
+  font-size: var(--site-type-size, 11px) !important;
+  font-weight: 400 !important;
+  line-height: 1.65 !important;
+  letter-spacing: 0 !important;
+}
+
 /* Same thin underline as the "Contact" link in the heading */
 [id="X1134136285"] .site-footer a {
   color: #ffffff !important;
