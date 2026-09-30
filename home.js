@@ -1066,7 +1066,13 @@
    return open || null;
  }
 
- document.addEventListener("keydown", function (event) {
+ /* Listen on window in the capture phase so this runs before Cargo's own
+    arrow-key page navigation, then stop the key reaching it: left/right
+    only ever skip video here, never change page. */
+ if (window._elliotArrowKeys) {
+   window.removeEventListener("keydown", window._elliotArrowKeys, true);
+ }
+ window._elliotArrowKeys = function (event) {
    if (event.key !== "ArrowLeft" && event.key !== "ArrowRight") return;
    if (event.altKey || event.ctrlKey || event.metaKey || event.shiftKey) return;
 
@@ -1078,16 +1084,19 @@
          /^(INPUT|TEXTAREA|SELECT)$/.test(target.tagName))) return;
    }
 
+   event.preventDefault();
+   event.stopImmediatePropagation();
+
    var video = keyboardVideo();
    if (!video || !Number.isFinite(video.duration)) return;
 
-   event.preventDefault();
    var step = event.key === "ArrowRight" ? SEEK_STEP : -SEEK_STEP;
    video.currentTime = Math.min(
      Math.max(0, video.currentTime + step),
      Math.max(0, video.duration - 0.05)
    );
- });
+ };
+ window.addEventListener("keydown", window._elliotArrowKeys, true);
 
  /* Desktop-only previous/next navigation. */
  if (page) {
