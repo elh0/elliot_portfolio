@@ -49,6 +49,15 @@
       ]
     },
     {
+      title: "Helinox ‘Zero’ S/S26",
+      category: "Fashion",
+      director: "Tom Silvester",
+      format: "S35, Digital",
+      videos: [
+      { src: "https://player.vimeo.com/progressive_redirect/playback/1231792538/rendition/1080p/file.mp4%20%281080p%29.mp4?loc=external&log_user=0&signature=f124268d3884f75c86dfb18bdedcf41661dd78dea1b5bdae7c04890dd2f6252d" }
+      ]
+    },
+    {
       title: "Playing House",
       category: "Fashion",
       director: "Lydia Garnett",
