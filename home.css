@@ -398,6 +398,44 @@ body:has([id="X1134136285"]) {
   -webkit-tap-highlight-color: transparent;
 }
 
+[id="X1134136285"] .video-controls > * {
+  flex: 0 0 auto;
+}
+
+[id="X1134136285"] .video-controls > .video-progress {
+  flex: 1 1 auto;
+  min-width: 0;
+}
+
+[id="X1134136285"] .video-mute-toggle {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 16px;
+  height: 24px;
+  -webkit-tap-highlight-color: transparent;
+}
+
+[id="X1134136285"] .video-mute-toggle svg {
+  display: block;
+  width: 12px;
+  height: 12px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.2;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+[id="X1134136285"] .video-mute-toggle svg .icon-fill {
+  fill: currentColor;
+  stroke: none;
+}
+
+[id="X1134136285"] .video-mute-toggle:hover {
+  color: #8f8f8f;
+}
+
 [id="X1134136285"] .video-fullscreen-toggle {
   display: inline-flex;
   align-items: center;
@@ -486,8 +524,9 @@ body:has([id="X1134136285"]) {
 }
 
 [id="X1134136285"] .video-controls {
-  display: grid;
-  grid-template-columns: auto minmax(0, 1fr) auto auto auto;
+  /* One row that never wraps: time, progress bar (fills), then icons */
+  display: flex;
+  flex-wrap: nowrap;
   align-items: center;
   box-sizing: border-box;
   width: 100%;

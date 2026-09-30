@@ -1,6 +1,25 @@
 (function () {
  var page = document.querySelector('[id="X1134136285"]');
 
+ /* Speaker icons: with sound waves while playing sound, crossed when muted. */
+ var SOUND_ON_ICON =
+   '<svg viewBox="0 0 12 12" aria-hidden="true" focusable="false">' +
+   '<path class="icon-fill" d="M1 4.25h2L6 1.75v8.5L3 7.75H1z"/>' +
+   '<path d="M8 4.25a2.5 2.5 0 0 1 0 3.5M9.5 2.75a4.6 4.6 0 0 1 0 6.5"/></svg>';
+ var SOUND_OFF_ICON =
+   '<svg viewBox="0 0 12 12" aria-hidden="true" focusable="false">' +
+   '<path class="icon-fill" d="M1 4.25h2L6 1.75v8.5L3 7.75H1z"/>' +
+   '<path d="M8 4.5l3 3M11 4.5l-3 3"/></svg>';
+
+ function setMuteIcon(button, muted) {
+   var state = muted ? "off" : "on";
+   if (button.getAttribute("data-sound") === state) return;
+   button.setAttribute("data-sound", state);
+   button.innerHTML = muted ? SOUND_OFF_ICON : SOUND_ON_ICON;
+   button.setAttribute("aria-label", muted ? "Unmute" : "Mute");
+ }
+
+
  /* The project list. Edit here to add, remove or reorder projects; the page
     markup is built from this, so nothing needs pasting into Cargo. */
  var PROJECTS = [
@@ -275,7 +294,8 @@
        progress.setAttribute("aria-label", "Video progress");
        progress.style.setProperty("--progress", "0%");
        controls.appendChild(progress);
-       var mute = el("button", "video-mute-toggle", "Mute");
+       var mute = el("button", "video-mute-toggle");
+       setMuteIcon(mute, false);
        mute.type = "button";
        controls.appendChild(mute);
 
@@ -756,7 +776,7 @@
       muteButton = document.createElement("button");
       muteButton.className = "video-mute-toggle";
       muteButton.type = "button";
-      muteButton.textContent = "Mute";
+      setMuteIcon(muteButton, false);
       controls.appendChild(muteButton);
    }
 
@@ -788,7 +808,7 @@
       );
 
       stage.classList.toggle("is-paused", video.paused);
-      muteButton.textContent = video.muted ? "Unmute" : "Mute";
+      setMuteIcon(muteButton, video.muted);
     }
 
     function animateProgress() {
