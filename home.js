@@ -419,6 +419,7 @@
      or opens a project, it fades out for good and the hover thumbnails take
      over. */
   var BACKGROUND_VIDEO = "https://player.vimeo.com/progressive_redirect/playback/1071786882/rendition/1080p/file.mp4%20%281080p%29.mp4?loc=external&log_user=0&signature=bb427ec363ba3c6895452e43799399e366b81c94201c7b7d02769f76461fe59d";
+  var BACKGROUND_VIDEO_MOBILE = "https://player.vimeo.com/progressive_redirect/playback/1071786882/rendition/720p/file.mp4%20%28720p%29.mp4?loc=external&log_user=0&signature=0c0894255b1ccc728a1be1eeb017060c52311c6a5133eceda6ad94aa42e9bd59";
   var INTRO_SEEN_KEY = "elliotIntroSeen";
   var backgroundVideo = null;
 
@@ -483,7 +484,9 @@
     background.setAttribute("aria-hidden", "true");
 
     backgroundVideo = document.createElement("video");
-    backgroundVideo.src = BACKGROUND_VIDEO;
+    backgroundVideo.src = window.matchMedia("(max-width: 767px)").matches
+      ? BACKGROUND_VIDEO_MOBILE
+      : BACKGROUND_VIDEO;
     backgroundVideo.muted = true;
     backgroundVideo.defaultMuted = true;
     backgroundVideo.loop = true;

@@ -2,6 +2,8 @@
   /* Change these to swap the landing video or where its links lead. */
   var LANDING = {
     video: "https://player.vimeo.com/progressive_redirect/playback/1071786882/rendition/1080p/file.mp4%20%281080p%29.mp4?loc=external&log_user=0&signature=bb427ec363ba3c6895452e43799399e366b81c94201c7b7d02769f76461fe59d",
+    /* Smaller file for phones: starts much sooner on mobile data. */
+    mobileVideo: "https://player.vimeo.com/progressive_redirect/playback/1071786882/rendition/720p/file.mp4%20%28720p%29.mp4?loc=external&log_user=0&signature=0c0894255b1ccc728a1be1eeb017060c52311c6a5133eceda6ad94aa42e9bd59",
     poster: "",
     indexUrl: "/projects"
   };
@@ -61,7 +63,9 @@
     if (!video) {
       video = document.createElement("video");
       video.className = "landing-video";
-      video.src = LANDING.video;
+      video.src = window.matchMedia("(max-width: 767px)").matches && LANDING.mobileVideo
+        ? LANDING.mobileVideo
+        : LANDING.video;
     }
     if (LANDING.poster && !video.getAttribute("poster")) video.poster = LANDING.poster;
     video.muted = true;
