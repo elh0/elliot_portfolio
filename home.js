@@ -414,8 +414,8 @@
     window.addEventListener("blur", hideProjectPreview);
   }
 
-  /* Intro showreel: plays full-screen behind the project list on the first
-     load of a visit. The first time someone hovers a project title (desktop)
+  /* Intro showreel (desktop only): plays full-screen behind the project list
+     on the first load of a visit. The first time someone hovers a project title (desktop)
      or opens a project, it fades out for good and the hover thumbnails take
      over. */
   var BACKGROUND_VIDEO = "https://player.vimeo.com/progressive_redirect/playback/1071786882/rendition/1080p/file.mp4%20%281080p%29.mp4?loc=external&log_user=0&signature=bb427ec363ba3c6895452e43799399e366b81c94201c7b7d02769f76461fe59d";
@@ -477,6 +477,7 @@
   if (
     page &&
     !introAlreadySeen() &&
+    !window.matchMedia("(max-width: 767px)").matches &&
     !window.matchMedia("(prefers-reduced-motion: reduce)").matches
   ) {
     var background = document.createElement("div");

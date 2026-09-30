@@ -1,4 +1,11 @@
 (function () {
+  /* Phones skip the landing reel and go straight to the project list.
+     replace() keeps the back button from bouncing back here. */
+  if (window.matchMedia("(max-width: 767px)").matches) {
+    window.location.replace("/projects");
+    return;
+  }
+
   /* Change these to swap the landing video or where its links lead. */
   var LANDING = {
     video: "https://player.vimeo.com/progressive_redirect/playback/1071786882/rendition/1080p/file.mp4%20%281080p%29.mp4?loc=external&log_user=0&signature=bb427ec363ba3c6895452e43799399e366b81c94201c7b7d02769f76461fe59d",
