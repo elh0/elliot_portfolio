@@ -306,6 +306,11 @@
  var hoverPreview = null;
   var hoverPreviewImage = null;
 
+ /* Light/dark toggle icon: a half-filled circle. */
+ var THEME_ICON =
+   '<svg viewBox="0 0 12 12" aria-hidden="true" focusable="false">' +
+   '<circle cx="6" cy="6" r="4.75"/><path d="M6 1.25a4.75 4.75 0 0 1 0 9.5z"/></svg>';
+
  function rebuildProjectThemeControls() {
    if (!page) return;
 
@@ -328,7 +333,7 @@
     var button = document.createElement("button");
     button.className = "video-theme-toggle";
     button.type = "button";
-    button.textContent = "Light";
+    button.innerHTML = THEME_ICON;
     button.setAttribute("aria-label", "Switch to light mode");
      button.setAttribute("aria-pressed", "false");
      button.addEventListener("click", function (event) {
@@ -354,7 +359,7 @@
    page.classList.toggle("is-light-theme", isLight);
 
    page.querySelectorAll(".video-theme-toggle").forEach(function (button) {
-     button.textContent = isLight ? "Dark" : "Light";
+     button.innerHTML = THEME_ICON;
      button.setAttribute("aria-pressed", String(isLight));
      button.setAttribute(
        "aria-label",

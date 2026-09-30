@@ -402,7 +402,7 @@ body:has([id="X1134136285"]) {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  width: 24px;
+  width: 16px;
   height: 24px;
 }
 
@@ -523,6 +523,31 @@ body:has([id="X1134136285"]) {
   white-space: nowrap;
   cursor: pointer;
   transition: color 180ms ease;
+}
+
+[id="X1134136285"] .video-theme-toggle {
+  display: inline-flex !important;
+  align-items: center;
+  justify-content: center;
+  width: 16px;
+  height: 24px;
+}
+
+[id="X1134136285"] .video-theme-toggle svg {
+  display: block;
+  width: 11px;
+  height: 11px;
+  stroke: currentColor;
+  stroke-width: 1.2;
+}
+
+[id="X1134136285"] .video-theme-toggle svg circle {
+  fill: none;
+}
+
+[id="X1134136285"] .video-theme-toggle svg path {
+  fill: currentColor;
+  stroke: none;
 }
 
 [id="X1134136285"] .video-theme-toggle:hover,
