@@ -113,6 +113,13 @@ body:has([id="X1134136285"]) {
   transition: color 800ms ease;
 }
 
+/* No grey/blue flash when tapping a row on phones */
+[id="X1134136285"] .project-item summary,
+[id="X1134136285"] .project-navigation-link,
+[id="X1134136285"] .video-controls button {
+  -webkit-tap-highlight-color: transparent;
+}
+
 [id="X1134136285"] .project-item summary::-webkit-details-marker {
   display: none !important;
 }

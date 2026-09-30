@@ -1,5 +1,278 @@
 (function () {
  var page = document.querySelector('[id="X1134136285"]');
+
+ /* The project list. Edit here to add, remove or reorder projects; the page
+    markup is built from this, so nothing needs pasting into Cargo. */
+ var PROJECTS = [
+    {
+      title: "Polène SS24",
+      category: "Fashion",
+      director: "Guillaume Lebel",
+      format: "Digital, LF, 35mm Print",
+      videos: [
+      { src: "https://player.vimeo.com/progressive_redirect/playback/1040453005/rendition/1080p/file.mp4%20%281080p%29.mp4?loc=external&log_user=0&signature=d7bb8e0abc51de4abec416624d4363cbd1383cc82939a29cbba1f42927e5d7e6",
+        poster: "https://i.vimeocdn.com/video/1963352200-b51179485e9c29a3f35948459b6d7d0589ed682ca53c598383f2cd018546414f-d_1280?region=us&mw=1920&q=90",
+        ratio: "1440 / 1080", time: "0:58", duration: 58.58 }
+      ]
+    },
+    {
+      title: "Adidas ‘Return of the 15’",
+      category: "Commercial",
+      director: "Hannan Hussain",
+      format: "S35, Digital",
+      videos: [
+      { src: "https://player.vimeo.com/progressive_redirect/playback/1227015224/rendition/1080p/file.mp4%20%281080p%29.mp4?loc=external&log_user=0&signature=4a6ce9d029807f6f15b3f12ec99c2714483f99121606b2722de4b12d908812e1",
+        poster: "https://i.vimeocdn.com/video/2201141803-8e1793107c9d95a9ed69fe5e9fd4a005b6a5b1eebd37986610f51696b1a570a3-d_1280?region=us&mw=1920&q=90",
+        ratio: "1440 / 1080", time: "0:55", duration: 55.743333 }
+      ]
+    },
+    {
+      title: "T Magazine",
+      category: "Fashion",
+      director: "Jess Madavo",
+      format: "Standard 16",
+      videos: [
+      { src: "https://player.vimeo.com/progressive_redirect/playback/1072485630/rendition/1080p/file.mp4%20%281080p%29.mp4?loc=external&log_user=0&signature=3d6f0558a02ab26a2d519977c1b10534bb5674d5fe3aa03c702a0a02c3071862",
+        poster: "https://i.vimeocdn.com/video/2001413250-9cc6946f4c4bb871925c710dd5dfdbdefc3d410e04ae130a6ac21c0c5baae0f8-d_1280?region=us&mw=1920&q=90",
+        ratio: "1620 / 1080", time: "0:43", duration: 43.711667 }
+      ]
+    },
+    {
+      title: "Pléi",
+      category: "Fashion",
+      director: "Guillaume Lebel",
+      format: "LF, Digital, 35mm Print",
+      videos: [
+      { src: "https://player.vimeo.com/progressive_redirect/playback/948314452/rendition/1080p/file.mp4%20%281080p%29.mp4?loc=external&log_user=0&signature=3826045616c5697e66ff31a37f3c0125aa7efe3fee1f400713b97e2e911169c0",
+        poster: "https://i.vimeocdn.com/video/1855463606-98fab6c5cbc0fd9d58918481eccb24f53f7113ea27e3caf0a3e798eaa5fe092f-d_1280?region=us&mw=1920&q=90",
+        ratio: "1920 / 1080", time: "0:54", duration: 54.57 }
+      ]
+    },
+    {
+      title: "Playing House",
+      category: "Fashion",
+      director: "Lydia Garnett",
+      format: "Standard 16 to 16:9",
+      videos: [
+      { src: "https://player.vimeo.com/progressive_redirect/playback/1229248245/rendition/1080p/file.mp4%20%281080p%29.mp4?loc=external&log_user=0&signature=ed86d3e4fff4e6a7a0ffc719b293e43be38f553a65b8d953eb6e5a4010ca0edd",
+        poster: "https://i.vimeocdn.com/video/2203862107-cedc1cf330e12155e0ab81cbd9d052412d652eb1da77cd0ca7954be225e375a7-d_1280?region=us&mw=1920&q=90",
+        ratio: "1920 / 1080", time: "0:09", duration: 9.876667 },
+      { src: "https://player.vimeo.com/progressive_redirect/playback/1229247950/rendition/1080p/file.mp4%20%281080p%29.mp4?loc=external&log_user=0&signature=0defd985e0204e0513b4ca142a7d20e39e0eea3b9a050335b9416105fa0e4b06",
+        poster: "https://i.vimeocdn.com/video/2203861862-e1352a80a9579666276fe3ce48e6c39d712061d5ee46deea70119b60fce9e64a-d_1280?region=us&mw=1920&q=90",
+        ratio: "1920 / 1080", time: "0:08", duration: 8.255 },
+      { src: "https://player.vimeo.com/progressive_redirect/playback/1229248244/rendition/1080p/file.mp4%20%281080p%29.mp4?loc=external&log_user=0&signature=4f92587d2d106926c18f87271cd8624dd94e5e4d341eebf3318b033f9be5ed07",
+        poster: "https://i.vimeocdn.com/video/2203862133-d0fa428e9fd4f6e4dddc1290c1d04c91163962a3fa0e83c5a192478666fc6daf-d_1280?region=us&mw=1920&q=90",
+        ratio: "1920 / 1080", time: "0:12", duration: 12.671667 },
+      { src: "https://player.vimeo.com/progressive_redirect/playback/1229248243/rendition/1080p/file.mp4%20%281080p%29.mp4?loc=external&log_user=0&signature=b09dfc59219db1d65a9ab83f5716e9d9daf2838efd64096e950f47de7784f9cc",
+        poster: "https://i.vimeocdn.com/video/2203862153-c4319ae5f382573f42da1d7a49a75947756ec07ca10399da317bd70b24866be3-d_1280?region=us&mw=1920&q=90",
+        ratio: "1920 / 1080", time: "0:13", duration: 13.418333 }
+      ]
+    },
+    {
+      title: "Art of Movement",
+      category: "Short",
+      director: "Tayler Prince-Fraser",
+      format: "S35, LF, Digital",
+      videos: [
+      { src: "https://player.vimeo.com/progressive_redirect/playback/1142188732/rendition/1080p/file.mp4%20%281080p%29.mp4?loc=external&log_user=0&signature=71dbe0db74b962ea3ec5aefc9bc3537a4d7579cec775b6d08dda02b68dcfd01d",
+        poster: "https://i.vimeocdn.com/video/2089855194-62ecd2e45e1f8ecbe66c98420c80ad28f2f0a95e14dfbffd61156297af49930b-d_1280?region=us&mw=1920&q=90",
+        ratio: "2048 / 1152", time: "2:06", duration: 126.506667 }
+      ]
+    },
+    {
+      title: "Oasis x Spotify",
+      category: "Commercial",
+      director: "Uncanny",
+      format: "Standard 16, S16",
+      videos: [
+      { src: "https://player.vimeo.com/progressive_redirect/playback/1099008622/rendition/1080p/file.mp4%20%281080p%29.mp4?loc=external&log_user=0&signature=dc129afeac280bf6b7c5cb2785b02cb0b5b24bb6655523356f50d6da700ea6e6",
+        poster: "https://i.vimeocdn.com/video/2033812422-93ef9e77c85f1b57fd5890f27ac72922934251ccc0c3a0d4d288fa942277d80f-d_1280?region=us&mw=1920&q=90",
+        ratio: "1572 / 1080", time: "1:11", duration: 71.125 }
+      ]
+    },
+    {
+      title: "Corteiz ‘Lundun’",
+      category: "Commercial",
+      director: "Uncanny",
+      format: "Standard 16",
+      videos: [
+      { src: "https://player.vimeo.com/progressive_redirect/playback/1072932139/rendition/1080p/file.mp4%20%281080p%29.mp4?loc=external&log_user=0&signature=99567ab965f52a6c9f252508113be239e021c05992530790e03b20ad3010af06",
+        poster: "https://i.vimeocdn.com/video/2006470127-41dc28a06889dec234c7ca2a3c6e7c2154fe49ae11aa0c50b81eb97a235e40c0-d_1280?region=us&mw=1920&q=90",
+        ratio: "1620 / 1080", time: "0:10", duration: 10.41 }
+      ]
+    },
+    {
+      title: "Xiaoqiao - Lethe",
+      category: "Music",
+      director: "Erika Kamano",
+      format: "S35, Digital",
+      videos: [
+      { src: "https://player.vimeo.com/progressive_redirect/playback/1071457554/rendition/1080p/file.mp4%20%281080p%29.mp4?loc=external&log_user=0&signature=302eac755a08f76de9fb55e865caabf20c2617fb7955cfad21c77c66e80575ca",
+        poster: "https://i.vimeocdn.com/video/2000183801-d5097b7141d6c7715065e5e3b162de9c763437d50cd7d050ed7940c0064d20b7-d_1280?region=us&mw=1920&q=90",
+        ratio: "1920 / 1080", time: "0:25", duration: 25.001667 }
+      ]
+    },
+    {
+      title: "Adidas ‘Tug of War’",
+      category: "Commercial",
+      director: "Dominic Chew",
+      format: "S35, Digital",
+      videos: [
+      { src: "https://player.vimeo.com/progressive_redirect/playback/1227034781/rendition/1080p/file.mp4%20%281080p%29.mp4?loc=external&log_user=0&signature=4a0bc10300ec0d73e06d94a76aa2e29606ab7a962a6613a9bc0a39e77bb392cc",
+        poster: "https://i.vimeocdn.com/video/2206436103-df8a7a46b7f8b7c756821cb8f516c78c96cefb36d67806b0e15f85ff08515292-d_1280?region=us&mw=1920&q=90",
+        ratio: "1440 / 1080", time: "0:47", duration: 47.806667 }
+      ]
+    },
+    {
+      title: "CP x Barbour",
+      category: "Fashion",
+      director: "Theo Cottle",
+      format: "S16",
+      videos: [
+      { src: "https://player.vimeo.com/progressive_redirect/playback/875187596/rendition/1080p/file.mp4%20%281080p%29.mp4?loc=external&log_user=0&signature=7feda85be6dce794fc49e477986d856960673e4cac5827704ae6e019f247d9ac",
+        poster: "https://i.vimeocdn.com/video/1739627020-3fe56cc00ed2d14ebd5afc390b1f4de6955e858b25e839bd90482c4bb3a289dc-d_1280?region=us&mw=1920&q=90",
+        ratio: "1920 / 1080", time: "0:29", duration: 29.93 }
+      ]
+    },
+    {
+      title: "The North Face",
+      category: "Fashion",
+      director: "Tayler Prince-Fraser",
+      format: "Standard 16",
+      videos: [
+      { src: "https://player.vimeo.com/progressive_redirect/playback/808697355/rendition/1080p/file.mp4%20%281080p%29.mp4?loc=external&log_user=0&signature=a569704a71b810409671edff0c916535bce5762bf8db809984564dcdd062e888",
+        poster: "https://i.vimeocdn.com/video/2206436844-155cd6eac648929c0cf40f79212f93dc639e38ad27a6e6d32bd53ca50f4a4221-d_1280?region=us&mw=1920&q=90",
+        ratio: "1440 / 1080", time: "1:06", duration: 66.9 }
+      ]
+    },
+    {
+      title: "Raf Simons",
+      category: "Fashion",
+      director: "Elliot Holbrow",
+      format: "S35, Digital",
+      videos: [
+      { src: "https://player.vimeo.com/progressive_redirect/playback/486365701/rendition/1080p/file.mp4%20%281080p%29.mp4?loc=external&log_user=0&signature=1643d8e00fd6239bb01c18f962f78be2a4f3cc03dc754b515e280d3c8acec277",
+        poster: "https://i.vimeocdn.com/video/1006781815-55d0d3b118c5764babf019a3a1e1940fefcc4569463e392bf4f5dd02fc3cc483-d_1280?region=us&mw=1920&q=90",
+        ratio: "1920 / 1080", time: "0:41", duration: 41.258333 }
+      ]
+    },
+    {
+      title: "Swank Mami - MC69",
+      category: "Music",
+      director: "Claryn Chong",
+      format: "S35, Digital",
+      videos: [
+      { src: "https://player.vimeo.com/progressive_redirect/playback/1132515614/rendition/1080p/file.mp4%20%281080p%29.mp4?loc=external&log_user=0&signature=cbe53569d3db381d73c4c486235f404e6465ffbad36985de7279251973ee7d3b",
+        poster: "https://i.vimeocdn.com/video/2076827688-215e537ce1299d74233874078dfde5b678932b17b1cc3ebb2782dfc0292e7d94-d_1280?region=us&mw=1920&q=90",
+        ratio: "1620 / 1080", time: "2:33", duration: 153.45 }
+      ]
+    },
+    {
+      title: "Unflirt - Seasong",
+      category: "Music",
+      director: "Claryn Chong",
+      format: "DV, Beta, Digital",
+      videos: [
+      { src: "https://player.vimeo.com/progressive_redirect/playback/1113705769/rendition/540p/file.mp4%20%28540p%29.mp4?loc=external&log_user=0&signature=96f1fab2ff41a3675a60bad71284fda6014143e03ff94810af49733e2f6ed202",
+        poster: "https://i.vimeocdn.com/video/2052938166-6f07389d7ecf100967d152a91839ef9dbe09802cb9e748b4d567841a312806e8-d_640?region=us&mw=1920&q=90",
+        ratio: "886 / 540", time: "3:41", duration: 221.46 }
+      ]
+    },
+    {
+      title: "Rotator",
+      category: "Short",
+      director: "Uncanny",
+      format: "Digital, Standard 16",
+      videos: [
+      { src: "https://player.vimeo.com/progressive_redirect/playback/1113672737/rendition/1080p/file.mp4%20%281080p%29.mp4?loc=external&log_user=0&signature=5c6db461969362b269e6cc545745cab6e4cd701e3f4008cf622bd2973768e132",
+        poster: "https://i.vimeocdn.com/video/2052937277-8597d16a4732b82b3d1b60e9cb3ba545d5f184ebf4e8bb19a335453ed0620e1c-d_1280?region=us&mw=1920&q=90",
+        ratio: "1440 / 1080", time: "3:51", duration: 231.806667 }
+      ]
+    }
+  ];
+
+ /* Build the project list into the empty .project-accordion. If the Cargo
+    markup already contains projects, leave it alone. */
+ function renderProjects() {
+   var accordion = page && page.querySelector(".project-accordion");
+   if (!accordion || accordion.querySelector("details.project-item")) return;
+
+   function el(tag, className, text) {
+     var node = document.createElement(tag);
+     if (className) node.className = className;
+     if (text != null) node.textContent = text;
+     return node;
+   }
+
+   PROJECTS.forEach(function (project) {
+     var details = el("details", "project-item");
+     details.setAttribute("name", "elliot-projects");
+
+     var summary = el("summary");
+     var title = el("span", "project-title-text", project.title);
+     title.setAttribute("data-mobile-category", project.category);
+     var leader = el("span", "project-leader");
+     leader.setAttribute("aria-hidden", "true");
+     summary.appendChild(title);
+     summary.appendChild(leader);
+     summary.appendChild(el("span", "project-category", project.category));
+     details.appendChild(summary);
+
+     var content = el("div", "project-content");
+     var carousel = el("div", "project-carousel");
+
+     project.videos.forEach(function (clip) {
+       var slide = el("div", "project-slide");
+       var wrap = el("div", "video-wrap");
+       var stage = el("div", "video-stage is-paused");
+       stage.style.setProperty("--video-ratio", clip.ratio);
+
+       var video = el("video", "project-video");
+       video.setAttribute("playsinline", "");
+       video.setAttribute("preload", "none");
+       video.setAttribute("data-deferred-src", clip.src);
+       video.setAttribute("data-deferred-poster", clip.poster);
+       stage.appendChild(video);
+
+       var controls = el("div", "video-controls");
+       controls.appendChild(el("span", "video-time", clip.time));
+       var progress = el("input", "video-progress");
+       progress.type = "range";
+       progress.min = "0";
+       progress.max = String(clip.duration);
+       progress.step = "0.01";
+       progress.value = "0";
+       progress.setAttribute("aria-label", "Video progress");
+       progress.style.setProperty("--progress", "0%");
+       controls.appendChild(progress);
+       var mute = el("button", "video-mute-toggle", "Mute");
+       mute.type = "button";
+       controls.appendChild(mute);
+
+       wrap.appendChild(stage);
+       wrap.appendChild(controls);
+       slide.appendChild(wrap);
+       carousel.appendChild(slide);
+     });
+
+     var meta = el("div", "project-meta");
+     [["Director:", project.director, "project-meta-item"],
+      ["Format:", project.format, "project-meta-item project-meta-right"]
+     ].forEach(function (row) {
+       var item = el("span", row[2]);
+       item.appendChild(el("span", "project-meta-label", row[0]));
+       item.appendChild(document.createTextNode(" " + row[1]));
+       meta.appendChild(item);
+     });
+
+     content.appendChild(carousel);
+     content.appendChild(meta);
+     details.appendChild(content);
+     accordion.appendChild(details);
+   });
+ }
+
+ renderProjects();
  var hoverPreview = null;
   var hoverPreviewImage = null;
 
