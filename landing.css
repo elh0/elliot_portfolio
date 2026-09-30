@@ -1,0 +1,84 @@
+/* Landing page: full-screen muted video, heading in the index's position. */
+
+body:has(.landing) {
+  background: #000000 !important;
+  overflow: hidden;
+}
+
+.landing .landing-link,
+.landing .landing-link:hover,
+.landing .landing-link:active {
+  position: fixed;
+  z-index: 10;
+  inset: 0;
+  display: block;
+  border: 0 !important;
+  opacity: 1 !important;
+  text-decoration: none !important;
+  cursor: pointer;
+}
+
+.landing .landing-video {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  background: #000000;
+  pointer-events: none;
+}
+
+/* Slight dim so the white type stays legible over bright footage */
+.landing .landing-link::after {
+  position: absolute;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.18);
+  content: "";
+  pointer-events: none;
+}
+
+.landing .landing-overlay {
+  position: absolute;
+  z-index: 1;
+  inset: 0;
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  width: min(72%, 72rem);
+  margin: 0 auto;
+  padding: clamp(7rem, 16vh, 12rem) 0 3rem;
+}
+
+.landing .landing-overlay,
+.landing .landing-overlay * {
+  color: #ffffff !important;
+  font-family: ui-monospace, "SFMono-Regular", Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace !important;
+  font-size: 11px !important;
+  font-weight: 400 !important;
+  line-height: 1.65 !important;
+  letter-spacing: 0 !important;
+}
+
+.landing .landing-enter {
+  display: inline-flex;
+  gap: 0.6ch;
+  align-self: flex-start;
+  transition: opacity 500ms ease;
+}
+
+.landing .landing-link:hover .landing-enter {
+  opacity: 0.6;
+}
+
+@media (max-width: 767px) {
+  .landing .landing-overlay {
+    width: 100%;
+    padding: 3rem 1.25rem;
+  }
+}
+
+.mobile .landing .landing-overlay {
+  width: 100%;
+  padding: 3rem 1.25rem;
+}
