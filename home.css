@@ -556,10 +556,12 @@ body:has([id="X1134136285"]) {
   display: none;
 }
 
-/* Mobile footer: representation and sign-off (hidden on desktop) */
+/* Footer: representation and sign-off */
 
 [id="X1134136285"] .site-footer {
-  display: none;
+  position: relative;
+  z-index: 1;
+  display: flex;
   flex-direction: column;
   gap: 0.1rem;
   margin-top: 2.5rem;
@@ -595,16 +597,6 @@ body:has([id="X1134136285"]) {
 [id="X1134136285"] .site-footer a:hover {
   color: #8f8f8f !important;
   border-bottom-color: #8f8f8f !important;
-}
-
-.mobile [id="X1134136285"] .site-footer {
-  display: flex;
-}
-
-@media (max-width: 767px) {
-  [id="X1134136285"] .site-footer {
-    display: flex;
-  }
 }
 
 [id="X1134136285"].is-light-theme .site-footer {
