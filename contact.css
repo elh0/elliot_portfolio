@@ -10,9 +10,15 @@ body:has(.contact-page) {
 
 .page:has(.contact-page) {
   min-height: auto !important;
+  padding: 0 !important;
 }
 
+/* Cancel Cargo's default page padding and 93% width, as the index does,
+   so both pages share the same left edge and column. */
 .page-layout:has(.contact-page) {
+  width: 100% !important;
+  max-width: 100% !important;
+  padding: 0 !important;
   align-items: flex-start !important;
   align-content: flex-start !important;
   justify-content: flex-start !important;
