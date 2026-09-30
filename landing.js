@@ -54,10 +54,16 @@
     stage.className = "landing-stage";
     stage.setAttribute("aria-hidden", "true");
 
-    var video = document.createElement("video");
-    video.className = "landing-video";
-    video.src = LANDING.video;
-    if (LANDING.poster) video.poster = LANDING.poster;
+    /* Use the <video> already in the Cargo HTML if there is one: the browser
+       starts downloading it as soon as the page renders, before this script
+       arrives. Otherwise create it. */
+    var video = landing.querySelector("video.landing-video");
+    if (!video) {
+      video = document.createElement("video");
+      video.className = "landing-video";
+      video.src = LANDING.video;
+    }
+    if (LANDING.poster && !video.getAttribute("poster")) video.poster = LANDING.poster;
     video.muted = true;
     video.defaultMuted = true;
     video.loop = true;
@@ -121,7 +127,8 @@
 
     /* With no poster set, borrow Vimeo's thumbnail so there's a frame
        on screen before the video starts. */
-    var match = !LANDING.poster && LANDING.video.match(/playback\/(\d+)\//);
+    var match = !LANDING.poster && !video.getAttribute("poster") &&
+      LANDING.video.match(/playback\/(\d+)\//);
     if (match) {
       fetch("https://vimeo.com/api/oembed.json?url=" +
         encodeURIComponent("https://vimeo.com/" + match[1]) + "&maxwidth=1920")
