@@ -13,6 +13,22 @@
  })();
  var previewManifest = null;
 
+ /* iPhones only let a video play with sound if that video was started or
+    loaded during a tap. A swipe doesn't count as a tap, so on each real
+    tap, "unlock" every project video that isn't loaded yet by calling
+    load() on it (harmless: it has no source until its project opens).
+    Then swiping can start the next video with sound. */
+ function unlockVideosForSound() {
+   document.querySelectorAll('[id="X1134136285"] video.project-video')
+     .forEach(function (video) {
+       if (video._elliotUnlocked || video.getAttribute("src")) return;
+       video._elliotUnlocked = true;
+       video.load();
+     });
+ }
+ /* iOS sends "click" only for taps, never after a scroll or swipe. */
+ document.addEventListener("click", unlockVideosForSound, true);
+
  function loadPreviewManifest() {
    if (!previewManifest) {
      previewManifest = window.fetch(PREVIEW_BASE + "previews.json", { cache: "no-cache" })
@@ -1115,6 +1131,7 @@
       /* Stop the browser's own click (and double-tap handling) for this tap. */
       event.preventDefault();
       lastTouchEndAt = Date.now();
+      unlockVideosForSound(); /* a real tap, though its click is cancelled */
       handleTap(event.changedTouches[0].clientX);
     }, { passive: false });
 
