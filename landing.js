@@ -16,9 +16,10 @@
     event.stopImmediatePropagation();
   };
   window.addEventListener("keydown", window._elliotArrowKeys, true);
-  /* Phones skip the landing reel and go straight to the project list.
+  /* Phones (held either way up) skip the landing reel and go straight to
+     the project list.
      replace() keeps the back button from bouncing back here. */
-  if (window.matchMedia("(max-width: 767px)").matches) {
+  if (window.matchMedia("(max-width: 767px), (hover: none) and (pointer: coarse) and (max-height: 500px)").matches) {
     window.location.replace("/projects");
     return;
   }
@@ -87,7 +88,7 @@
     if (!video) {
       video = document.createElement("video");
       video.className = "landing-video";
-      video.src = window.matchMedia("(max-width: 767px)").matches && LANDING.mobileVideo
+      video.src = window.matchMedia("(max-width: 767px), (hover: none) and (pointer: coarse) and (max-height: 500px)").matches && LANDING.mobileVideo
         ? LANDING.mobileVideo
         : LANDING.video;
     }

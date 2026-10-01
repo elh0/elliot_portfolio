@@ -2,6 +2,12 @@
  var page = document.querySelector('[id="X1134136285"]');
  var lastActiveVideo = null;
 
+ /* Phones in either orientation: narrow screens, plus touch screens that
+    are short (a phone held sideways is wider than many laptops' 768px
+    breakpoint). Matches the phone @media rules in home.css. */
+ var PHONE_QUERY =
+   "(max-width: 767px), (hover: none) and (pointer: coarse) and (max-height: 500px)";
+
  /* Scrub previews (thumbnail strips made by scripts/make-previews.js) live
     next to this script on GitHub Pages. The list is fetched only the
     first time someone hovers or drags a timeline. */
@@ -325,7 +331,9 @@
        var slide = el("div", "project-slide");
        var wrap = el("div", "video-wrap");
        var stage = el("div", "video-stage is-paused");
-       stage.style.setProperty("--video-ratio", clip.ratio || "16 / 9");
+       /* On the wrap so the stage (aspect ratio) and the wrap (sized to fit
+          a sideways phone's height, in home.css) can both use it. */
+       wrap.style.setProperty("--video-ratio", clip.ratio || "16 / 9");
 
        var video = el("video", "project-video");
        video.setAttribute("playsinline", "");
@@ -603,7 +611,7 @@
   if (
     page &&
     !introAlreadySeen() &&
-    !window.matchMedia("(max-width: 767px)").matches &&
+    !window.matchMedia(PHONE_QUERY).matches &&
     !window.matchMedia("(prefers-reduced-motion: reduce)").matches
   ) {
     var background = document.createElement("div");
@@ -611,7 +619,7 @@
     background.setAttribute("aria-hidden", "true");
 
     backgroundVideo = document.createElement("video");
-    backgroundVideo.src = window.matchMedia("(max-width: 767px)").matches
+    backgroundVideo.src = window.matchMedia(PHONE_QUERY).matches
       ? BACKGROUND_VIDEO_MOBILE
       : BACKGROUND_VIDEO;
     backgroundVideo.muted = true;
@@ -760,7 +768,8 @@
 
    function setVideoRatio() {
      if (video.videoWidth > 0 && video.videoHeight > 0) {
-       stage.style.setProperty(
+       stage.style.removeProperty("--video-ratio");
+       wrap.style.setProperty(
          "--video-ratio",
          video.videoWidth + " / " + video.videoHeight
        );
@@ -1723,7 +1732,7 @@
 
    function isPhone() {
      return !!page.closest(".mobile") ||
-       window.matchMedia("(max-width: 767px)").matches;
+       window.matchMedia(PHONE_QUERY).matches;
    }
 
    var CHEVRON_PATHS = {

@@ -135,7 +135,7 @@ html body .contact-page .contact-leader {
 
 /* Mobile: label and value stacked, dotted rule underneath */
 
-@media (max-width: 767px) {
+@media (max-width: 767px), (hover: none) and (pointer: coarse) and (max-height: 500px) {
   .page-content:has(.contact-page) {
     width: 100% !important;
     max-width: 100% !important;

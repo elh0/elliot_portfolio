@@ -972,7 +972,7 @@ body:has([id="X1134136285"]) {
 
 /* Standard browser fallback for mobile */
 
-@media (max-width: 767px) {
+@media (max-width: 767px), (hover: none) and (pointer: coarse) and (max-height: 500px) {
   [id="X1134136285"] .page-content {
     width: 100%;
     max-width: 100%;
@@ -1137,7 +1137,7 @@ body:has([id="X1134136285"].is-light-theme) {
   border-bottom-color: rgba(0, 0, 0, 0.72);
 }
 
-@media (max-width: 767px) {
+@media (max-width: 767px), (hover: none) and (pointer: coarse) and (max-height: 500px) {
   [id="X1134136285"].is-light-theme .project-item summary::after {
     border-bottom-color: rgba(0, 0, 0, 0.72);
   }
@@ -1178,4 +1178,25 @@ body:has([id="X1134136285"].is-light-theme) {
 
 [id="X1134136285"].is-light-theme .video-theme-divider {
   color: rgba(0, 0, 0, 0.42);
+}
+
+/* Phone held sideways: shrink the video so all of it, and its playbar,
+   fits the screen's height (its width follows the video's shape). */
+@media (hover: none) and (pointer: coarse) and (orientation: landscape) and (max-height: 500px) {
+  [id="X1134136285"] .video-wrap {
+    width: min(100%, calc((100vh - 5rem) * (var(--video-ratio, 16 / 9))));
+    width: min(100%, calc((100svh - 5rem) * (var(--video-ratio, 16 / 9))));
+    margin-right: auto;
+    margin-left: auto;
+  }
+
+  [id="X1134136285"] .video-wrap:fullscreen {
+    width: 100%;
+    margin: 0;
+  }
+
+  [id="X1134136285"] .video-wrap:-webkit-full-screen {
+    width: 100%;
+    margin: 0;
+  }
 }
