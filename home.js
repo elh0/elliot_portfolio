@@ -949,16 +949,10 @@
       updateControls();
     }
 
-    stage.addEventListener("click", function (event) {
-      if (lastPointerType !== "touch") {
-        togglePlayback();
-        return;
-      }
-
+    function handleTap(clientX) {
       var bounds = stage.getBoundingClientRect();
-      var direction = event.clientX - bounds.left < bounds.width / 2 ? -1 : 1;
+      var direction = clientX - bounds.left < bounds.width / 2 ? -1 : 1;
       var now = Date.now();
-
       var isDoubleTap = now - lastTapAt < 450;
 
       if (now < skipChainUntil || isDoubleTap) {
@@ -983,6 +977,43 @@
         singleTapFiredAt = Date.now();
         togglePlayback();
       }, 300);
+    }
+
+    /* Touch: read raw touches. iPhones often merge a quick double-tap into
+       a single "click", so click events alone miss the second tap. */
+    var touchStartX = 0;
+    var touchStartY = 0;
+    var touchMoved = false;
+    var lastTouchEndAt = 0;
+
+    stage.addEventListener("touchstart", function (event) {
+      var touch = event.touches[0];
+      touchStartX = touch.clientX;
+      touchStartY = touch.clientY;
+      touchMoved = event.touches.length > 1;
+    }, { passive: true });
+
+    stage.addEventListener("touchmove", function (event) {
+      var touch = event.touches[0];
+      if (Math.abs(touch.clientX - touchStartX) > 10 ||
+          Math.abs(touch.clientY - touchStartY) > 10) {
+        touchMoved = true;
+      }
+    }, { passive: true });
+
+    stage.addEventListener("touchend", function (event) {
+      if (touchMoved) return; /* a scroll or pinch, not a tap */
+      /* Stop the browser's own click (and double-tap handling) for this tap. */
+      event.preventDefault();
+      lastTouchEndAt = Date.now();
+      handleTap(event.changedTouches[0].clientX);
+    }, { passive: false });
+
+    /* Mouse/trackpad clicks play/pause straight away. */
+    stage.addEventListener("click", function () {
+      if (Date.now() - lastTouchEndAt < 800) return; /* already handled as touch */
+      if (lastPointerType === "touch") return;
+      togglePlayback();
     });
 
     function replay(event) {
