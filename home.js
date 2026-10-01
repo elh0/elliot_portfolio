@@ -1095,6 +1095,8 @@
     var touchStartX = 0;
     var touchStartY = 0;
     var touchStartAt = 0;
+    var touchStartAtFirst = true;
+    var touchStartAtLast = true;
     var touchMoved = false;
     var lastTouchEndAt = 0;
 
@@ -1104,6 +1106,13 @@
       touchStartY = touch.clientY;
       touchStartAt = Date.now();
       touchMoved = event.touches.length > 1;
+
+      /* Multi-video projects: remember if the slideshow was already on
+         its first or last video when this swipe began. */
+      var carousel = stage.closest(".project-carousel");
+      var maxScroll = carousel ? carousel.scrollWidth - carousel.clientWidth : 0;
+      touchStartAtFirst = !carousel || carousel.scrollLeft <= 2;
+      touchStartAtLast = !carousel || carousel.scrollLeft >= maxScroll - 2;
     }, { passive: true });
 
     stage.addEventListener("touchmove", function (event) {
@@ -1117,16 +1126,17 @@
     stage.addEventListener("touchend", function (event) {
       if (touchMoved) {
         /* A quick sideways swipe moves to the next/previous project
-           (left = next). Not in projects with several videos, where a
-           swipe scrolls between them, and not in fullscreen. */
+           (left = next). In projects with several videos a swipe first
+           moves through them like a slideshow; only a swipe past the
+           last (or back past the first) changes project. Not in
+           fullscreen. */
         var touch = event.changedTouches[0];
         var dx = touch.clientX - touchStartX;
         var dy = touch.clientY - touchStartY;
-        var project = stage.closest("details.project-item");
+        var leavesProject = dx < 0 ? touchStartAtLast : touchStartAtFirst;
         if (event.touches.length === 0 &&
             Math.abs(dx) > 60 && Math.abs(dx) > Math.abs(dy) * 2 &&
-            Date.now() - touchStartAt < 700 &&
-            project && project.querySelectorAll(".video-stage").length === 1 &&
+            Date.now() - touchStartAt < 700 && leavesProject &&
             !document.fullscreenElement && !document.webkitFullscreenElement) {
           stepProject(dx < 0 ? 1 : -1, true);
         }
@@ -1517,6 +1527,53 @@
       allowMuted
     );
   }
+
+  /* Multi-video projects: when a swipe settles on another video, play it
+     (and the play handler pauses the one before), like a slideshow. */
+  document.querySelectorAll('[id="X1134136285"] .project-carousel')
+    .forEach(function (carousel) {
+      var slides = carousel.querySelectorAll(".project-slide");
+      if (slides.length < 2) return;
+
+      var settleTimer = null;
+      var currentSlide = 0;
+
+      function slideInView() {
+        var best = 0;
+        var bestDistance = Infinity;
+        var left = carousel.getBoundingClientRect().left;
+        for (var i = 0; i < slides.length; i++) {
+          var distance = Math.abs(slides[i].getBoundingClientRect().left - left);
+          if (distance < bestDistance) {
+            best = i;
+            bestDistance = distance;
+          }
+        }
+        return best;
+      }
+
+      carousel.addEventListener("scroll", function () {
+        window.clearTimeout(settleTimer);
+        settleTimer = window.setTimeout(function () {
+          var project = carousel.closest("details.project-item");
+          var index = slideInView();
+          if (!project || !project.open || index === currentSlide) return;
+          currentSlide = index;
+          var video = slides[index].querySelector("video.project-video");
+          if (video && typeof video._elliotAutoplay === "function") {
+            video._elliotAutoplay(true);
+          }
+        }, 160);
+      }, { passive: true });
+
+      /* Reopening the project starts again from the first video. */
+      carousel.closest("details.project-item").addEventListener("toggle", function () {
+        if (!this.open) {
+          currentSlide = 0;
+          carousel.scrollLeft = 0;
+        }
+      });
+    });
 
   document.querySelectorAll(
     '[id="X1134136285"] details.project-item'
