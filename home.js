@@ -630,20 +630,15 @@
   }
 
   /* Restore a deferred video's source so it can load and play. */
-  /* Fully unload a video whose project has closed. iPhones (all iOS
-     browsers) limit how many videos can hold decoders at once; a merely
-     paused video in a closed project could stop the next one playing.
-     The position is kept and restored when the project reopens. */
+  /* Fully unload a video whose project has closed, so it starts from the
+     beginning next time. iPhones (all iOS browsers) also limit how many
+     videos can hold decoders at once; a merely paused video in a closed
+     project could stop the next one playing. */
   function releaseVideo(video) {
     var src = video.getAttribute("src");
     if (!src) return;
 
     video.pause();
-    if (!video.ended && video.currentTime > 0.5) {
-      video.setAttribute("data-resume-time", String(video.currentTime));
-    } else {
-      video.removeAttribute("data-resume-time");
-    }
     video.setAttribute("data-deferred-src", src);
     video.removeAttribute("src");
     video.load();
@@ -653,16 +648,6 @@
     var deferred = video.getAttribute("data-deferred-src");
     if (!deferred) return;
 
-    var resumeTime = Number(video.getAttribute("data-resume-time"));
-    video.removeAttribute("data-resume-time");
-    if (resumeTime > 0) {
-      video.addEventListener("loadedmetadata", function resume() {
-        video.removeEventListener("loadedmetadata", resume);
-        if (resumeTime < (video.duration || 0) - 0.5) {
-          video.currentTime = resumeTime;
-        }
-      });
-    }
 
     var deferredPoster = video.getAttribute("data-deferred-poster");
     if (deferredPoster) {
