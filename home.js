@@ -1067,6 +1067,11 @@
 
     /* Touch: read raw touches. iPhones often merge a quick double-tap into
        a single "click", so click events alone miss the second tap. */
+    /* Sideways drags are swipes, never page panning or zooming; this also
+       helps iPhones treat a swipe as a tap, so the next video can play
+       with sound. */
+    stage.style.touchAction = "pan-y";
+
     var touchStartX = 0;
     var touchStartY = 0;
     var touchStartAt = 0;
@@ -1103,7 +1108,7 @@
             Date.now() - touchStartAt < 700 &&
             project && project.querySelectorAll(".video-stage").length === 1 &&
             !document.fullscreenElement && !document.webkitFullscreenElement) {
-          stepProject(dx < 0 ? 1 : -1);
+          stepProject(dx < 0 ? 1 : -1, true);
         }
         return; /* otherwise a scroll or pinch, not a tap */
       }
@@ -1476,8 +1481,10 @@
     });
   }
 
-  /* Move to the next (1) or previous (-1) project from the open one. */
-  function stepProject(step) {
+  /* Move to the next (1) or previous (-1) project from the open one.
+     allowMuted: start muted if the browser won't allow sound (iPhones
+     don't count a swipe as a tap). */
+  function stepProject(step, allowMuted) {
     var projects = allProjects();
     var current = -1;
     for (var i = 0; i < projects.length; i++) {
@@ -1485,7 +1492,8 @@
     }
     if (current < 0 || projects.length < 2) return;
     goToProject(
-      projects[(current + step + projects.length) % projects.length]
+      projects[(current + step + projects.length) % projects.length],
+      allowMuted
     );
   }
 
