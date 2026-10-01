@@ -27,10 +27,10 @@ body:has(.contact-page) {
 .page-content:has(.contact-page) {
   align-self: flex-start !important;
   box-sizing: border-box !important;
-  width: min(72%, 72rem) !important;
-  max-width: 72rem !important;
-  margin: 0 auto !important;
-  padding: clamp(7rem, 16vh, 12rem) 0 4rem !important;
+  width: 100% !important;
+  max-width: none !important;
+  margin: 0 !important;
+  padding: 18px clamp(24px, 4.5vw, 72px) 4rem !important;
   text-align: left !important;
   background: transparent !important;
 }
@@ -61,136 +61,152 @@ html body .contact-page a:active {
   text-decoration: none !important;
 }
 
-.contact-page .index-heading {
-  margin: 0 0 2rem;
+/* Name bar along the top, as on the projects page (built by contact.js) */
+
+.contact-page .index-heading.is-built {
+  display: grid;
+  grid-template-columns: 1fr 1fr auto;
+  gap: 0 2ch;
+  align-items: baseline;
+  margin: 0;
 }
 
-/* Contact rows, styled like the project list */
+.contact-page .site-role {
+  color: #8f8f8f !important;
+}
+
+.contact-page .site-nav {
+  display: flex;
+  gap: 2.5ch;
+}
+
+html body .contact-page .site-nav a {
+  border-bottom: 1px solid transparent !important;
+}
+
+html body .contact-page .site-nav a.is-current,
+html body .contact-page .site-nav a:hover {
+  border-bottom-color: #ffffff !important;
+}
+
+/* Contact rows: label in the projects' title column, value in the
+   director column, so the two pages line up. */
+
+.contact-page .contact-list {
+  margin-top: calc(clamp(4rem, 14vh, 9rem) + 14px + 2.65em);
+}
 
 .contact-page .contact-row {
-  display: flex !important;
+  display: grid !important;
+  grid-template-columns: 4ch minmax(0, 3fr) minmax(0, 6.2fr);
+  column-gap: 2ch;
   align-items: baseline;
   box-sizing: border-box;
   width: 100%;
-  padding: 0.35rem 0 0.3rem !important;
+  padding: 4px 0 !important;
   color: #ffffff !important;
-  transition: color 800ms ease;
-}
-
-.contact-page .contact-label {
-  flex: 0 0 auto;
-}
-
-html body .contact-page .contact-leader {
-  flex: 1 1 auto;
-  min-width: 2rem;
-  margin: 0 0.8ch 0.32em;
-  border: 0 !important;
-  border-bottom: 1px dotted rgba(255, 255, 255, 0.72) !important;
-}
-
-.contact-page .contact-value {
-  flex: 0 1 auto;
-  min-width: 0;
-  color: #8f8f8f !important;
-  text-align: right;
-  overflow-wrap: anywhere;
   transition: color 240ms ease;
 }
 
-.contact-page .contact-row:hover {
+.contact-page .contact-label {
+  grid-column: 2;
   color: #8f8f8f !important;
+  transition: color 240ms ease;
 }
 
-.contact-page .contact-row:hover .contact-value {
-  color: #ffffff !important;
-}
-
-/* Back to index, styled like the index's previous/next project links */
-
+.contact-page .contact-leader,
 .contact-page .contact-nav {
-  margin-top: 1.5rem;
+  display: none !important;
 }
 
-.contact-page .contact-nav-link {
-  display: inline-flex !important;
-  align-items: center;
-  gap: 0.6ch;
-}
-
-.contact-page .contact-nav-arrow {
+.contact-page .contact-value {
+  grid-column: 3;
+  min-width: 0;
   color: #ffffff !important;
-  transition: color 500ms ease;
+  overflow-wrap: anywhere;
 }
 
-.contact-page .contact-nav-title {
-  color: rgba(255, 255, 255, 0.7) !important;
-  transition: color 500ms ease;
+@media (hover: hover) and (pointer: fine) {
+  .contact-page .contact-list:hover .contact-row:not(:hover) .contact-value,
+  .contact-page .contact-list:hover .contact-row:not(:hover) .contact-label {
+    color: rgba(255, 255, 255, 0.42) !important;
+  }
+
+  .contact-page .contact-row:hover .contact-label {
+    color: #ffffff !important;
+  }
 }
 
-.contact-page .contact-nav-link:hover .contact-nav-arrow,
-.contact-page .contact-nav-link:hover .contact-nav-title {
-  color: #8f8f8f !important;
-}
-
-/* Mobile: label and value stacked, dotted rule underneath */
+/* Phones: name bar on two lines, label above value */
 
 @media (max-width: 767px), (hover: none) and (pointer: coarse) and (max-height: 500px) {
   .page-content:has(.contact-page) {
-    width: 100% !important;
-    max-width: 100% !important;
-    padding: 3rem 1.25rem !important;
+    padding: 16px 1.25rem 3rem !important;
+  }
+
+  .contact-page .index-heading.is-built {
+    grid-template-columns: minmax(0, 1fr) auto;
+  }
+
+  .contact-page .site-role {
+    grid-row: 2;
+    grid-column: 1;
+  }
+
+  .contact-page .site-nav {
+    grid-row: 1 / span 2;
+    grid-column: 2;
+    flex-direction: column;
+    gap: 0;
+    text-align: right;
+  }
+
+  .contact-page .contact-list {
+    margin-top: 4.5rem;
   }
 
   .contact-page .contact-row {
-    position: relative;
-    display: grid !important;
     grid-template-columns: minmax(0, 1fr);
+    padding: 0.35rem 0 0.3rem !important;
   }
 
-  .contact-page .contact-row::after {
-    position: absolute;
-    right: 0;
-    bottom: 0;
-    left: 0;
-    border-bottom: 1px dotted rgba(255, 255, 255, 0.72);
-    content: "";
-  }
-
-  .contact-page .contact-leader {
-    display: none;
-  }
-
+  .contact-page .contact-label,
   .contact-page .contact-value {
-    text-align: left;
+    grid-column: 1;
   }
 }
 
 .mobile .page-content:has(.contact-page) {
-  width: 100% !important;
-  max-width: 100% !important;
-  padding: 3rem 1.25rem !important;
+  padding: 16px 1.25rem 3rem !important;
+}
+
+.mobile .contact-page .index-heading.is-built {
+  grid-template-columns: minmax(0, 1fr) auto;
+}
+
+.mobile .contact-page .site-role {
+  grid-row: 2;
+  grid-column: 1;
+}
+
+.mobile .contact-page .site-nav {
+  grid-row: 1 / span 2;
+  grid-column: 2;
+  flex-direction: column;
+  gap: 0;
+  text-align: right;
+}
+
+.mobile .contact-page .contact-list {
+  margin-top: 4.5rem;
 }
 
 .mobile .contact-page .contact-row {
-  position: relative;
-  display: grid !important;
   grid-template-columns: minmax(0, 1fr);
+  padding: 0.35rem 0 0.3rem !important;
 }
 
-.mobile .contact-page .contact-row::after {
-  position: absolute;
-  right: 0;
-  bottom: 0;
-  left: 0;
-  border-bottom: 1px dotted rgba(255, 255, 255, 0.72);
-  content: "";
-}
-
-.mobile .contact-page .contact-leader {
-  display: none;
-}
-
+.mobile .contact-page .contact-label,
 .mobile .contact-page .contact-value {
-  text-align: left;
+  grid-column: 1;
 }

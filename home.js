@@ -1,5 +1,27 @@
 (function () {
  var page = document.querySelector('[id="X1134136285"]');
+
+ /* GitHub Pages can serve this script fresh with an older cached home.css
+    for a few minutes after a change. Load the stylesheet this script was
+    written for, then drop the plain link. Bump with every home.css change
+    the script relies on. */
+ var STYLE_VERSION = "2026-10-01-table";
+ (function loadMatchingStyles() {
+   var script = document.currentScript;
+   if (!script || !script.src) return;
+   var href = script.src.replace(/[^\/]*$/, "") + "home.css?v=" + STYLE_VERSION;
+   var links = Array.prototype.slice.call(
+     document.querySelectorAll('link[rel="stylesheet"][href*="home.css"]')
+   );
+   if (links.some(function (link) { return link.href === href; })) return;
+   var link = document.createElement("link");
+   link.rel = "stylesheet";
+   link.href = href;
+   link.addEventListener("load", function () {
+     links.forEach(function (old) { old.remove(); });
+   });
+   document.head.appendChild(link);
+ })();
  var lastActiveVideo = null;
 
  /* Phones in either orientation: narrow screens, plus touch screens that
@@ -100,7 +122,9 @@
       director: "Uncanny",
       format: "S35, Digital",
       videos: [
-      { src: "https://player.vimeo.com/progressive_redirect/playback/1231798890/rendition/1080p/file.mp4%20%281080p%29.mp4?loc=external&log_user=0&signature=c617a62fc6f2ab5a215be8a055a2ebd0437f25e361183ad1d8eb425047de42ac" }
+      { src: "https://player.vimeo.com/progressive_redirect/playback/1231798890/rendition/1080p/file.mp4%20%281080p%29.mp4?loc=external&log_user=0&signature=c617a62fc6f2ab5a215be8a055a2ebd0437f25e361183ad1d8eb425047de42ac",
+        poster: "https://i.vimeocdn.com/video/2207048883-a2602d1d5d84f0ea6ef7913a029e02ef6b0fac76463b33c47ef696ef02c4e184-d_1280?region=us&mw=1920&q=90",
+        ratio: "1620 / 1080", time: "3:12", duration: 192.04 }
       ]
     },
     {
@@ -131,7 +155,9 @@
       director: "Tom Silvester",
       format: "S35, Digital",
       videos: [
-      { src: "https://player.vimeo.com/progressive_redirect/playback/1231792538/rendition/1080p/file.mp4%20%281080p%29.mp4?loc=external&log_user=0&signature=f124268d3884f75c86dfb18bdedcf41661dd78dea1b5bdae7c04890dd2f6252d" }
+      { src: "https://player.vimeo.com/progressive_redirect/playback/1231792538/rendition/1080p/file.mp4%20%281080p%29.mp4?loc=external&log_user=0&signature=f124268d3884f75c86dfb18bdedcf41661dd78dea1b5bdae7c04890dd2f6252d",
+        poster: "https://i.vimeocdn.com/video/2207037900-5a31ea12d2693ffd169e6d2d3b93b67419ade5ab16e8c1d97a5c5ac0a404da94-d_1280?region=us&mw=1920&q=90",
+        ratio: "1920 / 1080", time: "0:39", duration: 39.492 }
       ]
     },
     {
@@ -160,7 +186,9 @@
       director: "Joe Ward",
       format: "Anamorphic, S35, Digital",
       videos: [
-      { src: "https://player.vimeo.com/progressive_redirect/playback/1231805582/rendition/1080p/file.mp4%20%281080p%29.mp4?loc=external&log_user=0&signature=5a08487628cc392908949636cd0e3784e1490ffb5678b91af9426da75584cc1a" }
+      { src: "https://player.vimeo.com/progressive_redirect/playback/1231805582/rendition/1080p/file.mp4%20%281080p%29.mp4?loc=external&log_user=0&signature=5a08487628cc392908949636cd0e3784e1490ffb5678b91af9426da75584cc1a",
+        poster: "https://i.vimeocdn.com/video/2207059436-bc9e4934c45eeb13d524897b57fc1c849646e6bd5358ce1a31059cd9961cc346-d_1280?region=us&mw=1920&q=90",
+        ratio: "2560 / 1089", time: "3:31", duration: 211.93 }
       ]
     },
     {
@@ -298,6 +326,30 @@
      .replace(/^-+|-+$/g, "");
  }
 
+ /* Total running time of a project's videos, e.g. "0:44" for four clips. */
+ function projectRunningTime(project) {
+   var total = 0;
+   for (var i = 0; i < project.videos.length; i++) {
+     if (!project.videos[i].duration) return project.videos[0].time || "";
+     total += project.videos[i].duration;
+   }
+   var seconds = Math.floor(total);
+   return Math.floor(seconds / 60) + ":" + String(seconds % 60).padStart(2, "0");
+ }
+
+ /* Vimeo thumbnail at a given width. Vimeo serves at most the size named
+    in the path ("-d_1280"), whatever "mw" asks for, so change both. */
+ function posterAtWidth(source, width) {
+   try {
+     var url = new URL(source.replace(/-d_\d+(x\d+)?/, "-d_" + width), window.location.href);
+     url.searchParams.set("mw", String(width));
+     url.searchParams.set("q", "90");
+     return url.toString();
+   } catch (error) {
+     return source;
+   }
+ }
+
  function renderProjects() {
    var accordion = page && page.querySelector(".project-accordion");
    if (!accordion || accordion.querySelector("details.project-item")) return;
@@ -309,22 +361,27 @@
      return node;
    }
 
-   PROJECTS.forEach(function (project) {
+   PROJECTS.forEach(function (project, index) {
      var details = el("details", "project-item");
      details.setAttribute("name", "elliot-projects");
      details.setAttribute("data-slug", project.slug || slugify(project.title));
 
+     details.setAttribute("data-category", project.category);
+
+     /* One table row: number, title, director, format, type, running time.
+        Phones show only the number, title and type (home.css). */
      var summary = el("summary");
-     var title = el("span", "project-title-text", project.title);
-     title.setAttribute("data-mobile-category", project.category);
-     var leader = el("span", "project-leader");
-     leader.setAttribute("aria-hidden", "true");
-     summary.appendChild(title);
-     summary.appendChild(leader);
+     summary.appendChild(el("span", "project-number", String(index + 1).padStart(2, "0")));
+     summary.appendChild(el("span", "project-title-text", project.title));
+     summary.appendChild(el("span", "project-director", project.director));
+     summary.appendChild(el("span", "project-format", project.format));
      summary.appendChild(el("span", "project-category", project.category));
+     summary.appendChild(el("span", "project-time", projectRunningTime(project)));
      details.appendChild(summary);
 
      var content = el("div", "project-content");
+     /* The open video is capped to the screen's height (home.css). */
+     content.style.setProperty("--project-ratio", project.videos[0].ratio || "16 / 9");
      var carousel = el("div", "project-carousel");
 
      project.videos.forEach(function (clip) {
@@ -384,7 +441,176 @@
    });
  }
 
+ /* Page layout around the list: the name bar along the top, the type
+    filters and List / Contact sheet switch, the column headings, and the
+    contact sheet itself. All built here, so nothing needs pasting into
+    Cargo. */
+ var currentFilter = "All";
+
+ function setProjectFilter(category) {
+   if (!page) return;
+   currentFilter = category;
+   page.querySelectorAll("details.project-item").forEach(function (project) {
+     var show = category === "All" ||
+       project.getAttribute("data-category") === category;
+     if (!show && project.open) project.open = false;
+     project.hidden = !show;
+   });
+   page.querySelectorAll(".project-frame").forEach(function (frame) {
+     frame.hidden = !(category === "All" ||
+       frame.getAttribute("data-category") === category);
+   });
+   page.querySelectorAll(".project-filter").forEach(function (button) {
+     button.setAttribute("aria-pressed",
+       String(button.getAttribute("data-category") === category));
+   });
+ }
+
+ function setProjectView(view) {
+   if (!page) return;
+   var sheet = view === "sheet";
+   if (sheet) {
+     page.querySelectorAll("details.project-item[open]").forEach(function (project) {
+       project.open = false;
+     });
+   }
+   page.classList.toggle("is-sheet-view", sheet);
+   var accordion = page.querySelector(".project-accordion");
+   var columns = page.querySelector(".project-columns");
+   var frames = page.querySelector(".project-sheet");
+   if (accordion) accordion.hidden = sheet;
+   if (columns) columns.hidden = sheet;
+   if (frames) frames.hidden = !sheet;
+   page.querySelectorAll(".project-view").forEach(function (button) {
+     button.setAttribute("aria-pressed",
+       String(button.getAttribute("data-view") === view));
+   });
+ }
+
+ function buildPageLayout() {
+   var accordion = page && page.querySelector(".project-accordion");
+   if (!accordion) return;
+
+   function el(tag, className, text) {
+     var node = document.createElement(tag);
+     if (className) node.className = className;
+     if (text != null) node.textContent = text;
+     return node;
+   }
+
+   /* Name bar: replaces the stacked heading pasted into Cargo. */
+   var heading = page.querySelector(".index-heading");
+   if (heading && !heading.classList.contains("is-built")) {
+     var contactLink = heading.querySelector("a");
+     var contactHref = contactLink ? contactLink.getAttribute("href") : "/contact";
+     heading.innerHTML = "";
+     heading.appendChild(el("span", "site-name", "Elliot Holbrow"));
+     heading.appendChild(el("span", "site-role", "Cinematographer, London"));
+     var nav = el("nav", "site-nav");
+     nav.setAttribute("aria-label", "Site");
+     var work = el("a", "is-current", "Work");
+     work.href = "/projects";
+     work.setAttribute("aria-current", "page");
+     var contact = el("a", "", "Contact");
+     contact.href = contactHref;
+     nav.appendChild(work);
+     nav.appendChild(contact);
+     heading.appendChild(nav);
+     heading.classList.add("is-built");
+   }
+
+   /* Cargo can keep generated markup between visits: start fresh. */
+   page.querySelectorAll(".project-tools, .project-columns, .project-sheet")
+     .forEach(function (node) { node.remove(); });
+
+   var categories = [];
+   var counts = { All: PROJECTS.length };
+   PROJECTS.forEach(function (project) {
+     if (!counts[project.category]) {
+       counts[project.category] = 0;
+       categories.push(project.category);
+     }
+     counts[project.category] += 1;
+   });
+
+   var tools = el("div", "project-tools");
+   var filters = el("div", "project-filters");
+   filters.setAttribute("role", "group");
+   filters.setAttribute("aria-label", "Show projects by type");
+   ["All"].concat(categories).forEach(function (category) {
+     var button = el("button", "project-filter", category);
+     button.type = "button";
+     button.setAttribute("data-category", category);
+     button.appendChild(el("sup", "", String(counts[category])));
+     button.addEventListener("click", function () {
+       setProjectFilter(category);
+     });
+     filters.appendChild(button);
+   });
+
+   var views = el("div", "project-views");
+   views.setAttribute("role", "group");
+   views.setAttribute("aria-label", "View");
+   [["list", "List"], ["sheet", "Contact sheet"]].forEach(function (view) {
+     var button = el("button", "project-view", view[1]);
+     button.type = "button";
+     button.setAttribute("data-view", view[0]);
+     button.addEventListener("click", function () {
+       setProjectView(view[0]);
+     });
+     views.appendChild(button);
+   });
+   tools.appendChild(filters);
+   tools.appendChild(views);
+
+   var columns = el("div", "project-columns");
+   columns.setAttribute("aria-hidden", "true");
+   ["No.", "Title", "Director", "Format", "Type", "Time"].forEach(function (label) {
+     columns.appendChild(el("span", "", label));
+   });
+
+   /* Contact sheet: each project's Vimeo thumbnail; a click opens it. */
+   var sheet = el("div", "project-sheet");
+   var items = accordion.querySelectorAll("details.project-item");
+   PROJECTS.forEach(function (project, index) {
+     var details = items[index];
+     var frame = el("button", "project-frame");
+     frame.type = "button";
+     frame.setAttribute("data-category", project.category);
+     frame.setAttribute("aria-label", "Open " + project.title);
+     var image = el("span", "project-frame-image");
+     var poster = project.videos[0].poster;
+     if (poster) {
+       var img = el("img");
+       img.alt = "";
+       img.loading = "lazy";
+       img.decoding = "async";
+       img.src = posterAtWidth(poster, 960);
+       image.appendChild(img);
+     }
+     var edge = el("span", "project-frame-edge");
+     edge.appendChild(el("span", "project-frame-title", project.title));
+     edge.appendChild(el("span", "project-frame-number", String(index + 1).padStart(2, "0")));
+     frame.appendChild(image);
+     frame.appendChild(edge);
+     frame.addEventListener("click", function () {
+       if (!details) return;
+       setProjectView("list");
+       goToProject(details, true);
+     });
+     sheet.appendChild(frame);
+   });
+
+   accordion.parentNode.insertBefore(tools, accordion);
+   accordion.parentNode.insertBefore(columns, accordion);
+   accordion.parentNode.insertBefore(sheet, accordion.nextSibling);
+
+   setProjectFilter("All");
+   setProjectView("list");
+ }
+
  renderProjects();
+ buildPageLayout();
  var hoverPreview = null;
   var hoverPreviewImage = null;
 
@@ -491,14 +717,7 @@
  }
 
  function highQualityPoster(source) {
-   try {
-     var posterUrl = new URL(source, window.location.href);
-     posterUrl.searchParams.set("mw", "2560");
-     posterUrl.searchParams.set("q", "100");
-     return posterUrl.toString();
-   } catch (error) {
-     return source;
-   }
+   return posterAtWidth(source, 2560);
  }
 
  if (page) {
@@ -1505,14 +1724,17 @@
     }
   }
 
+  /* The projects currently listed (the type filter hides the others). */
   function allProjects() {
     return Array.prototype.slice.call(
       document.querySelectorAll('[id="X1134136285"] details.project-item')
-    );
+    ).filter(function (project) { return !project.hidden; });
   }
 
   /* Open a project (closing the others), start it and scroll to it. */
   function goToProject(target, allowMuted) {
+    if (target.hidden) setProjectFilter("All");
+    if (page && page.classList.contains("is-sheet-view")) setProjectView("list");
     allProjects().forEach(function (project) {
       if (project !== target) project.open = false;
     });
@@ -1791,7 +2013,11 @@
    /* Centre each chevron in the empty space beside the project column,
       and show them only while a project is open. */
    function updateNavigation() {
-     var current = projects.length > 1 ? openProject() : -1;
+     var listed = allProjects();
+     var current = -1;
+     for (var i = 0; listed.length > 1 && i < listed.length; i++) {
+       if (listed[i].open) current = i;
+     }
      var show = current >= 0 && !isPhone();
      var accordion = page.querySelector(".project-accordion") || page;
      var rect = accordion.getBoundingClientRect();
@@ -1811,11 +2037,11 @@
      });
 
      if (current >= 0) {
-       var count = projects.length;
+       var count = listed.length;
        previousButton.setAttribute("aria-label", "Previous project, " +
-         projectTitle(projects[(current - 1 + count) % count]));
+         projectTitle(listed[(current - 1 + count) % count]));
        nextButton.setAttribute("aria-label", "Next project, " +
-         projectTitle(projects[(current + 1) % count]));
+         projectTitle(listed[(current + 1) % count]));
      }
    }
 

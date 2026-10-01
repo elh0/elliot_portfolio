@@ -27,14 +27,18 @@ Cargo holds only a few lines of HTML per page. The styling, the video player and
 ## How it behaves
 
 - **Landing (desktop):** full-screen muted reel, name top-left, "Index →" bottom-left; clicking anywhere goes to `/projects`. Phones skip it and go straight to `/projects`.
-- **Projects:** on desktop, the reel plays once per visit behind the list until the first hover or opened project. Project videos load only when their project is opened, and the first one starts playing straight away (with sound).
+- **Projects:** your name runs across the top, then the type filters (All, Fashion, Commercial, Music, Short) and a List / Contact sheet switch. The list is a table: number, title, director, format, type and running time (phones show number, title and type). Hovering a row on desktop fills the screen with its Vimeo thumbnail; the contact sheet shows every thumbnail as a grid. On desktop, the reel plays once per visit behind the list until the first hover or opened project. Project videos load only when their project is opened, and the first one starts playing straight away (with sound).
 - **Player:** tap/click plays and pauses; double-tap/double-click the left or right side skips 5s; F is fullscreen. A video plays round twice the first time, then shows its thumbnail and Replay. Hovering or dragging the timeline shows a preview frame.
-- **Moving between projects:** on desktop, the chevrons either side of the screen or the ← → keys; on phones, swipe sideways on the video (in multi-video projects, swipes go through its videos first).
-- **Contact:** dotted-leader rows lined up with the project list, "← Index" back to `/projects`.
+- **Moving between projects:** on desktop, the chevrons either side of the screen or the ← → keys; on phones, swipe sideways on the video (in multi-video projects, swipes go through its videos first). With a type filter on, these move through that type only.
+- **Contact:** the same name bar (Work goes back to `/projects`), with each label in the projects' title column and its value in the director column.
 
 ## Project links
 
 Each project has its own link, which opens it and starts it playing: `elliot.onl/projects#` plus the project's name in lower case with dashes, e.g. `elliot.onl/projects#bladee-blondie`. The address bar shows it whenever a project is open, so the easiest way to get a link is to open the project and copy the address. Renaming a project changes its link; to keep an old link working, give the project a `slug` in `PROJECTS`.
+
+## Testing
+
+`node tests/suite.js` checks the projects and contact pages in Chromium on desktop, an iPhone and iPhones held sideways: the layout, filters, contact sheet, hover thumbnails, autoplay, chevrons, arrow keys, double-tap skipping, swiping and project links. It needs Playwright. Sound and gestures on a real iPhone still need checking on a phone.
 
 ## Automatic jobs (GitHub Actions)
 

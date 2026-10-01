@@ -12,7 +12,7 @@ Elliot Holbrow's cinematography portfolio. Read README.md first for how the site
 
 - Plain ES5-style JS (`var`, `function`), one IIFE per file, no dependencies, no build.
 - All project-page styles are scoped under `[id="X1134136285"]` (the Cargo Projects page ID).
-- GitHub Pages caching can serve a new `home.js` with an old `home.css` for a while. Anything a new feature relies on visually (player chrome, preview, chevrons, playbar layout) gets its essential styles inline from JS.
+- GitHub Pages caching can serve a new `home.js` with an old `home.css` for a while. `home.js` and `contact.js` load their stylesheet as `?v=STYLE_VERSION`, so bump `STYLE_VERSION` in the script whenever a CSS change and a JS change depend on each other. Chevrons and the playbar layout also keep their essential styles inline from JS.
 - Cargo: its own arrow-key page navigation is blocked by `window._elliotArrowKeys` (window, capture phase). Cargo's default `.page-layout` padding and link borders need `!important` overrides.
 - Phones are matched by `PHONE_QUERY` in `home.js` (narrow screens or short touch screens, so a phone held sideways is still a phone). The same query is used in `landing.js`, `home.css` and `contact.css`; keep them in sync.
 - iOS WebKit (every iPhone browser) limits simultaneous video decoders (closed projects are unloaded with `releaseVideo`), merges quick double-taps (raw touch events are used), only plays with sound after a tap (videos are unlocked on taps; muted fallback otherwise), and does native fullscreen only on the video element.
@@ -20,6 +20,7 @@ Elliot Holbrow's cinematography portfolio. Read README.md first for how the site
 ## Decisions Elliot has made (don't undo without asking)
 
 - Type: 11px monospace everywhere, white on black (light mode via the theme toggle). Minimal: no borders, no rounded corners.
+- Layout (Oct 2026 redesign, to move away from George Powers' site): name bar across the top (name, "Cinematographer, London", Work / Contact), built by JS from Cargo's heading; full-width table rows (No., Title, Director, Format, Type, Time) with no dotted leaders; type filters and a contact-sheet view. Hover fills the screen with the project's Vimeo thumbnail at 2560px. Keep all the player and navigation behaviour below when restyling.
 - Player: click/tap plays and pauses; double-click/double-tap left or right skips 5s; ← → change project (desktop); F is fullscreen. A video plays round twice the first time, then shows its thumbnail and Replay.
 - Opening a project autoplays its first video. Closing a project unloads its video, so it restarts next time.
 - Desktop: thin tall chevrons, fixed in the side margins at mid-screen, change project. Phones: no chevrons; swipe on the video instead. Multi-video projects (Playing House) swipe through their videos like a slideshow first.
@@ -28,4 +29,4 @@ Elliot Holbrow's cinematography portfolio. Read README.md first for how the site
 
 ## Testing
 
-There is no test suite in the repo yet. Changes have been checked with Playwright (Chromium at `/opt/pw-browsers`, or the globally installed `playwright`) against a local page built from `home.html` + `home.css` + `home.js`, with Vimeo requests routed to a local test clip (Range responses needed for seeking). Cover desktop, an iPhone profile, and an iPhone held sideways. Real-iPhone behaviour (autoplay with sound, gestures) can't be fully reproduced in Chromium, so tell Elliot what to check on his phone.
+Run `node tests/suite.js` before pushing (see README). It uses Playwright (Chromium at `/opt/pw-browsers`, or the globally installed `playwright`) against local pages built from `home.html` / `contact.html`, with Vimeo requests routed to `tests/clip.webm` (Range responses needed for seeking). It covers desktop, an iPhone, and iPhones held sideways; add checks for new behaviour. Real-iPhone behaviour (autoplay with sound, gestures) can't be fully reproduced in Chromium, so tell Elliot what to check on his phone.
