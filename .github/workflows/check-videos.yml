@@ -1,0 +1,42 @@
+# Checks every Vimeo video link on the site still works: weekly, whenever
+# the site's code changes, or by hand (Actions → Check video links → Run).
+# If any are broken it opens (or adds to) a GitHub issue, which emails you.
+
+name: Check video links
+
+on:
+  schedule:
+    - cron: "17 8 * * 1" # Mondays, about 9am UK
+  push:
+    branches: [main]
+    paths: ["home.js", "landing.js", "landing.html", "scripts/check-videos.js"]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  issues: write
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Check video links
+        run: node scripts/check-videos.js
+      - name: Report broken links
+        if: failure()
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+        run: |
+          title="Broken video links on elliot.onl"
+          body="Some video links have stopped working, so those videos show a blank player. Details: $RUN_URL"
+          existing=$(gh issue list --state open --search "\"$title\" in:title" --json number --jq '.[0].number')
+          if [ -n "$existing" ]; then
+            gh issue comment "$existing" --body "$body"
+          else
+            gh issue create --title "$title" --body "$body"
+          fi
