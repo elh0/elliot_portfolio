@@ -896,6 +896,8 @@
               stage.classList.add("is-paused");
               return;
             }
+            /* Project closed (video released) while it was starting. */
+            if (!video.getAttribute("src")) return;
             video.load();
             var retry = video.play();
             if (retry && typeof retry.catch === "function") {
@@ -909,6 +911,11 @@
         video.pause();
       }
     }
+
+    /* Start playing when the project is opened (see autoplayProject). */
+    video._elliotAutoplay = function () {
+      if (video.paused) togglePlayback();
+    };
 
     /* Listen on the stage rather than the video: iOS browsers do not
        reliably dispatch taps to a <video> element without native controls.
@@ -1191,9 +1198,29 @@
     updateControls();
   });
 
+  /* Autoplay the first video of a project as it opens. Called straight
+     from the click/tap that opens it, because browsers (iPhones especially)
+     only allow playback with sound inside a user gesture; the details
+     "toggle" event fires too late to count. If the browser still blocks
+     it, the video just waits paused for a tap, as before. */
+  function autoplayProject(project) {
+    var video = project.querySelector("video.project-video");
+    if (video && typeof video._elliotAutoplay === "function") {
+      video._elliotAutoplay();
+    }
+  }
+
   document.querySelectorAll(
     '[id="X1134136285"] details.project-item'
   ).forEach(function (project) {
+   var summary = project.querySelector(":scope > summary");
+   if (summary) {
+     summary.addEventListener("click", function () {
+       /* Clicked while closed = opening. */
+       if (!project.open) autoplayProject(project);
+     });
+   }
+
    project.addEventListener("toggle", function () {
      hideProjectPreview();
 
@@ -1334,6 +1361,7 @@
          if (project !== target) project.open = false;
        });
        target.open = true;
+       autoplayProject(target);
 
        window.requestAnimationFrame(function () {
          target.scrollIntoView({ behavior: "smooth", block: "start" });

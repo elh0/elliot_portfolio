@@ -27,7 +27,7 @@ Cargo holds only a few lines of HTML per page. The styling, the video player and
 ## How it behaves
 
 - **Landing (desktop):** full-screen muted reel, name top-left, "Index →" bottom-left; clicking anywhere goes to `/projects`. Phones skip it and go straight to `/projects`.
-- **Projects:** on desktop, the reel plays once per visit behind the list until the first hover or opened project. Project videos load only when their project is opened.
+- **Projects:** on desktop, the reel plays once per visit behind the list until the first hover or opened project. Project videos load only when their project is opened, and the first one starts playing straight away (with sound).
 - **Contact:** dotted-leader rows lined up with the project list, "← Index" back to `/projects`.
 
 ## Things that must stay true
