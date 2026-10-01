@@ -1,0 +1,30 @@
+name: Fetch thumbnails for redesign preview
+on:
+  push:
+    branches: [preview-thumbnails]
+    paths: [".github/workflows/preview-thumbs.yml"]
+permissions:
+  contents: write
+jobs:
+  fetch:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-node@v5
+        with: { node-version: 22 }
+      - run: |
+          sudo apt-get install -y imagemagick >/dev/null 2>&1 || true
+          mkdir -p thumbs
+          node -e '
+          const fs=require("fs");const s=fs.readFileSync("home.js","utf8");
+          const a=s.indexOf("var PROJECTS = ")+15,b=s.indexOf("];",a)+1;const P=eval(s.slice(a,b));
+          (async()=>{for(const [i,p] of P.entries()){const v=p.videos[0];const id=v.src.match(/playback\/(\d+)/)[1];
+            let url=v.poster;
+            if(!url){try{const r=await fetch("https://vimeo.com/api/oembed.json?url=https://vimeo.com/"+id+"&width=1280");const j=await r.json();url=j.thumbnail_url}catch(e){console.log("oembed fail",id,e.message)}}
+            if(!url){console.log("no thumb",p.title);continue}
+            const r=await fetch(url);const buf=Buffer.from(await r.arrayBuffer());fs.writeFileSync("thumbs/"+String(i+1).padStart(2,"0")+".jpg",buf);console.log(i+1,p.title,r.status,buf.length,url)}})()'
+          for f in thumbs/*.jpg; do convert "$f" -resize 1280x1280\> -strip -quality 70 "$f"; done
+          ls -la thumbs
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add thumbs && git commit -m "Thumbnails for redesign preview" && git push origin HEAD:preview-thumbnails
