@@ -19,10 +19,31 @@
    }
    /* Cargo re-inserts its plain link each time the page is shown, so keep
       removing it once the matching stylesheet has loaded. */
+   /* Older copies of these styles can also live in Cargo's own CSS (from
+      before they moved to GitHub), where removing a link can't reach them.
+      Delete just those rules, leaving the rest of Cargo's CSS alone. */
+   function dropLegacyRules(rules, owner) {
+     for (var r = rules.length - 1; r >= 0; r--) {
+       var rule = rules[r];
+       if (rule.cssRules && !rule.selectorText) {
+         dropLegacyRules(rule.cssRules, rule);
+       } else if (rule.selectorText &&
+           rule.selectorText.indexOf("X1134136285") >= 0) {
+         owner.deleteRule(r);
+       }
+     }
+   }
    function dropStale() {
      if (!ready) return;
      stylesheets().forEach(function (link) {
        if (link !== current && link.href.indexOf("?v=") < 0) link.remove();
+     });
+     Array.prototype.forEach.call(document.styleSheets, function (sheet) {
+       if (sheet.ownerNode === current) return;
+       if (sheet.href && sheet.href.indexOf("?v=") >= 0) return;
+       var rules;
+       try { rules = sheet.cssRules; } catch (error) { return; }
+       if (rules) dropLegacyRules(rules, sheet);
      });
    }
    stylesheets().forEach(function (link) {
@@ -43,7 +64,14 @@
    dropStale();
    if (!window["_elliotStyleWatch_home.css"] && window.MutationObserver) {
      window["_elliotStyleWatch_home.css"] = true;
-     new MutationObserver(function () {
+     new MutationObserver(function (mutations) {
+       var styled = mutations.some(function (mutation) {
+         return Array.prototype.some.call(mutation.addedNodes, function (node) {
+           return node.nodeName === "LINK" || node.nodeName === "STYLE" ||
+               mutation.target.nodeName === "STYLE";
+         });
+       });
+       if (!styled) return;
        current = stylesheets().filter(function (link) { return link.href === href; })[0] || current;
        dropStale();
      }).observe(document.documentElement, { childList: true, subtree: true });
@@ -795,9 +823,9 @@
   }
 
   /* Intro showreel (desktop only): plays full-screen behind the project list
-     on the first load of a visit. The first time someone hovers a project title (desktop)
-     or opens a project, it fades out for good and the hover thumbnails take
-     over. */
+     on the first load of a visit. Hovering a title shows that project's
+     thumbnail over it; opening a project fades the reel out for good, and
+     from then on the hover thumbnails are the only backdrop. */
   var BACKGROUND_VIDEO = "https://player.vimeo.com/progressive_redirect/playback/1071786882/rendition/1080p/file.mp4%20%281080p%29.mp4?loc=external&log_user=0&signature=bb427ec363ba3c6895452e43799399e366b81c94201c7b7d02769f76461fe59d";
   var BACKGROUND_VIDEO_MOBILE = "https://player.vimeo.com/progressive_redirect/playback/1071786882/rendition/720p/file.mp4%20%28720p%29.mp4?loc=external&log_user=0&signature=0c0894255b1ccc728a1be1eeb017060c52311c6a5133eceda6ad94aa42e9bd59";
   var INTRO_SEEN_KEY = "elliotIntroSeen";
@@ -914,12 +942,6 @@
 
     background.appendChild(backgroundVideo);
     page.insertBefore(background, page.firstChild);
-
-    page.querySelectorAll(".project-item > summary").forEach(function (summary) {
-      summary.addEventListener("mouseenter", function () {
-        if (supportsProjectPreview()) dismissIntro();
-      });
-    });
 
     page.querySelectorAll("details.project-item").forEach(function (project) {
       project.addEventListener("toggle", function () {

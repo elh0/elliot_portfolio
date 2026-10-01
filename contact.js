@@ -16,10 +16,31 @@
     }
     /* Cargo re-inserts its plain link each time the page is shown, so keep
        removing it once the matching stylesheet has loaded. */
+    /* Older copies of these styles can also live in Cargo's own CSS (from
+       before they moved to GitHub), where removing a link can't reach them.
+       Delete just those rules, leaving the rest of Cargo's CSS alone. */
+    function dropLegacyRules(rules, owner) {
+      for (var r = rules.length - 1; r >= 0; r--) {
+        var rule = rules[r];
+        if (rule.cssRules && !rule.selectorText) {
+          dropLegacyRules(rule.cssRules, rule);
+        } else if (rule.selectorText &&
+            rule.selectorText.indexOf(".contact-page") >= 0) {
+          owner.deleteRule(r);
+        }
+      }
+    }
     function dropStale() {
       if (!ready) return;
       stylesheets().forEach(function (link) {
         if (link !== current && link.href.indexOf("?v=") < 0) link.remove();
+      });
+      Array.prototype.forEach.call(document.styleSheets, function (sheet) {
+        if (sheet.ownerNode === current) return;
+        if (sheet.href && sheet.href.indexOf("?v=") >= 0) return;
+        var rules;
+        try { rules = sheet.cssRules; } catch (error) { return; }
+        if (rules) dropLegacyRules(rules, sheet);
       });
     }
     stylesheets().forEach(function (link) {
@@ -40,7 +61,14 @@
     dropStale();
     if (!window["_elliotStyleWatch_contact.css"] && window.MutationObserver) {
       window["_elliotStyleWatch_contact.css"] = true;
-      new MutationObserver(function () {
+      new MutationObserver(function (mutations) {
+        var styled = mutations.some(function (mutation) {
+          return Array.prototype.some.call(mutation.addedNodes, function (node) {
+            return node.nodeName === "LINK" || node.nodeName === "STYLE" ||
+              mutation.target.nodeName === "STYLE";
+          });
+        });
+        if (!styled) return;
         current = stylesheets().filter(function (link) { return link.href === href; })[0] || current;
         dropStale();
       }).observe(document.documentElement, { childList: true, subtree: true });

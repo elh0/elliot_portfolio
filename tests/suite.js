@@ -65,7 +65,9 @@ async function desktop(b) {
   check('desktop: hover thumbnail is 2560px', /-d_2560/.test(hov.src) && /mw=2560/.test(hov.src), hov.src);
   check('desktop: other rows fade on hover', hov.hovered === 'rgb(255, 255, 255)' && hov.other !== hov.hovered, hov);
   await wait(p, 1000);
-  check('desktop: intro dismissed after hover', await p.evaluate(() => !document.querySelector('.page-background')));
+  check('desktop: intro reel keeps playing under the hover thumbnail', await p.evaluate(() => { const v = document.querySelector('.page-background video'); return !!v && !v.paused; }));
+  await p.mouse.move(5, 5); await wait(p, 500);
+  check('desktop: leaving the list hides the thumbnail, reel still there', await p.evaluate(() => !document.querySelector('.project-hover-preview').classList.contains('is-visible') && !!document.querySelector('.page-background')));
 
   // open by click: autoplay with sound
   await p.locator('summary').nth(1).click(); await wait(p, 1500);
@@ -73,6 +75,8 @@ async function desktop(b) {
   check('desktop: click opens project', s.open === 1, s);
   check('desktop: opened project autoplays with sound', s.playing && s.muted === false, s);
   check('desktop: hash follows open project', s.hash === '#adidas-return-of-the-15', s.hash);
+  await wait(p, 600);
+  check('desktop: opening a project ends the intro reel', await p.evaluate(() => !document.querySelector('.page-background')));
   const fit = await p.evaluate(() => { const w = document.querySelector('details[open] .video-wrap').getBoundingClientRect(); const c = document.querySelector('details[open] .video-controls').getBoundingClientRect(); return { h: w.height, ctl: c.bottom - w.top, vh: innerHeight }; });
   check('desktop: video and playbar fit the screen height', fit.ctl <= fit.vh, fit);
   const align = await p.evaluate(() => Math.abs(document.querySelector('details[open] .video-wrap').getBoundingClientRect().left - document.querySelector('details[open] .project-title-text').getBoundingClientRect().left));

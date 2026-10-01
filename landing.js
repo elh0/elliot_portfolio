@@ -16,13 +16,14 @@
     event.stopImmediatePropagation();
   };
   window.addEventListener("keydown", window._elliotArrowKeys, true);
-  /* Phones (held either way up) skip the landing reel and go straight to
-     the project list.
-     replace() keeps the back button from bouncing back here. */
-  if (window.matchMedia("(max-width: 767px), (hover: none) and (pointer: coarse) and (max-height: 500px)").matches) {
-    window.location.replace("/projects");
-    return;
-  }
+  /* The homepage is now the project list itself, with the reel playing
+     behind it on desktop, so everyone goes straight to /projects (once
+     Projects is set as the homepage in Cargo, this page isn't shown at
+     all). replace() keeps the back button from bouncing back here.
+     Everything below is the old full-screen landing, kept in case it's
+     wanted again: delete this block to bring it back. */
+  window.location.replace("/projects");
+  return;
 
   /* Change these to swap the landing video or where its links lead. */
   var LANDING = {
