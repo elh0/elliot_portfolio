@@ -1347,7 +1347,10 @@
  };
  window.addEventListener("keydown", window._elliotArrowKeys, true);
 
- /* Desktop-only previous/next navigation. */
+ /* Desktop-only previous/next navigation: a thin chevron either side of
+    the page, fixed to the screen while a project is open, so it can be
+    clicked from anywhere on the page. Phones don't get it (too busy).
+    Styled inline so an older cached home.css can't change it. */
  if (page) {
    var projects = Array.prototype.slice.call(
      page.querySelectorAll("details.project-item")
@@ -1355,7 +1358,7 @@
 
    /* Cargo can retain generated markup while discarding its listeners.
       Always rebuild navigation so every button receives a live handler. */
-   page.querySelectorAll(".project-navigation").forEach(function (navigation) {
+   document.querySelectorAll(".project-navigation").forEach(function (navigation) {
      navigation.remove();
    });
 
@@ -1364,43 +1367,61 @@
      return title ? title.textContent.trim() : "Project";
    }
 
-   /* Tall thin chevron, drawn like the playbar icons. */
-   var CHEVRON_LEFT =
-     '<svg width="18" height="36" viewBox="0 0 18 36" fill="none" ' +
-     'stroke="currentColor" stroke-width="1.25" aria-hidden="true" ' +
-     'style="display:block"><path d="M16 2 2 18l14 16"/></svg>';
-   var CHEVRON_RIGHT =
-     '<svg width="18" height="36" viewBox="0 0 18 36" fill="none" ' +
-     'stroke="currentColor" stroke-width="1.25" aria-hidden="true" ' +
-     'style="display:block"><path d="M2 2l14 16L2 34"/></svg>';
+   function openProject() {
+     for (var i = 0; i < projects.length; i++) {
+       if (projects[i].open) return i;
+     }
+     return -1;
+   }
 
-   /* Desktop: a chevron either side of the video, centred in the empty
-      space and level with the middle of the video. Phones hide
-      .project-navigation in home.css. Layout is set inline so an older
-      cached home.css can't put the old bottom links back. */
-   function makeProjectLink(direction, target) {
+   function isPhone() {
+     return !!page.closest(".mobile") ||
+       window.matchMedia("(max-width: 767px)").matches;
+   }
+
+   var CHEVRON_PATHS = {
+     previous: "M16 2 2 18l14 16",
+     next: "M2 2l14 16L2 34"
+   };
+
+   function makeProjectLink(direction) {
      var button = document.createElement("button");
-     var arrow = document.createElement("span");
      var isPrevious = direction === "previous";
 
      button.type = "button";
      button.className = "project-navigation-link project-navigation-" + direction;
-     button.setAttribute("aria-label", (isPrevious ? "Previous project, " : "Next project, ") + projectTitle(target));
-     button.title = projectTitle(target);
+     button.innerHTML =
+       '<svg width="18" height="36" viewBox="0 0 18 36" fill="none" ' +
+       'stroke="currentColor" stroke-width="1.25" aria-hidden="true" ' +
+       'style="display:block"><path d="' + CHEVRON_PATHS[direction] +
+       '"/></svg>';
      button.style.cssText =
-       "position:absolute;top:0;display:block;max-width:none;margin:0;" +
-       "padding:14px;border:0;background:transparent;cursor:pointer;" +
-       "line-height:0;" +
-       (isPrevious
-         ? "left:calc((100% - 100vw) / 4);transform:translate(-50%,-50%);"
-         : "right:calc((100% - 100vw) / 4);transform:translate(50%,-50%);");
-     arrow.className = "project-navigation-arrow";
-     arrow.style.display = "block";
-     arrow.innerHTML = isPrevious ? CHEVRON_LEFT : CHEVRON_RIGHT;
-     button.appendChild(arrow);
+       "position:fixed;top:50%;z-index:20;display:block;margin:0;" +
+       "padding:14px;border:0;border-radius:0;background:transparent;" +
+       "line-height:0;cursor:pointer;opacity:0;pointer-events:none;" +
+       "transition:opacity 300ms ease, color 500ms ease;" +
+       "-webkit-tap-highlight-color:transparent;" +
+       (isPrevious ? "transform:translate(-50%,-50%);"
+                   : "transform:translate(50%,-50%);");
+
+     button.addEventListener("mouseenter", function () {
+       button._elliotHover = true;
+       updateNavigation();
+     });
+     button.addEventListener("mouseleave", function () {
+       button._elliotHover = false;
+       updateNavigation();
+     });
+
      button.addEventListener("click", function (event) {
        event.preventDefault();
        event.stopPropagation();
+
+       var current = openProject();
+       if (current < 0) return;
+       var step = isPrevious ? -1 : 1;
+       var target =
+         projects[(current + step + projects.length) % projects.length];
 
        projects.forEach(function (project) {
          if (project !== target) project.open = false;
@@ -1416,39 +1437,64 @@
      return button;
    }
 
-   projects.forEach(function (project, index) {
-     var content = project.querySelector(".project-content");
-     if (!content || projects.length < 2) return;
+   var navigation = document.createElement("nav");
+   navigation.className = "project-navigation";
+   navigation.setAttribute("aria-label", "Project navigation");
+   navigation.style.cssText = "display:contents;";
+   var previousButton = makeProjectLink("previous");
+   var nextButton = makeProjectLink("next");
+   navigation.appendChild(previousButton);
+   navigation.appendChild(nextButton);
 
-     var previous = projects[(index - 1 + projects.length) % projects.length];
-     var next = projects[(index + 1) % projects.length];
-     var navigation = document.createElement("nav");
-     navigation.className = "project-navigation";
-     navigation.setAttribute("aria-label", "Project navigation");
-     navigation.appendChild(makeProjectLink("previous", previous));
-     navigation.appendChild(makeProjectLink("next", next));
-     navigation.style.cssText =
-       "position:absolute;left:0;right:0;top:0;height:0;width:auto;" +
-       "margin:0;padding:0;z-index:3;";
-     content.style.position = "relative";
-     content.appendChild(navigation);
+   /* Centre each chevron in the empty space beside the project column,
+      and show them only while a project is open. */
+   function updateNavigation() {
+     var current = projects.length > 1 ? openProject() : -1;
+     var show = current >= 0 && !isPhone();
+     var accordion = page.querySelector(".project-accordion") || page;
+     var rect = accordion.getBoundingClientRect();
+     var viewportWidth = document.documentElement.clientWidth;
+     var light = page.classList.contains("is-light-theme");
 
-     /* Keep the arrows level with the middle of the first video as its
-        size changes (opening, resizing, the real aspect ratio loading). */
-     var stage = content.querySelector(".video-stage");
-     function placeNavigation() {
-       if (!stage || !project.open) return;
-       var stageRect = stage.getBoundingClientRect();
-       var contentRect = content.getBoundingClientRect();
-       navigation.style.top =
-         stageRect.top - contentRect.top + stageRect.height / 2 + "px";
+     previousButton.style.left = rect.left / 2 + "px";
+     nextButton.style.right = (viewportWidth - rect.right) / 2 + "px";
+
+     [previousButton, nextButton].forEach(function (button) {
+       button.style.opacity = show ? "1" : "0";
+       button.style.pointerEvents = show ? "auto" : "none";
+       button.tabIndex = show ? 0 : -1;
+       button.style.color = button._elliotHover
+         ? "#8f8f8f"
+         : (light ? "#000000" : "#ffffff");
+     });
+
+     if (current >= 0) {
+       var count = projects.length;
+       previousButton.setAttribute("aria-label", "Previous project, " +
+         projectTitle(projects[(current - 1 + count) % count]));
+       nextButton.setAttribute("aria-label", "Next project, " +
+         projectTitle(projects[(current + 1) % count]));
      }
-     if (stage && typeof ResizeObserver === "function") {
-       new ResizeObserver(placeNavigation).observe(stage);
-     }
-     project.addEventListener("toggle", placeNavigation);
-     window.addEventListener("resize", placeNavigation);
-     placeNavigation();
-   });
+   }
+
+   if (projects.length > 1) {
+     document.body.appendChild(navigation);
+     projects.forEach(function (project) {
+       project.addEventListener("toggle", updateNavigation);
+     });
+     window.addEventListener("resize", updateNavigation);
+     new MutationObserver(updateNavigation)
+       .observe(page, { attributes: true, attributeFilter: ["class"] });
+     updateNavigation();
+
+     /* The chevrons live on <body> (so nothing on the page can stop them
+        staying fixed); take them away if Cargo swaps this page out. */
+     var pageWatch = new MutationObserver(function () {
+       if (document.contains(page)) return;
+       navigation.remove();
+       pageWatch.disconnect();
+     });
+     pageWatch.observe(document.body, { childList: true, subtree: true });
+   }
  }
 })();

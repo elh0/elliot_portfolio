@@ -16,7 +16,7 @@ Cargo holds only a few lines of HTML per page. The styling, the video player and
 
 ## Common changes
 
-**Add, remove or reorder a project:** edit the `PROJECTS` list near the top of `home.js`. Each project has a title, category, director, format and one or more videos. Each video needs its Vimeo file link (`src`), thumbnail (`poster`), aspect ratio, and running time. Numbering, Previous/Next and the hover previews update automatically.
+**Add, remove or reorder a project:** edit the `PROJECTS` list near the top of `home.js`. Each project has a title, category, director, format and one or more videos. Each video needs its Vimeo file link (`src`), thumbnail (`poster`), aspect ratio, and running time. Numbering, the Previous/Next chevrons and the hover previews update automatically.
 
 **Swap the landing / intro reel:** change `video` (desktop, 1080p) at the top of `landing.js` and `BACKGROUND_VIDEO` in `home.js`. The `<source>` in `landing.html` also holds the 1080p link, so that one line needs re-pasting into Cargo.
 
