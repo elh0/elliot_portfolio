@@ -912,22 +912,13 @@
 
     /* Listen on the stage rather than the video: iOS browsers do not
        reliably dispatch taps to a <video> element without native controls.
-       Touch: one tap plays/pauses; double-tap the right/left half to skip
-       forward/back 5s (like YouTube), and further quick taps keep skipping. */
-    var lastPointerType = "mouse";
+       Tap or click plays/pauses; double-tap or double-click the right/left
+       half to skip forward/back (like YouTube on phones), and further quick
+       taps keep skipping. */
     var singleTapTimer = null;
     var lastTapAt = 0;
     var skipChainUntil = 0;
-
     var singleTapFiredAt = 0;
-
-    stage.addEventListener("pointerdown", function (event) {
-      lastPointerType = event.pointerType || "mouse";
-    });
-    /* Backup for browsers that don't report pointer types on touch. */
-    stage.addEventListener("touchstart", function () {
-      lastPointerType = "touch";
-    }, { passive: true });
 
     function showSkipHint(direction) {
       var hint = document.createElement("span");
@@ -1009,11 +1000,16 @@
       handleTap(event.changedTouches[0].clientX);
     }, { passive: false });
 
-    /* Mouse/trackpad clicks play/pause straight away. */
-    stage.addEventListener("click", function () {
+    /* Mouse/trackpad: the same as touch. Click plays/pauses; double-click
+       the right/left half to skip forward/back. */
+    stage.addEventListener("click", function (event) {
       if (Date.now() - lastTouchEndAt < 800) return; /* already handled as touch */
-      if (lastPointerType === "touch") return;
-      togglePlayback();
+      handleTap(event.clientX);
+    });
+
+    /* Double-clicks shouldn't select text or trigger anything else. */
+    stage.addEventListener("dblclick", function (event) {
+      event.preventDefault();
     });
 
     function replay(event) {
