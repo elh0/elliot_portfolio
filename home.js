@@ -870,6 +870,40 @@
 
       stage.classList.toggle("is-paused", video.paused);
       setMuteIcon(muteButton, video.muted);
+      updateEndPoster();
+    }
+
+    /* When a video finishes, fade its thumbnail back in over the last
+       frame. Styled inline so it works even with an older cached home.css;
+       it ignores clicks, so tapping still replays and skipping back still
+       works (seeking away from the end hides it). */
+    var endPoster = null;
+
+    function updateEndPoster() {
+      var posterSrc = video.getAttribute("poster");
+      var show = video.ended && !!posterSrc;
+
+      if (!endPoster) {
+        if (!show) return;
+        endPoster = document.createElement("img");
+        endPoster.className = "video-end-poster";
+        endPoster.alt = "";
+        endPoster.setAttribute("aria-hidden", "true");
+        endPoster.draggable = false;
+        endPoster.style.cssText =
+          "position:absolute;inset:0;z-index:1;display:block;width:100%;" +
+          "height:100%;margin:0;padding:0;border:0;max-width:none;" +
+          "pointer-events:none;opacity:0;transition:opacity 400ms ease;";
+        stage.insertBefore(endPoster, video.nextSibling);
+      }
+
+      if (show && endPoster.getAttribute("src") !== posterSrc) {
+        endPoster.setAttribute("src", posterSrc);
+      }
+      /* Match the video's framing (cover inline, contain in fullscreen). */
+      endPoster.style.objectFit =
+        window.getComputedStyle(video).objectFit || "cover";
+      endPoster.style.opacity = show ? "1" : "0";
     }
 
     function animateProgress() {
@@ -1098,6 +1132,8 @@
 
     document.addEventListener("fullscreenchange", syncFullscreenButton);
     document.addEventListener("webkitfullscreenchange", syncFullscreenButton);
+    document.addEventListener("fullscreenchange", updateEndPoster);
+    document.addEventListener("webkitfullscreenchange", updateEndPoster);
 
     lockControlsLayout(controls);
 
