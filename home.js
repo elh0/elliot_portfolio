@@ -669,6 +669,7 @@
     video.removeAttribute("data-deferred-src");
     video.preload = "metadata";
     video.src = deferred;
+    video._elliotLoopsLeft = 1;
   }
 
   function formatTime(seconds) {
@@ -840,7 +841,7 @@
 
       if (duration) video._elliotDurationText = formatTime(duration);
 
-      if (video.ended) {
+      if (video.ended && !video._elliotLoopsLeft) {
         /* Finished: the time becomes a Replay button. */
         if (time.getAttribute("data-replay") !== "1") {
           time.setAttribute("data-replay", "1");
@@ -892,7 +893,7 @@
 
     function updateEndPoster() {
       var posterSrc = video.getAttribute("poster");
-      var show = video.ended && !!posterSrc;
+      var show = video.ended && !video._elliotLoopsLeft && !!posterSrc;
 
       if (!endPoster) {
         if (!show) return;
@@ -1251,6 +1252,22 @@
     video.addEventListener("durationchange", updateControls);
     video.addEventListener("volumechange", updateControls);
     video.addEventListener("pause", updateControls);
+    /* The first time a project is watched, its video plays round once
+       more by itself; after that it stops on Replay rather than looping
+       for ever. Opening the project again resets this. */
+    if (video._elliotLoopsLeft === undefined) video._elliotLoopsLeft = 1;
+    video.addEventListener("ended", function () {
+      if (!video._elliotLoopsLeft) return;
+      video._elliotLoopsLeft -= 1;
+      video.currentTime = 0;
+      var again = video.play();
+      if (again && typeof again.catch === "function") {
+        again.catch(function () {
+          video._elliotLoopsLeft = 0;
+          updateControls();
+        });
+      }
+    });
     video.addEventListener("ended", updateControls);
 
    /* Remember the video last played or touched, for keyboard seeking. */
