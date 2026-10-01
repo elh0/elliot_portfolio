@@ -911,8 +911,62 @@
     }
 
     /* Listen on the stage rather than the video: iOS browsers do not
-       reliably dispatch taps to a <video> element without native controls. */
-    stage.addEventListener("click", togglePlayback);
+       reliably dispatch taps to a <video> element without native controls.
+       Touch: one tap plays/pauses; double-tap the right/left half to skip
+       forward/back (like YouTube), and further quick taps keep skipping. */
+    var lastPointerType = "mouse";
+    var singleTapTimer = null;
+    var lastTapAt = 0;
+    var skipChainUntil = 0;
+
+    stage.addEventListener("pointerdown", function (event) {
+      lastPointerType = event.pointerType || "mouse";
+    });
+
+    function showSkipHint(direction) {
+      var hint = document.createElement("span");
+      hint.className = "video-skip-hint " +
+        (direction > 0 ? "video-skip-hint-forward" : "video-skip-hint-back");
+      hint.textContent = (direction > 0 ? "+" : "\u2212") + SEEK_STEP + "s";
+      hint.setAttribute("aria-hidden", "true");
+      stage.appendChild(hint);
+      window.setTimeout(function () { hint.remove(); }, 650);
+    }
+
+    function skipBy(direction) {
+      if (!Number.isFinite(video.duration)) return;
+      video.currentTime = Math.min(
+        Math.max(0, video.currentTime + direction * SEEK_STEP),
+        Math.max(0, video.duration - 0.05)
+      );
+      showSkipHint(direction);
+      updateControls();
+    }
+
+    stage.addEventListener("click", function (event) {
+      if (lastPointerType !== "touch") {
+        togglePlayback();
+        return;
+      }
+
+      var bounds = stage.getBoundingClientRect();
+      var direction = event.clientX - bounds.left < bounds.width / 2 ? -1 : 1;
+      var now = Date.now();
+
+      if (now < skipChainUntil || (singleTapTimer && now - lastTapAt < 300)) {
+        window.clearTimeout(singleTapTimer);
+        singleTapTimer = null;
+        skipBy(direction);
+        skipChainUntil = now + 600;
+        return;
+      }
+
+      lastTapAt = now;
+      singleTapTimer = window.setTimeout(function () {
+        singleTapTimer = null;
+        togglePlayback();
+      }, 280);
+    });
 
     function replay(event) {
       if (time.getAttribute("data-replay") !== "1") return;

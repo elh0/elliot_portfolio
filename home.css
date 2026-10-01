@@ -398,6 +398,42 @@ body:has([id="X1134136285"]) {
   -webkit-tap-highlight-color: transparent;
 }
 
+/* Double-tap skip (touch): no browser zoom, brief "+3s" / "−3s" flash */
+[id="X1134136285"] .video-stage {
+  touch-action: manipulation;
+  -webkit-tap-highlight-color: transparent;
+}
+
+[id="X1134136285"] .video-skip-hint {
+  position: absolute;
+  z-index: 2;
+  top: 50%;
+  padding: 0.35rem 0.6rem;
+  color: #ffffff;
+  background: rgba(0, 0, 0, 0.45);
+  font-family: ui-monospace, "SFMono-Regular", Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+  font-size: var(--site-type-size, 11px);
+  line-height: 1;
+  pointer-events: none;
+  transform: translateY(-50%);
+  animation: elliot-skip-hint 650ms ease forwards;
+}
+
+[id="X1134136285"] .video-skip-hint-back {
+  left: 12%;
+}
+
+[id="X1134136285"] .video-skip-hint-forward {
+  right: 12%;
+}
+
+@keyframes elliot-skip-hint {
+  0% { opacity: 0; }
+  15% { opacity: 1; }
+  70% { opacity: 1; }
+  100% { opacity: 0; }
+}
+
 /* "↻ Replay" in place of the time once a video ends */
 [id="X1134136285"] .video-time[data-replay="1"] {
   cursor: pointer;
