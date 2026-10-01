@@ -398,6 +398,39 @@ body:has([id="X1134136285"]) {
   -webkit-tap-highlight-color: transparent;
 }
 
+/* "↻ Replay" in place of the time once a video ends */
+[id="X1134136285"] .video-time[data-replay="1"] {
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+}
+
+[id="X1134136285"] .video-replay {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.6ch;
+  transition: color 500ms ease;
+}
+
+[id="X1134136285"] .video-replay svg {
+  display: block;
+  width: 11px;
+  height: 11px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.2;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+[id="X1134136285"] .video-time[data-replay="1"]:hover .video-replay {
+  color: #8f8f8f;
+}
+
+[id="X1134136285"] .video-time[data-replay="1"]:focus-visible {
+  outline: 1px dotted currentColor;
+  outline-offset: 3px;
+}
+
 [id="X1134136285"] .video-controls > * {
   flex: 0 0 auto;
 }

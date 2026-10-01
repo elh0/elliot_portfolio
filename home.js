@@ -2,6 +2,12 @@
  var page = document.querySelector('[id="X1134136285"]');
  var lastActiveVideo = null;
 
+ /* Shown in place of the time once a video has finished. */
+ var REPLAY_HTML =
+   '<span class="video-replay"><svg viewBox="0 0 12 12" width="11" height="11" ' +
+   'aria-hidden="true" focusable="false"><path d="M2.2 6a3.8 3.8 0 1 0 1.1-2.7"/>' +
+   '<path d="M3.1 1.2v2.3h2.3"/></svg>Replay</span>';
+
  /* Speaker icons: with sound waves while playing sound, crossed when muted. */
  var SOUND_ON_ICON =
    '<svg viewBox="0 0 12 12" width="11" height="11" aria-hidden="true" focusable="false">' +
@@ -624,9 +630,39 @@
   }
 
   /* Restore a deferred video's source so it can load and play. */
+  /* Fully unload a video whose project has closed. iPhones (all iOS
+     browsers) limit how many videos can hold decoders at once; a merely
+     paused video in a closed project could stop the next one playing.
+     The position is kept and restored when the project reopens. */
+  function releaseVideo(video) {
+    var src = video.getAttribute("src");
+    if (!src) return;
+
+    video.pause();
+    if (!video.ended && video.currentTime > 0.5) {
+      video.setAttribute("data-resume-time", String(video.currentTime));
+    } else {
+      video.removeAttribute("data-resume-time");
+    }
+    video.setAttribute("data-deferred-src", src);
+    video.removeAttribute("src");
+    video.load();
+  }
+
   function activateVideo(video) {
     var deferred = video.getAttribute("data-deferred-src");
     if (!deferred) return;
+
+    var resumeTime = Number(video.getAttribute("data-resume-time"));
+    video.removeAttribute("data-resume-time");
+    if (resumeTime > 0) {
+      video.addEventListener("loadedmetadata", function resume() {
+        video.removeEventListener("loadedmetadata", resume);
+        if (resumeTime < (video.duration || 0) - 0.5) {
+          video.currentTime = resumeTime;
+        }
+      });
+    }
 
     var deferredPoster = video.getAttribute("data-deferred-poster");
     if (deferredPoster) {
@@ -806,11 +842,33 @@
       var duration = video.duration || 0;
       var hasStarted = !video.paused || video.currentTime > 0;
 
-      /* Before metadata loads, keep the duration written in the markup. */
-      if (hasStarted || duration) {
-        time.textContent = formatTime(
-          hasStarted ? video.currentTime : duration
-        );
+      if (duration) video._elliotDurationText = formatTime(duration);
+
+      if (video.ended) {
+        /* Finished: the time becomes a Replay button. */
+        if (time.getAttribute("data-replay") !== "1") {
+          time.setAttribute("data-replay", "1");
+          time.setAttribute("role", "button");
+          time.setAttribute("tabindex", "0");
+          time.setAttribute("aria-label", "Replay");
+          time.innerHTML = REPLAY_HTML;
+        }
+      } else {
+        if (time.getAttribute("data-replay") === "1") {
+          time.removeAttribute("data-replay");
+          time.removeAttribute("role");
+          time.removeAttribute("tabindex");
+          time.removeAttribute("aria-label");
+        }
+
+        /* Before metadata loads, keep the duration already shown. */
+        if (hasStarted || duration) {
+          time.textContent = formatTime(
+            hasStarted ? video.currentTime : duration
+          );
+        } else if (video._elliotDurationText) {
+          time.textContent = video._elliotDurationText;
+        }
       }
 
       progress.max = duration || 100;
@@ -846,8 +904,20 @@
         var playAttempt = video.play();
 
         if (playAttempt && typeof playAttempt.catch === "function") {
-          playAttempt.catch(function () {
-            stage.classList.add("is-paused");
+          playAttempt.catch(function (error) {
+            /* A blocked play (no user gesture) can't be retried; any other
+               failure gets one fresh load and another try. */
+            if (error && error.name === "NotAllowedError") {
+              stage.classList.add("is-paused");
+              return;
+            }
+            video.load();
+            var retry = video.play();
+            if (retry && typeof retry.catch === "function") {
+              retry.catch(function () {
+                stage.classList.add("is-paused");
+              });
+            }
           });
         }
       } else {
@@ -858,6 +928,19 @@
     /* Listen on the stage rather than the video: iOS browsers do not
        reliably dispatch taps to a <video> element without native controls. */
     stage.addEventListener("click", togglePlayback);
+
+    function replay(event) {
+      if (time.getAttribute("data-replay") !== "1") return;
+      event.preventDefault();
+      event.stopPropagation();
+      video.currentTime = 0;
+      togglePlayback();
+    }
+
+    time.addEventListener("click", replay);
+    time.addEventListener("keydown", function (event) {
+      if (event.key === "Enter" || event.key === " ") replay(event);
+    });
 
     /* Fullscreen: the whole player (picture + playbar) where the browser
        allows it; iPhone Safari only allows the native video player. */
@@ -1046,6 +1129,7 @@
      } else {
        project.querySelectorAll("video").forEach(function (video) {
          video.pause();
+         if (video.classList.contains("project-video")) releaseVideo(video);
        });
       }
 
