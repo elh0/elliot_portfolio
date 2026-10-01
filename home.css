@@ -1119,7 +1119,7 @@ body:has([id="X1134136285"].is-light-theme) {
 
 [id="X1134136285"] .index-heading.is-built {
   display: grid;
-  grid-template-columns: 1fr 1fr auto;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
   gap: 0 2ch;
   align-items: baseline;
   margin: 0;
@@ -1131,6 +1131,7 @@ body:has([id="X1134136285"].is-light-theme) {
 
 [id="X1134136285"] .site-nav {
   display: flex;
+  justify-self: end;
   gap: 2.5ch;
 }
 
@@ -1266,16 +1267,18 @@ body:has([id="X1134136285"].is-light-theme) {
   }
 }
 
-/* Open project: lined up with the title column, and never taller than
-   the screen (its width follows the first video's shape). */
 [id="X1134136285"] .project-content {
-  padding: 14px 0 34px calc(4ch + 2ch);
+  padding: 14px 0 34px;
 }
 
+/* Open project: centred, and never taller than the screen (its width
+   follows the first video's shape). The chevrons sit just outside it. */
 [id="X1134136285"] .project-content > .project-carousel,
 [id="X1134136285"] .project-content > .project-meta {
   max-width: calc((100vh - 9rem) * (var(--project-ratio, 16 / 9)));
   max-width: calc((100svh - 9rem) * (var(--project-ratio, 16 / 9)));
+  margin-right: auto;
+  margin-left: auto;
 }
 
 /* Contact sheet */
@@ -1472,4 +1475,17 @@ body:has([id="X1134136285"].is-light-theme) {
     gap: 0.1rem;
     margin-top: 3rem;
   }
+}
+
+/* One type size everywhere (the filter counts are the only smaller text),
+   whatever size Cargo gives its own elements. */
+[id="X1134136285"] {
+  --site-type-size: 11px;
+}
+
+[id="X1134136285"] .page-content,
+[id="X1134136285"] .page-content *:not(sup),
+.project-navigation-link {
+  font-size: 11px !important;
+  line-height: 1.65;
 }

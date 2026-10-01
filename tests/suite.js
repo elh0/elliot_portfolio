@@ -79,13 +79,16 @@ async function desktop(b) {
   check('desktop: opening a project ends the intro reel', await p.evaluate(() => !document.querySelector('.page-background')));
   const fit = await p.evaluate(() => { const w = document.querySelector('details[open] .video-wrap').getBoundingClientRect(); const c = document.querySelector('details[open] .video-controls').getBoundingClientRect(); return { h: w.height, ctl: c.bottom - w.top, vh: innerHeight }; });
   check('desktop: video and playbar fit the screen height', fit.ctl <= fit.vh, fit);
-  const align = await p.evaluate(() => Math.abs(document.querySelector('details[open] .video-wrap').getBoundingClientRect().left - document.querySelector('details[open] .project-title-text').getBoundingClientRect().left));
-  check('desktop: video lines up with title column', align <= 1, align);
+  const centre = await p.evaluate(() => { const r = document.querySelector('details[open] .project-carousel').getBoundingClientRect(); const a = document.querySelector('.project-accordion').getBoundingClientRect(); return { video: Math.round(r.left + r.width / 2), list: Math.round(a.left + a.width / 2), w: Math.round(r.width) }; });
+  check('desktop: open video is centred', Math.abs(centre.video - centre.list) <= 2, centre);
 
   // chevrons
   const chev = await p.evaluate(() => [...document.querySelectorAll('.project-navigation-link')].map(b => ({ op: b.style.opacity, x: Math.round(b.getBoundingClientRect().left), w: Math.round(b.getBoundingClientRect().width) })));
   const content = await p.evaluate(() => { const r = document.querySelector('.project-accordion').getBoundingClientRect(); return [r.left, r.right]; });
-  check('desktop: chevrons visible in side margins', chev.length === 2 && chev.every(c => c.op === '1') && chev[0].x + chev[0].w <= content[0] + 2 && chev[1].x >= content[1] - 2, { chev, content });
+  const vid = await p.evaluate(() => { const r = document.querySelector('details[open] .project-carousel').getBoundingClientRect(); return [r.left, r.right]; });
+  check('desktop: chevrons sit just outside the video', chev.length === 2 && chev.every(c => c.op === '1') && chev[0].x + chev[0].w <= vid[0] + 2 && vid[0] - (chev[0].x + chev[0].w) <= 60 && chev[1].x >= vid[1] - 2 && chev[1].x - vid[1] <= 60, { chev, vid });
+  const sizes = await p.evaluate(() => [...new Set([...document.querySelectorAll('.page-content *')].filter(e => e.offsetParent && e.childNodes.length && [...e.childNodes].some(n => n.nodeType === 3 && n.textContent.trim()) && e.tagName !== 'SUP').map(e => getComputedStyle(e).fontSize))]);
+  check('desktop: all text is 11px', sizes.length === 1 && sizes[0] === '11px', sizes);
   await p.locator('.project-navigation-next').click(); await wait(p, 1500);
   s = await state(p);
   check('desktop: next chevron opens next project and plays', s.open === 2 && s.playing, s);
@@ -253,6 +256,9 @@ async function contact(b) {
     });
     check(name + ': same name bar as projects', r.built && /Elliot Holbrow Cinematographer, London Work Contact/.test(r.text), r);
     check(name + ': rows without dotted leaders, no sideways scroll', r.rows === 5 && r.leaders === 0 && !r.overflow, r);
+    const lineup = await p.evaluate(() => ({ name: Math.round(document.querySelector('.site-name').getBoundingClientRect().left), label: Math.round(document.querySelector('.contact-label').getBoundingClientRect().left), role: Math.round(document.querySelector('.site-role').getBoundingClientRect().left), value: Math.round(document.querySelector('.contact-value').getBoundingClientRect().left), sizes: [...new Set([...document.querySelectorAll('.contact-page *')].filter(e => e.offsetParent).map(e => getComputedStyle(e).fontSize))] }));
+    check(name + ': labels line up with the name' + (name.includes('desktop') ? ', values with the role' : ''), lineup.label === lineup.name && (!name.includes('desktop') || lineup.value === lineup.role), lineup);
+    check(name + ': all text is 11px', lineup.sizes.length === 1 && lineup.sizes[0] === '11px', lineup.sizes);
     await p.screenshot({ path: shot(name.replace(/\W+/g, '-') + '') });
     check(name + ': no script errors', errors.length === 0, errors);
     await c.close();

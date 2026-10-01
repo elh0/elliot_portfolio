@@ -5,7 +5,7 @@
     for a few minutes after a change. Load the stylesheet this script was
     written for, then drop the plain link. Bump with every home.css change
     the script relies on. */
- var STYLE_VERSION = "2026-10-01-table";
+ var STYLE_VERSION = "2026-10-01-b";
  (function loadMatchingStyles() {
    var script = document.currentScript;
    if (!script || !script.src) return;
@@ -2069,12 +2069,19 @@
      }
      var show = current >= 0 && !isPhone();
      var accordion = page.querySelector(".project-accordion") || page;
-     var rect = accordion.getBoundingClientRect();
+     /* Beside the open video (centred, so often narrower than the list);
+        otherwise in the page margins. */
+     var media = current >= 0 &&
+       listed[current].querySelector(".project-carousel");
+     var rect = (media && media.getBoundingClientRect().width
+       ? media : accordion).getBoundingClientRect();
      var viewportWidth = document.documentElement.clientWidth;
      var light = page.classList.contains("is-light-theme");
 
-     previousButton.style.left = rect.left / 2 + "px";
-     nextButton.style.right = (viewportWidth - rect.right) / 2 + "px";
+     var margin = Math.max(24, Math.min(48, rect.left / 2));
+     previousButton.style.left = Math.max(24, rect.left - margin) + "px";
+     nextButton.style.right =
+       Math.max(24, viewportWidth - rect.right - margin) + "px";
 
      [previousButton, nextButton].forEach(function (button) {
        button.style.opacity = show ? "1" : "0";
