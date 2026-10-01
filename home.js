@@ -1341,7 +1341,7 @@
         scrubFrame = document.createElement("div");
         scrubFrame.style.cssText =
           "display:none;background-repeat:no-repeat;background-color:#000;" +
-          "border-radius:8px;overflow:hidden;";
+          "border-radius:0;";
         scrubLabel = document.createElement("span");
         scrubLabel.style.cssText =
           "display:block;padding:0;color:#fff;white-space:nowrap;" +
