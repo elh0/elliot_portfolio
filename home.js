@@ -246,6 +246,16 @@
 
  /* Build the project list into the empty .project-accordion. If the Cargo
     markup already contains projects, leave it alone. */
+ /* Project link name: "Bladee - Blondie" → "bladee-blondie", used for
+    elliot.onl/projects#bladee-blondie. A project can set its own "slug". */
+ function slugify(text) {
+   return String(text)
+     .normalize("NFD").replace(/[\u0300-\u036f]/g, "")
+     .toLowerCase()
+     .replace(/[^a-z0-9]+/g, "-")
+     .replace(/^-+|-+$/g, "");
+ }
+
  function renderProjects() {
    var accordion = page && page.querySelector(".project-accordion");
    if (!accordion || accordion.querySelector("details.project-item")) return;
@@ -260,6 +270,7 @@
    PROJECTS.forEach(function (project) {
      var details = el("details", "project-item");
      details.setAttribute("name", "elliot-projects");
+     details.setAttribute("data-slug", project.slug || slugify(project.title));
 
      var summary = el("summary");
      var title = el("span", "project-title-text", project.title);
@@ -947,8 +958,30 @@
     }
 
     /* Start playing when the project is opened (see autoplayProject). */
-    video._elliotAutoplay = function () {
-      if (video.paused) togglePlayback();
+    /* allowMuted: when opened by a link rather than a click, browsers
+       won't play sound without a tap, so start muted instead. */
+    video._elliotAutoplay = function (allowMuted) {
+      if (!video.paused) return;
+      if (!allowMuted) {
+        togglePlayback();
+        return;
+      }
+
+      activateVideo(video);
+      var attempt = video.play();
+      if (attempt && typeof attempt.catch === "function") {
+        attempt.catch(function (error) {
+          if (!error || error.name !== "NotAllowedError" ||
+              !video.getAttribute("src")) return;
+          video.muted = true;
+          var muted = video.play();
+          if (muted && typeof muted.catch === "function") {
+            muted.catch(function () {
+              stage.classList.add("is-paused");
+            });
+          }
+        });
+      }
     };
 
     /* Listen on the stage rather than the video: iOS browsers do not
@@ -1015,6 +1048,7 @@
        a single "click", so click events alone miss the second tap. */
     var touchStartX = 0;
     var touchStartY = 0;
+    var touchStartAt = 0;
     var touchMoved = false;
     var lastTouchEndAt = 0;
 
@@ -1022,6 +1056,7 @@
       var touch = event.touches[0];
       touchStartX = touch.clientX;
       touchStartY = touch.clientY;
+      touchStartAt = Date.now();
       touchMoved = event.touches.length > 1;
     }, { passive: true });
 
@@ -1034,7 +1069,23 @@
     }, { passive: true });
 
     stage.addEventListener("touchend", function (event) {
-      if (touchMoved) return; /* a scroll or pinch, not a tap */
+      if (touchMoved) {
+        /* A quick sideways swipe moves to the next/previous project
+           (left = next). Not in projects with several videos, where a
+           swipe scrolls between them, and not in fullscreen. */
+        var touch = event.changedTouches[0];
+        var dx = touch.clientX - touchStartX;
+        var dy = touch.clientY - touchStartY;
+        var project = stage.closest("details.project-item");
+        if (event.touches.length === 0 &&
+            Math.abs(dx) > 60 && Math.abs(dx) > Math.abs(dy) * 2 &&
+            Date.now() - touchStartAt < 700 &&
+            project && project.querySelectorAll(".video-stage").length === 1 &&
+            !document.fullscreenElement && !document.webkitFullscreenElement) {
+          stepProject(dx < 0 ? 1 : -1);
+        }
+        return; /* otherwise a scroll or pinch, not a tap */
+      }
       /* Stop the browser's own click (and double-tap handling) for this tap. */
       event.preventDefault();
       lastTouchEndAt = Date.now();
@@ -1239,11 +1290,43 @@
      only allow playback with sound inside a user gesture; the details
      "toggle" event fires too late to count. If the browser still blocks
      it, the video just waits paused for a tap, as before. */
-  function autoplayProject(project) {
+  function autoplayProject(project, allowMuted) {
     var video = project.querySelector("video.project-video");
     if (video && typeof video._elliotAutoplay === "function") {
-      video._elliotAutoplay();
+      video._elliotAutoplay(allowMuted);
     }
+  }
+
+  function allProjects() {
+    return Array.prototype.slice.call(
+      document.querySelectorAll('[id="X1134136285"] details.project-item')
+    );
+  }
+
+  /* Open a project (closing the others), start it and scroll to it. */
+  function goToProject(target, allowMuted) {
+    allProjects().forEach(function (project) {
+      if (project !== target) project.open = false;
+    });
+    target.open = true;
+    autoplayProject(target, allowMuted);
+
+    window.requestAnimationFrame(function () {
+      target.scrollIntoView({ behavior: "smooth", block: "start" });
+    });
+  }
+
+  /* Move to the next (1) or previous (-1) project from the open one. */
+  function stepProject(step) {
+    var projects = allProjects();
+    var current = -1;
+    for (var i = 0; i < projects.length; i++) {
+      if (projects[i].open) current = i;
+    }
+    if (current < 0 || projects.length < 2) return;
+    goToProject(
+      projects[(current + step + projects.length) % projects.length]
+    );
   }
 
   document.querySelectorAll(
@@ -1417,21 +1500,7 @@
        event.preventDefault();
        event.stopPropagation();
 
-       var current = openProject();
-       if (current < 0) return;
-       var step = isPrevious ? -1 : 1;
-       var target =
-         projects[(current + step + projects.length) % projects.length];
-
-       projects.forEach(function (project) {
-         if (project !== target) project.open = false;
-       });
-       target.open = true;
-       autoplayProject(target);
-
-       window.requestAnimationFrame(function () {
-         target.scrollIntoView({ behavior: "smooth", block: "start" });
-       });
+       stepProject(isPrevious ? -1 : 1);
      });
 
      return button;
@@ -1476,6 +1545,42 @@
          projectTitle(projects[(current + 1) % count]));
      }
    }
+
+   /* Links to a project: elliot.onl/projects#bladee-blondie opens it.
+      The address bar follows the open project, so it can be copied. */
+   function projectForHash() {
+     var slug = decodeURIComponent(window.location.hash.slice(1));
+     if (!slug) return null;
+     for (var i = 0; i < projects.length; i++) {
+       if (projects[i].getAttribute("data-slug") === slug) return projects[i];
+     }
+     return null;
+   }
+
+   function syncHash() {
+     if (!window.history || !window.history.replaceState) return;
+     var current = openProject();
+     var hash = current >= 0
+       ? "#" + projects[current].getAttribute("data-slug")
+       : "";
+     if (window.location.hash === hash) return;
+     if (!hash && !projectForHash()) return; /* leave other hashes alone */
+     window.history.replaceState(
+       window.history.state, "",
+       window.location.pathname + window.location.search + hash
+     );
+   }
+
+   function openFromHash() {
+     var target = projectForHash();
+     if (target && !target.open) goToProject(target, true);
+   }
+
+   projects.forEach(function (project) {
+     project.addEventListener("toggle", syncHash);
+   });
+   window.addEventListener("hashchange", openFromHash);
+   openFromHash();
 
    if (projects.length > 1) {
      document.body.appendChild(navigation);
