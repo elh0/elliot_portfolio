@@ -19,8 +19,8 @@ jobs:
           const fs=require("fs");const s=fs.readFileSync("home.js","utf8");
           const a=s.indexOf("var PROJECTS = ")+15,b=s.indexOf("];",a)+1;const P=eval(s.slice(a,b));
           (async()=>{for(const [i,p] of P.entries()){const v=p.videos[0];const id=v.src.match(/playback\/(\d+)/)[1];
-            let url=v.poster?v.poster.replace(/mw=\d+/,"mw=2560").replace(/q=\d+/,"q=100"):null;
-            if(!url){try{const r=await fetch("https://vimeo.com/api/oembed.json?url=https://vimeo.com/"+id+"&width=2560");const j=await r.json();url=j.thumbnail_url}catch(e){console.log("oembed fail",id,e.message)}}
+            let url=v.poster?v.poster.replace(/-d_\d+/,"-d_2560").replace(/mw=\d+/,"mw=2560").replace(/q=\d+/,"q=100"):null;
+            if(!url){try{const r=await fetch("https://vimeo.com/api/oembed.json?url=https://vimeo.com/"+id+"&width=2560");const j=await r.json();url=j.thumbnail_url.replace(/-d_[0-9x]+/,"-d_2560")}catch(e){console.log("oembed fail",id,e.message)}}
             if(!url){console.log("no thumb",p.title);continue}
             const r=await fetch(url);const buf=Buffer.from(await r.arrayBuffer());fs.writeFileSync("thumbs/"+String(i+1).padStart(2,"0")+".jpg",buf);console.log(i+1,p.title,r.status,buf.length,url)
             if(!v.poster){fs.appendFileSync("thumbs/urls.txt",p.title+" "+url+"\n")}}})()'
