@@ -1083,10 +1083,14 @@
 
     /* Touch: read raw touches. iPhones often merge a quick double-tap into
        a single "click", so click events alone miss the second tap. */
-    /* Sideways drags are swipes, never page panning or zooming; this also
-       helps iPhones treat a swipe as a tap, so the next video can play
-       with sound. */
-    stage.style.touchAction = "pan-y";
+    /* Single-video projects: sideways drags are swipes to the next or
+       previous project, never panning or zooming. Projects with several
+       videos (e.g. Playing House) keep sideways scrolling between them. */
+    var stageProject = stage.closest("details.project-item");
+    if (stageProject &&
+        stageProject.querySelectorAll("video.project-video").length === 1) {
+      stage.style.touchAction = "pan-y";
+    }
 
     var touchStartX = 0;
     var touchStartY = 0;
