@@ -913,7 +913,7 @@
     /* Listen on the stage rather than the video: iOS browsers do not
        reliably dispatch taps to a <video> element without native controls.
        Touch: one tap plays/pauses; double-tap the right/left half to skip
-       forward/back 10s (like YouTube), and further quick taps keep skipping. */
+       forward/back 5s (like YouTube), and further quick taps keep skipping. */
     var lastPointerType = "mouse";
     var singleTapTimer = null;
     var lastTapAt = 0;
@@ -1195,8 +1195,8 @@
  /* Keyboard: ← / → skip the current video back / forward 3 seconds;
     F toggles fullscreen. */
  var SEEK_STEP = 3;
- /* Double-tap skip on touch screens: 10 seconds, as on YouTube. */
- var TAP_SEEK_STEP = 10;
+ /* Double-tap skip on touch screens. */
+ var TAP_SEEK_STEP = 5;
 
  function keyboardVideo() {
    if (!page) return null;
