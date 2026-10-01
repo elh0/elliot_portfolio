@@ -1,0 +1,48 @@
+# Makes the scrub-preview thumbnails for any project video that doesn't
+# have one yet, and saves them to previews/ on main. Runs when home.js
+# changes (e.g. a new project), or by hand (Actions → Make scrub previews).
+
+name: Make scrub previews
+
+on:
+  push:
+    branches: [main]
+    paths: ["home.js", "scripts/make-previews.js"]
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: make-previews
+  cancel-in-progress: false
+
+jobs:
+  previews:
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-node@v5
+        with:
+          node-version: 22
+      - name: Install ffmpeg
+        run: command -v ffmpeg || (sudo apt-get update && sudo apt-get install -y ffmpeg)
+      - name: Make previews
+        run: node scripts/make-previews.js
+      - name: Save previews
+        if: always()
+        run: |
+          git add previews
+          if git diff --cached --quiet; then
+            echo "No new previews."
+            exit 0
+          fi
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git commit -m "Update scrub previews"
+          for attempt in 1 2 3; do
+            git pull --rebase origin main && git push origin HEAD:main && exit 0
+            sleep 5
+          done
+          exit 1

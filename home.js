@@ -2,6 +2,26 @@
  var page = document.querySelector('[id="X1134136285"]');
  var lastActiveVideo = null;
 
+ /* Scrub previews (thumbnail strips made by scripts/make-previews.js) live
+    next to this script on GitHub Pages. The list is fetched only the
+    first time someone hovers or drags a timeline. */
+ var PREVIEW_BASE = (function () {
+   var script = document.currentScript;
+   return script && script.src
+     ? script.src.replace(/[^\/]*$/, "") + "previews/"
+     : "https://elh0.github.io/elliot_portfolio/previews/";
+ })();
+ var previewManifest = null;
+
+ function loadPreviewManifest() {
+   if (!previewManifest) {
+     previewManifest = window.fetch(PREVIEW_BASE + "previews.json", { cache: "no-cache" })
+       .then(function (response) { return response.ok ? response.json() : {}; })
+       .catch(function () { return {}; });
+   }
+   return previewManifest;
+ }
+
  /* Shown in place of the time once a video has finished. */
  var REPLAY_HTML =
    '<span class="video-replay"><svg viewBox="0 0 12 12" width="11" height="11" ' +
@@ -1233,6 +1253,129 @@
     progress.addEventListener("pointercancel", function () {
       isScrubbing = false;
       updateControls();
+    });
+
+    /* Scrub preview, like YouTube: a small frame and the time above the
+       timeline while hovering (desktop) or dragging (desktop and phones).
+       Without a thumbnail strip for this video, just the time shows.
+       Styled inline so an older cached home.css can't break it. */
+    var scrubPreview = null;
+    var scrubFrame = null;
+    var scrubLabel = null;
+    var previewInfo = null;
+
+    function previewVideoId() {
+      var source = video.getAttribute("src") ||
+        video.getAttribute("data-deferred-src") || "";
+      var match = source.match(/\/playback\/(\d+)\//);
+      return match ? match[1] : null;
+    }
+
+    function prepareScrubPreview() {
+      loadPreviewManifest().then(function (manifest) {
+        var id = previewVideoId();
+        previewInfo = id && manifest && manifest[id]
+          ? { id: id, sheet: manifest[id] }
+          : null;
+        if (previewInfo) {
+          /* Start fetching the strip now, so it's there by the first move. */
+          new Image().src = previewSheetUrl();
+        }
+      });
+    }
+
+    function previewSheetUrl() {
+      return PREVIEW_BASE + previewInfo.id + ".jpg?v=" +
+        encodeURIComponent(previewInfo.sheet.version || "");
+    }
+
+    function showScrubPreview(clientX) {
+      var duration = video.duration;
+      if (!Number.isFinite(duration) || duration <= 0) return;
+
+      if (!scrubPreview) {
+        scrubPreview = document.createElement("div");
+        scrubPreview.className = "video-scrub-preview";
+        scrubPreview.setAttribute("aria-hidden", "true");
+        scrubPreview.style.cssText =
+          "position:absolute;z-index:4;left:0;bottom:0;display:flex;" +
+          "flex-direction:column;align-items:center;gap:4px;margin:0;" +
+          "padding:0;pointer-events:none;opacity:0;" +
+          "transition:opacity 120ms ease;";
+        scrubFrame = document.createElement("div");
+        scrubFrame.style.cssText =
+          "display:none;background-repeat:no-repeat;background-color:#000;" +
+          "box-shadow:0 0 0 1px rgba(255,255,255,0.35);";
+        scrubLabel = document.createElement("span");
+        scrubLabel.style.cssText =
+          "display:block;padding:1px 5px;color:#fff;white-space:nowrap;" +
+          "background:rgba(0,0,0,0.6);font-family:ui-monospace," +
+          "\"SFMono-Regular\",Menlo,Monaco,Consolas,\"Liberation Mono\"," +
+          "\"Courier New\",monospace;font-size:11px;line-height:1.5;";
+        scrubPreview.appendChild(scrubFrame);
+        scrubPreview.appendChild(scrubLabel);
+        if (window.getComputedStyle(wrap).position === "static") {
+          wrap.style.position = "relative";
+        }
+        wrap.appendChild(scrubPreview);
+      }
+
+      var bar = progress.getBoundingClientRect();
+      var box = wrap.getBoundingClientRect();
+      var position = Math.min(1, Math.max(0, (clientX - bar.left) / bar.width));
+      var time = position * duration;
+
+      scrubLabel.textContent = formatTime(time);
+
+      if (previewInfo) {
+        var sheet = previewInfo.sheet;
+        var width = box.width < 600 ? 120 : 160;
+        var scale = width / sheet.width;
+        var height = sheet.height * scale;
+        var frame = Math.min(sheet.count - 1, Math.floor(time / sheet.interval));
+        var column = frame % sheet.columns;
+        var row = Math.floor(frame / sheet.columns);
+
+        scrubFrame.style.display = "block";
+        scrubFrame.style.width = width + "px";
+        scrubFrame.style.height = height + "px";
+        scrubFrame.style.backgroundImage = 'url("' + previewSheetUrl() + '")';
+        scrubFrame.style.backgroundSize =
+          sheet.columns * width + "px auto";
+        scrubFrame.style.backgroundPosition =
+          -column * width + "px " + -row * height + "px";
+      } else {
+        scrubFrame.style.display = "none";
+      }
+
+      var previewWidth = scrubPreview.offsetWidth;
+      var left = clientX - box.left - previewWidth / 2;
+      left = Math.max(0, Math.min(box.width - previewWidth, left));
+      scrubPreview.style.left = left + "px";
+      scrubPreview.style.bottom = box.bottom - bar.top + 8 + "px";
+      scrubPreview.style.opacity = "1";
+    }
+
+    function hideScrubPreview() {
+      if (scrubPreview) scrubPreview.style.opacity = "0";
+    }
+
+    progress.addEventListener("pointerenter", prepareScrubPreview);
+    progress.addEventListener("pointerdown", function (event) {
+      prepareScrubPreview();
+      showScrubPreview(event.clientX);
+    });
+    progress.addEventListener("pointermove", function (event) {
+      if (isScrubbing || event.pointerType === "mouse") {
+        showScrubPreview(event.clientX);
+      }
+    });
+    progress.addEventListener("pointerup", function (event) {
+      if (event.pointerType !== "mouse") hideScrubPreview();
+    });
+    progress.addEventListener("pointercancel", hideScrubPreview);
+    progress.addEventListener("pointerleave", function () {
+      if (!isScrubbing) hideScrubPreview();
     });
 
     /* Preserve keyboard seeking for the native range control. */
