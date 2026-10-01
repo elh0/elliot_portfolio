@@ -23,6 +23,7 @@ Elliot Holbrow's cinematography portfolio. Read README.md first for how the site
 - Layout (Oct 2026 redesign, to move away from George Powers' site): name bar across the top (name, "Cinematographer, London", Work / Contact), built by JS from Cargo's heading; full-width table rows (No., Title, Director, Format, Type, Time) with no dotted leaders; type filters and a contact-sheet view. Hover fills the screen with the project's Vimeo thumbnail at 2560px. Keep all the player and navigation behaviour below when restyling.
 - Player: click/tap plays and pauses; double-click/double-tap left or right skips 5s; ← → change project (desktop); F is fullscreen. A video plays round twice the first time, then shows its thumbnail and Replay.
 - Opening a project autoplays its first video. Closing a project unloads its video, so it restarts next time.
+- Open project on desktop (Oct 2026): playbar and credits span the full row width; the picture is as big as the screen height allows (wide films fill the width, 4:3 sits centred on black).
 - Desktop: thin tall chevrons, fixed in the side margins at mid-screen, change project. Phones: no chevrons; swipe on the video instead. Multi-video projects (Playing House) swipe through their videos like a slideshow first.
 - Scrub preview: like YouTube, but with square corners and no border, time in white below.
 - Phones: the name bar shows only the link to the other page (Contact on the projects page, Work on the contact page), with no underline; filters stay on one line.
