@@ -919,9 +919,15 @@
     var lastTapAt = 0;
     var skipChainUntil = 0;
 
+    var singleTapFiredAt = 0;
+
     stage.addEventListener("pointerdown", function (event) {
       lastPointerType = event.pointerType || "mouse";
     });
+    /* Backup for browsers that don't report pointer types on touch. */
+    stage.addEventListener("touchstart", function () {
+      lastPointerType = "touch";
+    }, { passive: true });
 
     function showSkipHint(direction) {
       var hint = document.createElement("span");
@@ -953,19 +959,30 @@
       var direction = event.clientX - bounds.left < bounds.width / 2 ? -1 : 1;
       var now = Date.now();
 
-      if (now < skipChainUntil || (singleTapTimer && now - lastTapAt < 300)) {
-        window.clearTimeout(singleTapTimer);
-        singleTapTimer = null;
+      var isDoubleTap = now - lastTapAt < 450;
+
+      if (now < skipChainUntil || isDoubleTap) {
+        if (singleTapTimer) {
+          window.clearTimeout(singleTapTimer);
+          singleTapTimer = null;
+        } else if (singleTapFiredAt && now - singleTapFiredAt < 450) {
+          /* The first tap already played/paused: undo that, so a slower
+             double-tap never leaves the video paused. */
+          togglePlayback();
+        }
+        singleTapFiredAt = 0;
+        lastTapAt = 0;
         skipBy(direction);
-        skipChainUntil = now + 600;
+        skipChainUntil = now + 700;
         return;
       }
 
       lastTapAt = now;
       singleTapTimer = window.setTimeout(function () {
         singleTapTimer = null;
+        singleTapFiredAt = Date.now();
         togglePlayback();
-      }, 280);
+      }, 300);
     });
 
     function replay(event) {
