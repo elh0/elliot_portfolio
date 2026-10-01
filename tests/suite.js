@@ -80,6 +80,8 @@ async function desktop(b) {
   const fit = await p.evaluate(() => { const w = document.querySelector('details[open] .video-wrap').getBoundingClientRect(); const c = document.querySelector('details[open] .video-controls').getBoundingClientRect(); return { h: w.height, ctl: c.bottom - w.top, vh: innerHeight }; });
   check('desktop: video and playbar fit the screen height', fit.ctl <= fit.vh, fit);
   const centre = await p.evaluate(() => { const r = document.querySelector('details[open] .project-carousel').getBoundingClientRect(); const a = document.querySelector('.project-accordion').getBoundingClientRect(); return { video: Math.round(r.left + r.width / 2), list: Math.round(a.left + a.width / 2), w: Math.round(r.width) }; });
+  await p.locator('summary').nth(5).hover(); await wait(p, 400);
+  check('desktop: no hover thumbnail while a project is open', await p.evaluate(() => !document.querySelector('.project-hover-preview').classList.contains('is-visible')));
   check('desktop: open video is centred', Math.abs(centre.video - centre.list) <= 2, centre);
 
   // chevrons

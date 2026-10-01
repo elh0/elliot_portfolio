@@ -794,6 +794,8 @@
     page.querySelectorAll(".project-item > summary").forEach(function (summary) {
       summary.addEventListener("mouseenter", function (event) {
         if (!supportsProjectPreview()) return;
+        /* Previews are for browsing the list: none while a project is open. */
+        if (page.querySelector(".project-item[open]")) return;
 
         var project = summary.closest(".project-item");
         var video = project && project.querySelector("video.project-video");
