@@ -10,17 +10,44 @@
    var script = document.currentScript;
    if (!script || !script.src) return;
    var href = script.src.replace(/[^\/]*$/, "") + "home.css?v=" + STYLE_VERSION;
-   var links = Array.prototype.slice.call(
-     document.querySelectorAll('link[rel="stylesheet"][href*="home.css"]')
-   );
-   if (links.some(function (link) { return link.href === href; })) return;
-   var link = document.createElement("link");
-   link.rel = "stylesheet";
-   link.href = href;
-   link.addEventListener("load", function () {
-     links.forEach(function (old) { old.remove(); });
+   var current = null;
+   var ready = false;
+   function stylesheets() {
+     return Array.prototype.slice.call(
+       document.querySelectorAll('link[rel="stylesheet"][href*="home.css"]')
+     );
+   }
+   /* Cargo re-inserts its plain link each time the page is shown, so keep
+      removing it once the matching stylesheet has loaded. */
+   function dropStale() {
+     if (!ready) return;
+     stylesheets().forEach(function (link) {
+       if (link !== current && link.href.indexOf("?v=") < 0) link.remove();
+     });
+   }
+   stylesheets().forEach(function (link) {
+     if (!current && link.href === href) current = link;
    });
-   document.head.appendChild(link);
+   if (current) {
+     ready = true;
+   } else {
+     current = document.createElement("link");
+     current.rel = "stylesheet";
+     current.href = href;
+     current.addEventListener("load", function () {
+       ready = true;
+       dropStale();
+     });
+     document.head.appendChild(current);
+   }
+   dropStale();
+   if (!window["_elliotStyleWatch_home.css"] && window.MutationObserver) {
+     window["_elliotStyleWatch_home.css"] = true;
+     new MutationObserver(function () {
+       current = stylesheets().filter(function (link) { return link.href === href; })[0] || current;
+       dropStale();
+     }).observe(document.documentElement, { childList: true, subtree: true });
+   }
  })();
  var lastActiveVideo = null;
 
