@@ -913,7 +913,7 @@
     /* Listen on the stage rather than the video: iOS browsers do not
        reliably dispatch taps to a <video> element without native controls.
        Touch: one tap plays/pauses; double-tap the right/left half to skip
-       forward/back (like YouTube), and further quick taps keep skipping. */
+       forward/back 10s (like YouTube), and further quick taps keep skipping. */
     var lastPointerType = "mouse";
     var singleTapTimer = null;
     var lastTapAt = 0;
@@ -927,7 +927,7 @@
       var hint = document.createElement("span");
       hint.className = "video-skip-hint " +
         (direction > 0 ? "video-skip-hint-forward" : "video-skip-hint-back");
-      hint.textContent = (direction > 0 ? "+" : "\u2212") + SEEK_STEP + "s";
+      hint.textContent = (direction > 0 ? "+" : "\u2212") + TAP_SEEK_STEP + "s";
       hint.setAttribute("aria-hidden", "true");
       stage.appendChild(hint);
       window.setTimeout(function () { hint.remove(); }, 650);
@@ -936,7 +936,7 @@
     function skipBy(direction) {
       if (!Number.isFinite(video.duration)) return;
       video.currentTime = Math.min(
-        Math.max(0, video.currentTime + direction * SEEK_STEP),
+        Math.max(0, video.currentTime + direction * TAP_SEEK_STEP),
         Math.max(0, video.duration - 0.05)
       );
       showSkipHint(direction);
@@ -1178,6 +1178,8 @@
  /* Keyboard: ← / → skip the current video back / forward 3 seconds;
     F toggles fullscreen. */
  var SEEK_STEP = 3;
+ /* Double-tap skip on touch screens: 10 seconds, as on YouTube. */
+ var TAP_SEEK_STEP = 10;
 
  function keyboardVideo() {
    if (!page) return null;
