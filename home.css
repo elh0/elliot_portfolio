@@ -1477,6 +1477,102 @@ body:has([id="X1134136285"].is-light-theme) {
   }
 }
 
+/* Phones: one link in the name bar (the page you're not on), no
+   underlines, filters on one line */
+.mobile [id="X1134136285"] .page-layout {
+  padding: 0 !important;
+}
+
+.mobile [id="X1134136285"] .site-nav {
+  grid-row: 1;
+  grid-column: 2;
+  flex-direction: row;
+  gap: 2ch;
+}
+
+.mobile [id="X1134136285"] .site-nav a.is-current {
+  display: none !important;
+}
+
+.mobile [id="X1134136285"] .site-nav a,
+.mobile [id="X1134136285"] .site-nav a:hover {
+  border-bottom-color: transparent !important;
+}
+
+.mobile [id="X1134136285"] .project-tools {
+  flex-direction: column;
+  gap: 6px;
+  margin-top: 3.5rem;
+}
+
+.mobile [id="X1134136285"] .project-filters {
+  flex-wrap: nowrap;
+  gap: 0 2ch;
+  overflow-x: auto;
+  scrollbar-width: none;
+}
+
+.mobile [id="X1134136285"] .project-filters::-webkit-scrollbar {
+  display: none;
+}
+
+.mobile [id="X1134136285"] .project-filters button {
+  flex: none;
+  white-space: nowrap;
+}
+
+.mobile [id="X1134136285"] .project-views {
+  gap: 0 2ch;
+}
+
+@media (max-width: 767px), (hover: none) and (pointer: coarse) and (max-height: 500px) {
+  [id="X1134136285"] .page-layout {
+    padding: 0 !important;
+  }
+
+  [id="X1134136285"] .site-nav {
+    grid-row: 1;
+    grid-column: 2;
+    flex-direction: row;
+    gap: 2ch;
+  }
+
+  [id="X1134136285"] .site-nav a.is-current {
+    display: none !important;
+  }
+
+  [id="X1134136285"] .site-nav a,
+  [id="X1134136285"] .site-nav a:hover {
+    border-bottom-color: transparent !important;
+  }
+
+  [id="X1134136285"] .project-tools {
+    flex-direction: column;
+    gap: 6px;
+    margin-top: 3.5rem;
+  }
+
+  [id="X1134136285"] .project-filters {
+    flex-wrap: nowrap;
+    gap: 0 2ch;
+    overflow-x: auto;
+    scrollbar-width: none;
+  }
+
+  [id="X1134136285"] .project-filters::-webkit-scrollbar {
+    display: none;
+  }
+
+  [id="X1134136285"] .project-filters button {
+    flex: none;
+    white-space: nowrap;
+  }
+
+  [id="X1134136285"] .project-views {
+    gap: 0 2ch;
+  }
+}
+
 /* One type size everywhere (the filter counts are the only smaller text),
    whatever size Cargo gives its own elements. */
 [id="X1134136285"] {

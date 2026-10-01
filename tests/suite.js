@@ -184,6 +184,16 @@ async function phone(b, name, opts, sideways) {
   check(name + ': rows show number, title, type', look.shown.join('|') === '01|Polène SS24|Fashion' && look.cols === 'none', look);
   check(name + ': no intro reel', !look.intro);
   check(name + ': no horizontal scroll', !(await state(p)).overflow);
+  const bar = await p.evaluate(() => {
+    const links = [...document.querySelectorAll('.site-nav a')].filter(a => getComputedStyle(a).display !== 'none');
+    const filters = [...document.querySelectorAll('.project-filter')].map(f => Math.round(f.getBoundingClientRect().top));
+    const nameBox = document.querySelector('.site-name').getBoundingClientRect();
+    return { links: links.map(a => a.textContent), underline: links.map(a => getComputedStyle(a).borderBottomColor), sameLine: links.length && Math.abs(links[0].getBoundingClientRect().top - nameBox.top) < 2, filterRows: new Set(filters).size, left: Math.round(nameBox.left) };
+  });
+  check(name + ': name bar shows only Contact, on the name line, no underline', bar.links.join() === 'Contact' && bar.sameLine && bar.underline.every(c => c === 'rgba(0, 0, 0, 0)'), bar);
+  check(name + ': filters on one line', bar.filterRows === 1, bar);
+  if (!sideways) check(name + ': same 20px margin as the contact page', bar.left === 20, bar);
+  await p.screenshot({ path: shot(name.replace(/\W+/g, '-') + '-list') });
 
   await p.locator('summary').nth(0).tap(); await wait(p, 1500);
   let s = await state(p);
@@ -254,7 +264,7 @@ async function contact(b) {
       const h = document.querySelector('.contact-page .index-heading');
       return { built: h.classList.contains('is-built'), text: h.innerText.replace(/\s+/g, ' '), rows: document.querySelectorAll('.contact-row').length, leaders: [...document.querySelectorAll('.contact-leader')].filter(l => getComputedStyle(l).display !== 'none').length, overflow: document.documentElement.scrollWidth > innerWidth + 1, nameX: Math.round(document.querySelector('.site-name').getBoundingClientRect().left) };
     });
-    check(name + ': same name bar as projects', r.built && /Elliot Holbrow Cinematographer, London Work Contact/.test(r.text), r);
+    check(name + ': same name bar as projects' + (name.includes('desktop') ? '' : ', Work link only'), r.built && (name.includes('desktop') ? /Elliot Holbrow Cinematographer, London Work Contact/ : /^Elliot Holbrow Work Cinematographer, London$|^Elliot Holbrow Cinematographer, London Work$/).test(r.text.trim()), r);
     check(name + ': rows without dotted leaders, no sideways scroll', r.rows === 5 && r.leaders === 0 && !r.overflow, r);
     const lineup = await p.evaluate(() => ({ name: Math.round(document.querySelector('.site-name').getBoundingClientRect().left), label: Math.round(document.querySelector('.contact-label').getBoundingClientRect().left), role: Math.round(document.querySelector('.site-role').getBoundingClientRect().left), value: Math.round(document.querySelector('.contact-value').getBoundingClientRect().left), sizes: [...new Set([...document.querySelectorAll('.contact-page *')].filter(e => e.offsetParent).map(e => getComputedStyle(e).fontSize))] }));
     check(name + ': labels line up with the name' + (name.includes('desktop') ? ', values with the role' : ''), lineup.label === lineup.name && (!name.includes('desktop') || lineup.value === lineup.role), lineup);

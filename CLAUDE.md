@@ -25,6 +25,7 @@ Elliot Holbrow's cinematography portfolio. Read README.md first for how the site
 - Opening a project autoplays its first video. Closing a project unloads its video, so it restarts next time.
 - Desktop: thin tall chevrons, fixed in the side margins at mid-screen, change project. Phones: no chevrons; swipe on the video instead. Multi-video projects (Playing House) swipe through their videos like a slideshow first.
 - Scrub preview: like YouTube, but with square corners and no border, time in white below.
+- Phones: the name bar shows only the link to the other page (Contact on the projects page, Work on the contact page), with no underline; filters stay on one line.
 - Landing reel is desktop only; phones go straight to `/projects`.
 
 ## Testing
