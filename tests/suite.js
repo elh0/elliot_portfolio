@@ -169,6 +169,8 @@ async function desktop(b) {
   await p3.goto(base + '/projects#t-magazine'); await wait(p3, 1800);
   const f3 = await p3.evaluate(() => { const w = document.querySelector('details[open] .video-wrap').getBoundingClientRect(); const ctl = document.querySelector('details[open] .video-controls').getBoundingClientRect(); return { top: w.top, bottom: ctl.bottom, vh: innerHeight, phoneRows: getComputedStyle(document.querySelector('.project-director')).display }; });
   check('laptop 1280x680: video+playbar fit, desktop layout', f3.bottom - f3.top <= f3.vh && f3.phoneRows !== 'none', f3);
+  const span = await p3.evaluate(() => { const r = document.querySelector('details[open] summary').getBoundingClientRect(); const ctl = document.querySelector('details[open] .video-controls').getBoundingClientRect(); const meta = document.querySelector('details[open] .project-meta').getBoundingClientRect(); return { row: [r.left, r.right], ctl: [ctl.left, ctl.right], meta: [meta.left, meta.right] }; });
+  check('laptop 1280x680: playbar and credits span the full row width', ['ctl', 'meta'].every(k => Math.abs(span[k][0] - span.row[0]) < 1 && Math.abs(span[k][1] - span.row[1]) < 1), span);
   await c3.close();
 }
 

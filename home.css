@@ -1271,14 +1271,35 @@ body:has([id="X1134136285"].is-light-theme) {
   padding: 14px 0 34px;
 }
 
-/* Open project: centred, and never taller than the screen (its width
-   follows the first video's shape). The chevrons sit just outside it. */
-[id="X1134136285"] .project-content > .project-carousel,
-[id="X1134136285"] .project-content > .project-meta {
-  max-width: calc((100vh - 9rem) * (var(--project-ratio, 16 / 9)));
-  max-width: calc((100svh - 9rem) * (var(--project-ratio, 16 / 9)));
-  margin-right: auto;
-  margin-left: auto;
+/* Open project (desktop): the playbar and credits run the full width of
+   the rows, like the name bar. The picture is as big as the screen height
+   allows: wide films fill the width, 4:3 and 3:2 sit centred with black
+   either side. The chevrons sit in the side margins. */
+@media (min-width: 768px) and (min-height: 501px), (min-width: 768px) and (hover: hover) {
+  [id="X1134136285"] .project-content > .project-carousel,
+  [id="X1134136285"] .project-content > .project-meta {
+    max-width: none;
+    margin-right: 0;
+    margin-left: 0;
+  }
+
+  [id="X1134136285"] .project-content .video-stage {
+    aspect-ratio: auto;
+    height: min(calc(100vh - 7rem), calc((100vw - 2 * var(--page-gutter)) / (var(--video-ratio, 16 / 9))));
+    height: min(calc(100svh - 7rem), calc((100vw - 2 * var(--page-gutter)) / (var(--video-ratio, 16 / 9))));
+  }
+
+  [id="X1134136285"] .project-content .video-stage video {
+    object-fit: contain;
+  }
+
+  [id="X1134136285"] .project-content .video-wrap:fullscreen .video-stage {
+    height: auto;
+  }
+
+  [id="X1134136285"] .project-content .video-wrap:-webkit-full-screen .video-stage {
+    height: auto;
+  }
 }
 
 /* Contact sheet */

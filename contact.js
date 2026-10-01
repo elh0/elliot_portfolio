@@ -2,7 +2,7 @@
 
   /* Load the contact.css this script was written for, in case GitHub Pages
      still has an older copy cached (as home.js does). Bump with changes. */
-  var STYLE_VERSION = "2026-10-01-c";
+  var STYLE_VERSION = "2026-10-01-d";
   (function loadMatchingStyles() {
     var script = document.currentScript;
     if (!script || !script.src) return;
