@@ -1364,31 +1364,40 @@
      return title ? title.textContent.trim() : "Project";
    }
 
+   /* Tall thin chevron, drawn like the playbar icons. */
+   var CHEVRON_LEFT =
+     '<svg width="18" height="36" viewBox="0 0 18 36" fill="none" ' +
+     'stroke="currentColor" stroke-width="1.25" aria-hidden="true" ' +
+     'style="display:block"><path d="M16 2 2 18l14 16"/></svg>';
+   var CHEVRON_RIGHT =
+     '<svg width="18" height="36" viewBox="0 0 18 36" fill="none" ' +
+     'stroke="currentColor" stroke-width="1.25" aria-hidden="true" ' +
+     'style="display:block"><path d="M2 2l14 16L2 34"/></svg>';
+
+   /* Desktop: a chevron either side of the video, centred in the empty
+      space and level with the middle of the video. Phones hide
+      .project-navigation in home.css. Layout is set inline so an older
+      cached home.css can't put the old bottom links back. */
    function makeProjectLink(direction, target) {
      var button = document.createElement("button");
-     var directionLine = document.createElement("span");
      var arrow = document.createElement("span");
-     var label = document.createElement("span");
      var isPrevious = direction === "previous";
 
      button.type = "button";
      button.className = "project-navigation-link project-navigation-" + direction;
      button.setAttribute("aria-label", (isPrevious ? "Previous project, " : "Next project, ") + projectTitle(target));
-     directionLine.className = "project-navigation-direction";
+     button.title = projectTitle(target);
+     button.style.cssText =
+       "position:absolute;top:0;display:block;max-width:none;margin:0;" +
+       "padding:14px;border:0;background:transparent;cursor:pointer;" +
+       "line-height:0;" +
+       (isPrevious
+         ? "left:calc((100% - 100vw) / 4);transform:translate(-50%,-50%);"
+         : "right:calc((100% - 100vw) / 4);transform:translate(50%,-50%);");
      arrow.className = "project-navigation-arrow";
-     arrow.textContent = isPrevious ? "←" : "→";
-     label.className = "project-navigation-label";
-     label.textContent = isPrevious ? "Previous" : "Next";
-
-     if (isPrevious) {
-       directionLine.appendChild(arrow);
-       directionLine.appendChild(label);
-     } else {
-       directionLine.appendChild(label);
-       directionLine.appendChild(arrow);
-     }
-
-     button.appendChild(directionLine);
+     arrow.style.display = "block";
+     arrow.innerHTML = isPrevious ? CHEVRON_LEFT : CHEVRON_RIGHT;
+     button.appendChild(arrow);
      button.addEventListener("click", function (event) {
        event.preventDefault();
        event.stopPropagation();
@@ -1418,7 +1427,28 @@
      navigation.setAttribute("aria-label", "Project navigation");
      navigation.appendChild(makeProjectLink("previous", previous));
      navigation.appendChild(makeProjectLink("next", next));
+     navigation.style.cssText =
+       "position:absolute;left:0;right:0;top:0;height:0;width:auto;" +
+       "margin:0;padding:0;z-index:3;";
+     content.style.position = "relative";
      content.appendChild(navigation);
+
+     /* Keep the arrows level with the middle of the first video as its
+        size changes (opening, resizing, the real aspect ratio loading). */
+     var stage = content.querySelector(".video-stage");
+     function placeNavigation() {
+       if (!stage || !project.open) return;
+       var stageRect = stage.getBoundingClientRect();
+       var contentRect = content.getBoundingClientRect();
+       navigation.style.top =
+         stageRect.top - contentRect.top + stageRect.height / 2 + "px";
+     }
+     if (stage && typeof ResizeObserver === "function") {
+       new ResizeObserver(placeNavigation).observe(stage);
+     }
+     project.addEventListener("toggle", placeNavigation);
+     window.addEventListener("resize", placeNavigation);
+     placeNavigation();
    });
  }
 })();
