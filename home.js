@@ -1341,11 +1341,12 @@
         scrubFrame = document.createElement("div");
         scrubFrame.style.cssText =
           "display:none;background-repeat:no-repeat;background-color:#000;" +
-          "box-shadow:0 0 0 1px rgba(255,255,255,0.35);";
+          "border-radius:8px;overflow:hidden;";
         scrubLabel = document.createElement("span");
         scrubLabel.style.cssText =
-          "display:block;padding:1px 5px;color:#fff;white-space:nowrap;" +
-          "background:rgba(0,0,0,0.6);font-family:ui-monospace," +
+          "display:block;padding:0;color:#fff;white-space:nowrap;" +
+          "text-shadow:0 0 2px rgba(0,0,0,0.9),0 0 6px rgba(0,0,0,0.6);" +
+          "font-family:ui-monospace," +
           "\"SFMono-Regular\",Menlo,Monaco,Consolas,\"Liberation Mono\"," +
           "\"Courier New\",monospace;font-size:11px;line-height:1.5;";
         scrubPreview.appendChild(scrubFrame);
@@ -1365,7 +1366,9 @@
 
       if (previewInfo) {
         var sheet = previewInfo.sheet;
-        var width = box.width < 600 ? 120 : 160;
+        var fullscreen = !!(document.fullscreenElement ||
+          document.webkitFullscreenElement);
+        var width = box.width < 600 ? 128 : (fullscreen ? 240 : 180);
         var scale = width / sheet.width;
         var height = sheet.height * scale;
         var frame = Math.min(sheet.count - 1, Math.floor(time / sheet.interval));
@@ -1521,11 +1524,10 @@
     for (var i = 0; i < projects.length; i++) {
       if (projects[i].open) current = i;
     }
-    if (current < 0 || projects.length < 2) return;
-    goToProject(
-      projects[(current + step + projects.length) % projects.length],
-      allowMuted
-    );
+    if (current < 0 || projects.length < 2) return null;
+    var target = projects[(current + step + projects.length) % projects.length];
+    goToProject(target, allowMuted);
+    return target;
   }
 
   /* Multi-video projects: when a swipe settles on another video, play it
@@ -1611,10 +1613,9 @@
    });
  });
 
- /* Keyboard: ← / → skip the current video back / forward 3 seconds;
-    F toggles fullscreen. */
- var SEEK_STEP = 3;
- /* Double-tap skip on touch screens. */
+ /* Keyboard: ← / → go to the previous / next project; F toggles
+    fullscreen. Skipping within a video is double-click / double-tap. */
+ /* Double-tap / double-click skip. */
  var TAP_SEEK_STEP = 5;
 
  function keyboardVideo() {
@@ -1630,7 +1631,7 @@
 
  /* Listen on window in the capture phase so this runs before Cargo's own
     arrow-key page navigation, then stop the key reaching it: left/right
-    only ever skip video here, never change page. */
+    only ever change project here, never change page. */
  if (window._elliotArrowKeys) {
    window.removeEventListener("keydown", window._elliotArrowKeys, true);
  }
@@ -1664,15 +1665,32 @@
 
    event.preventDefault();
    event.stopImmediatePropagation();
+   if (event.repeat) return; /* holding the key down shouldn't race through */
 
-   var video = keyboardVideo();
-   if (!video || !Number.isFinite(video.duration)) return;
+   var wasFullscreen = !!(document.fullscreenElement ||
+     document.webkitFullscreenElement);
+   var target = stepProject(event.key === "ArrowRight" ? 1 : -1);
 
-   var step = event.key === "ArrowRight" ? SEEK_STEP : -SEEK_STEP;
-   video.currentTime = Math.min(
-     Math.max(0, video.currentTime + step),
-     Math.max(0, video.duration - 0.05)
-   );
+   /* In fullscreen, move fullscreen to the new project's video: leave
+      it first (otherwise fullscreens stack up and F only undoes one). */
+   var wrap = target && wasFullscreen && target.querySelector(".video-wrap");
+   if (wrap) {
+     var enter = function () {
+       var request = wrap.requestFullscreen || wrap.webkitRequestFullscreen;
+       if (!request) return;
+       var entering = request.call(wrap);
+       if (entering && typeof entering.catch === "function") {
+         entering.catch(function () {});
+       }
+     };
+     var exit = document.exitFullscreen || document.webkitExitFullscreen;
+     var leaving = exit && exit.call(document);
+     if (leaving && typeof leaving.then === "function") {
+       leaving.then(enter, enter);
+     } else {
+       window.setTimeout(enter, 100);
+     }
+   }
  };
  window.addEventListener("keydown", window._elliotArrowKeys, true);
 

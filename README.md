@@ -28,8 +28,8 @@ Cargo holds only a few lines of HTML per page. The styling, the video player and
 
 - **Landing (desktop):** full-screen muted reel, name top-left, "Index →" bottom-left; clicking anywhere goes to `/projects`. Phones skip it and go straight to `/projects`.
 - **Projects:** on desktop, the reel plays once per visit behind the list until the first hover or opened project. Project videos load only when their project is opened, and the first one starts playing straight away (with sound).
-- **Player:** tap/click plays and pauses; double-tap/double-click the left or right side skips 5s; ← → skip 3s; F is fullscreen. A video plays round twice the first time, then shows its thumbnail and Replay. Hovering or dragging the timeline shows a preview frame.
-- **Moving between projects:** on desktop, the chevrons either side of the screen; on phones, swipe sideways on the video.
+- **Player:** tap/click plays and pauses; double-tap/double-click the left or right side skips 5s; F is fullscreen. A video plays round twice the first time, then shows its thumbnail and Replay. Hovering or dragging the timeline shows a preview frame.
+- **Moving between projects:** on desktop, the chevrons either side of the screen or the ← → keys; on phones, swipe sideways on the video (in multi-video projects, swipes go through its videos first).
 - **Contact:** dotted-leader rows lined up with the project list, "← Index" back to `/projects`.
 
 ## Project links

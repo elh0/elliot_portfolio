@@ -16,7 +16,9 @@ const MANIFEST = path.join(OUT, "previews.json");
 
 const MAX_FRAMES = 100; /* at most one frame a second, 100 per video */
 const COLUMNS = 10;
-const FRAME_WIDTH = 240;
+const FRAME_WIDTH = 320; /* sharp at the player's size on retina screens */
+/* Bump to remake every preview (e.g. after changing how they're made). */
+const FORMAT = 2;
 
 function projectVideos() {
   const text = fs.readFileSync(HOME_JS, "utf8");
@@ -55,16 +57,15 @@ function makePreview(id, url) {
   const rows = Math.ceil(count / COLUMNS);
   const file = path.join(OUT, id + ".jpg");
 
-  /* Keyframes only, so it doesn't decode every frame of the film. */
+  /* Every frame is decoded, so each thumbnail is exactly on its time. */
   execFileSync(FFMPEG, [
     "-v", "error", "-y",
-    "-skip_frame", "nokey",
     "-i", url,
     "-vf",
     "fps=1/" + interval.toFixed(4) +
       ",scale=" + FRAME_WIDTH + ":-2,tile=" + COLUMNS + "x" + rows,
     "-frames:v", "1",
-    "-q:v", "5",
+    "-q:v", "4",
     file,
   ], { stdio: ["ignore", "inherit", "inherit"] });
 
@@ -77,6 +78,7 @@ function makePreview(id, url) {
     columns: COLUMNS,
     width: FRAME_WIDTH,
     height: Math.round(sheet.height / rows),
+    format: FORMAT,
     version: Date.now().toString(36),
   };
 }
@@ -90,7 +92,8 @@ fs.mkdirSync(OUT, { recursive: true });
 let made = 0;
 let failed = 0;
 for (const [id, url] of videos) {
-  if (manifest[id] && fs.existsSync(path.join(OUT, id + ".jpg"))) continue;
+  if (manifest[id] && manifest[id].format === FORMAT &&
+      fs.existsSync(path.join(OUT, id + ".jpg"))) continue;
   try {
     console.log("making preview for " + id + " …");
     manifest[id] = makePreview(id, url);
