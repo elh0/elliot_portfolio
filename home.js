@@ -5,7 +5,7 @@
     for a few minutes after a change. Load the stylesheet this script was
     written for, then drop the plain link. Bump with every home.css change
     the script relies on. */
- var STYLE_VERSION = "2026-10-02-b";
+ var STYLE_VERSION = "2026-10-02-c";
  (function loadMatchingStyles() {
    var script = document.currentScript;
    if (!script || !script.src) return;
@@ -429,10 +429,17 @@
         Phones show only the number, title and type (home.css). */
      var summary = el("summary");
      summary.appendChild(el("span", "project-number", String(index + 1).padStart(2, "0")));
-     summary.appendChild(el("span", "project-title-text", project.title));
-     summary.appendChild(el("span", "project-director", project.director));
-     summary.appendChild(el("span", "project-format", project.format));
-     summary.appendChild(el("span", "project-category", project.category));
+     /* Title, director, format and type end in a dotted leader that runs
+        to the next column (home.css), so the text sits in its own span. */
+     function cell(className, text) {
+       var span = el("span", className);
+       span.appendChild(el("span", "cell-text", text));
+       return span;
+     }
+     summary.appendChild(cell("project-title-text", project.title));
+     summary.appendChild(cell("project-director", project.director));
+     summary.appendChild(cell("project-format", project.format));
+     summary.appendChild(cell("project-category", project.category));
      summary.appendChild(el("span", "project-time", projectRunningTime(project)));
      details.appendChild(summary);
 
@@ -499,7 +506,7 @@
  }
 
  /* Page layout around the list: the name bar along the top, the type
-    filters and List / Contact sheet switch, the column headings, and the
+    filters and List / Grid switch, the column headings, and the
     contact sheet itself. All built here, so nothing needs pasting into
     Cargo. */
  var currentFilter = "All";
@@ -608,7 +615,7 @@
    var views = el("div", "project-views");
    views.setAttribute("role", "group");
    views.setAttribute("aria-label", "View");
-   [["list", "List"], ["sheet", "Contact sheet"]].forEach(function (view) {
+   [["list", "List"], ["sheet", "Grid"]].forEach(function (view) {
      var button = el("button", "project-view", view[1]);
      button.type = "button";
      button.setAttribute("data-view", view[0]);
@@ -651,7 +658,7 @@
      columns.appendChild(el("span", "", label));
    });
 
-   /* Contact sheet: each project's Vimeo thumbnail; a click opens it. */
+   /* Grid view: each project's Vimeo thumbnail; a click opens it. */
    var sheet = el("div", "project-sheet");
    var items = accordion.querySelectorAll("details.project-item");
    PROJECTS.forEach(function (project, index) {

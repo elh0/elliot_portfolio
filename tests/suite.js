@@ -64,6 +64,8 @@ async function desktop(b) {
   check('desktop: hover shows full-screen thumbnail', hov.vis && hov.full, hov);
   check('desktop: hover thumbnail is 2560px', /-d_2560/.test(hov.src) && /mw=2560/.test(hov.src), hov.src);
   check('desktop: other rows fade on hover', hov.hovered === 'rgb(255, 255, 255)' && hov.other !== hov.hovered, hov);
+  const leaders = await p.evaluate(() => { const s = document.querySelector('summary'); return ['.project-title-text', '.project-director', '.project-format', '.project-category', '.project-time'].map(k => { const a = getComputedStyle(s.querySelector(k), '::after'); return a.borderBottomStyle === 'dotted' && parseFloat(a.width) > 5; }); });
+  check('desktop: dotted leaders after title, director, format and type', leaders.join() === 'true,true,true,true,false', leaders);
   await wait(p, 1000);
   check('desktop: intro reel keeps playing under the hover thumbnail', await p.evaluate(() => { const v = document.querySelector('.page-background video'); return !!v && !v.paused; }));
   await p.mouse.move(5, 5); await wait(p, 500);
@@ -143,6 +145,10 @@ async function desktop(b) {
   check('desktop: switching to sheet closes the open project', sheet.open === 0);
   const chevHidden = await p.evaluate(() => [...document.querySelectorAll('.project-navigation-link')].every(b => b.style.opacity === '0'));
   check('desktop: chevrons hidden in contact sheet', chevHidden);
+  const grid = await p.evaluate(() => { const t = document.querySelector('.project-frame-title'); const e = document.querySelector('.project-frame-edge'); return { label: document.querySelector('.project-view[data-view="sheet"]').textContent, color: getComputedStyle(t).color, hidden: getComputedStyle(e).opacity }; });
+  check('desktop: grid view is called Grid, titles grey and tucked away', grid.label === 'Grid' && grid.color === 'rgb(143, 143, 143)' && grid.hidden === '0', grid);
+  await p.locator('.project-frame').nth(2).hover(); await wait(p, 600);
+  check('desktop: hovering a frame slides its title out', await p.evaluate(() => getComputedStyle(document.querySelectorAll('.project-frame-edge')[2]).opacity === '1' && getComputedStyle(document.querySelectorAll('.project-frame-edge')[0]).opacity === '0'));
   await p.screenshot({ path: shot('sheet') });
   await p.locator('.project-frame').nth(7).click(); await wait(p, 1500);
   s = await state(p);
@@ -197,6 +203,8 @@ async function phone(b, name, opts, sideways) {
   });
   check(name + ': name bar shows only Contact, on the name line, no underline', bar.links.join() === 'Contact' && bar.sameLine && bar.underline.every(c => c === 'rgba(0, 0, 0, 0)'), bar);
   check(name + ': filters on one line', bar.filterRows === 1, bar);
+  const pl = await p.evaluate(() => { const s = document.querySelector('summary'); const a = (k) => getComputedStyle(s.querySelector(k), '::after'); return { title: a('.project-title-text').borderBottomStyle === 'dotted' && parseFloat(a('.project-title-text').width) > 5, director: a('.project-director').display }; });
+  check(name + ': dotted leader from title to director', pl.title && pl.director === 'none', pl);
   if (!sideways) check(name + ': same 20px margin as the contact page', bar.left === 20, bar);
   // Dir / Type switch slides the right-hand column between director and type
   await p.locator('.project-detail[data-detail="type"]').tap(); await wait(p, 1200);
