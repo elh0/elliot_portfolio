@@ -781,6 +781,7 @@
      preview.remove();
    });
 
+   var hoverPreviewToken = null;
    hoverPreview = document.createElement("div");
    hoverPreview.className = "project-hover-preview";
     hoverPreview.setAttribute("aria-hidden", "true");
@@ -805,7 +806,18 @@
 
         if (!poster) return;
 
-     hoverPreviewImage.src = highQualityPoster(poster);
+     /* A small copy first (quick on any connection), then the sharp 2560px
+        one swapped in once it has arrived, if this row is still hovered. */
+     var sharp = highQualityPoster(poster);
+     var token = hoverPreviewToken = {};
+     if (hoverPreviewImage.getAttribute("src") !== sharp) {
+       hoverPreviewImage.src = posterAtWidth(poster, 640);
+       var loader = new Image();
+       loader.onload = function () {
+         if (hoverPreviewToken === token) hoverPreviewImage.src = sharp;
+       };
+       loader.src = sharp;
+     }
 
      if (page.classList.contains("is-light-theme")) {
        page.classList.add("restore-light-after-preview");
@@ -1681,6 +1693,15 @@
     }
 
     progress.addEventListener("pointerenter", prepareScrubPreview);
+    /* Fetch the thumbnail strip a moment after the video starts, so the
+       preview is ready by the first drag even on a slow phone connection
+       (the biggest strips are close to 1MB). */
+    video.addEventListener("playing", function () {
+      if (previewInfo) return;
+      window.setTimeout(function () {
+        if (!video.paused && video.getAttribute("src")) prepareScrubPreview();
+      }, 1500);
+    });
     progress.addEventListener("pointerdown", function (event) {
       prepareScrubPreview();
       showScrubPreview(event.clientX);
