@@ -5,7 +5,7 @@
     for a few minutes after a change. Load the stylesheet this script was
     written for, then drop the plain link. Bump with every home.css change
     the script relies on. */
- var STYLE_VERSION = "2026-10-02-d";
+ var STYLE_VERSION = "2026-10-02-e";
  (function loadMatchingStyles() {
    var script = document.currentScript;
    if (!script || !script.src) return;
@@ -433,15 +433,21 @@
         to the next column (home.css), so the text sits in its own span. */
      function cell(className, text) {
        var span = el("span", className);
-       span.appendChild(el("span", "cell-text", text));
+       var inner = el("span", "cell-text", text);
+       inner.setAttribute("data-text", text);
+       span.appendChild(inner);
        return span;
      }
      summary.appendChild(cell("project-title-text", project.title));
      /* Phones: the title's dotted leader stops this far from the right,
         so it meets the director or type (monospace, so 1 character = 1ch;
         they're cut off at 22ch). */
-     summary.style.setProperty("--dir-w", Math.min(project.director.length, 22) + "ch");
-     summary.style.setProperty("--type-w", Math.min(project.category.length, 22) + "ch");
+     var dirWidth = Math.min(project.director.length, 22) + "ch";
+     var typeWidth = Math.min(project.category.length, 22) + "ch";
+     summary.setAttribute("data-dir-w", dirWidth);
+     summary.setAttribute("data-type-w", typeWidth);
+     summary.style.setProperty("--dir-w", dirWidth);
+     summary.style.setProperty("--type-w", typeWidth);
      summary.appendChild(cell("project-director", project.director));
      summary.appendChild(cell("project-format", project.format));
      summary.appendChild(cell("project-category", project.category));
@@ -633,8 +639,69 @@
    /* Phones: what the right-hand column shows, director or type. The
       choice is remembered on this device. */
    var DETAIL_KEY = "elliotRowDetail";
-   function setRowDetail(detail) {
+   /* Switching scrambles each row's value into the new one, left to right,
+      like a departures board, rippling down the list; the dotted leader
+      follows the length. */
+   var SCRAMBLE_GLYPHS = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789/-";
+   var SCRAMBLE_FRAMES = 16;
+   var scrambleTimers = [];
+   function stopScramble() {
+     scrambleTimers.forEach(function (timer) { window.clearTimeout(timer); });
+     scrambleTimers = [];
+     accordion.querySelectorAll("summary").forEach(function (summary) {
+       ["director", "category"].forEach(function (key) {
+         var text = summary.querySelector(".project-" + key + " .cell-text");
+         if (text && text.getAttribute("data-text") != null) {
+           text.textContent = text.getAttribute("data-text");
+         }
+       });
+       summary.style.setProperty("--dir-w", summary.getAttribute("data-dir-w"));
+       summary.style.setProperty("--type-w", summary.getAttribute("data-type-w"));
+     });
+   }
+   function scrambleRows(detail) {
+     var key = detail === "type" ? "category" : "director";
+     var widthVar = detail === "type" ? "--type-w" : "--dir-w";
+     accordion.querySelectorAll("summary").forEach(function (summary, row) {
+       var text = summary.querySelector(".project-" + key + " .cell-text");
+       if (!text) return;
+       var to = text.getAttribute("data-text");
+       /* until its turn, the row keeps showing the old value */
+       var old = summary.querySelector(".project-" +
+         (key === "category" ? "director" : "category") + " .cell-text");
+       var oldText = old ? old.getAttribute("data-text") : to;
+       var from = oldText.length;
+       function frame(f) {
+         var t = f / SCRAMBLE_FRAMES;
+         var length = Math.round(from + (to.length - from) * Math.min(1, t * 1.6));
+         var out = "";
+         for (var k = 0; k < length; k++) {
+           var settle = (k / Math.max(length, 1)) * 0.6 + 0.35;
+           out += t >= settle || to.charAt(k) === " "
+             ? (to.charAt(k) || " ")
+             : SCRAMBLE_GLYPHS.charAt(Math.floor(Math.random() * SCRAMBLE_GLYPHS.length));
+         }
+         if (f >= SCRAMBLE_FRAMES) out = to;
+         text.textContent = out;
+         summary.style.setProperty(widthVar, Math.min(out.length, 22) + "ch");
+         if (f < SCRAMBLE_FRAMES) {
+           scrambleTimers.push(window.setTimeout(function () { frame(f + 1); }, 45));
+         }
+       }
+       text.textContent = oldText;
+       summary.style.setProperty(widthVar, Math.min(from, 22) + "ch");
+       scrambleTimers.push(window.setTimeout(function () { frame(1); }, row * 35));
+     });
+   }
+   function setRowDetail(detail, animate) {
+     var changed = page.classList.contains("shows-type") !== (detail === "type");
+     stopScramble();
      page.classList.toggle("shows-type", detail === "type");
+     if (animate && changed &&
+         window.matchMedia(PHONE_QUERY).matches &&
+         !window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
+       scrambleRows(detail);
+     }
      page.querySelectorAll(".project-detail").forEach(function (button) {
        button.setAttribute("aria-pressed",
          String(button.getAttribute("data-detail") === detail));
@@ -650,7 +717,7 @@
      button.type = "button";
      button.setAttribute("data-detail", detail[0]);
      button.addEventListener("click", function () {
-       setRowDetail(detail[0]);
+       setRowDetail(detail[0], true);
      });
      detailSwitch.appendChild(button);
    });
