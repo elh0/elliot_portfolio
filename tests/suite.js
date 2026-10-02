@@ -207,6 +207,20 @@ async function phone(b, name, opts, sideways) {
   if (sideways) check(name + ': video and playbar fit the screen height', fit.h <= fit.vh, fit);
   else check(name + ': video runs full width', fit.w >= fit.vw - 2 * 21, fit);
 
+  // drag along the timeline: the thumbnail preview follows the finger
+  const cdpScrub = await c.newCDPSession(p);
+  await p.evaluate(() => document.querySelector('details[open] .video-controls').scrollIntoView({ block: 'end' })); await wait(p, 300);
+  const pbar = await p.locator('details[open] .video-progress').boundingBox();
+  const py = pbar.y + pbar.height / 2;
+  await cdpScrub.send('Input.dispatchTouchEvent', { type: 'touchStart', touchPoints: [{ x: pbar.x + 10, y: py }] });
+  for (let i = 1; i <= 6; i++) { await cdpScrub.send('Input.dispatchTouchEvent', { type: 'touchMove', touchPoints: [{ x: pbar.x + 10 + i * pbar.width / 10, y: py }] }); await wait(p, 60); }
+  const scrub = await p.evaluate(() => { const s = document.querySelector('details[open] .video-scrub-preview'); const f = s && s.firstChild; return { shown: !!s && s.style.opacity === '1', frame: !!f && f.style.display === 'block' && /previews\//.test(f.style.backgroundImage) }; });
+  await cdpScrub.send('Input.dispatchTouchEvent', { type: 'touchEnd', touchPoints: [] }); await wait(p, 200);
+  const scrubGone = await p.evaluate(() => document.querySelector('details[open] .video-scrub-preview').style.opacity === '0');
+  check(name + ': dragging the timeline shows the thumbnail preview, gone on release', scrub.shown && scrub.frame && scrubGone, { scrub, scrubGone });
+  await p.evaluate(() => { const v = document.querySelector('details[open] video'); v.currentTime = 0; if (v.paused) v.play(); });
+  await p.evaluate(() => document.querySelector('details[open]').scrollIntoView({ block: 'start' })); await wait(p, 400);
+
   // double tap right half
   const box = await p.locator('details[open] .video-stage').first().boundingBox();
   const before = (await state(p)).t;

@@ -1616,7 +1616,9 @@
           "position:absolute;z-index:4;left:0;bottom:0;display:flex;" +
           "flex-direction:column;align-items:center;gap:4px;margin:0;" +
           "padding:0;pointer-events:none;opacity:0;" +
-          "transition:opacity 120ms ease;";
+          "transition:opacity 120ms ease;" +
+          /* its own layer, so iPhones draw it over the playing video */
+          "-webkit-transform:translateZ(0);transform:translateZ(0);";
         scrubFrame = document.createElement("div");
         scrubFrame.style.cssText =
           "display:none;background-repeat:no-repeat;background-color:#000;" +
@@ -1691,16 +1693,45 @@
     progress.addEventListener("pointerup", function (event) {
       if (event.pointerType !== "mouse") hideScrubPreview();
     });
-    progress.addEventListener("pointercancel", hideScrubPreview);
+    /* iPhones can hand a drag on the timeline to the native slider, which
+       cancels the pointer events (and hid the preview). Raw touches keep
+       the preview following the finger whichever of the two is seeking. */
+    var isTouchScrubbing = false;
+    progress.addEventListener("touchstart", function (event) {
+      if (!event.touches.length) return;
+      isTouchScrubbing = true;
+      prepareScrubPreview();
+      showScrubPreview(event.touches[0].clientX);
+    }, { passive: true });
+    progress.addEventListener("touchmove", function (event) {
+      if (isTouchScrubbing && event.touches.length) {
+        showScrubPreview(event.touches[0].clientX);
+      }
+    }, { passive: true });
+    function finishTouchScrubbing() {
+      isTouchScrubbing = false;
+      hideScrubPreview();
+    }
+    progress.addEventListener("touchend", finishTouchScrubbing);
+    progress.addEventListener("touchcancel", finishTouchScrubbing);
+
+    progress.addEventListener("pointercancel", function () {
+      if (!isTouchScrubbing) hideScrubPreview();
+    });
     progress.addEventListener("pointerleave", function () {
-      if (!isScrubbing) hideScrubPreview();
+      if (!isScrubbing && !isTouchScrubbing) hideScrubPreview();
     });
 
-    /* Preserve keyboard seeking for the native range control. */
+    /* Preserve keyboard seeking for the native range control (and the
+       native slider drag on iPhones, with its preview). */
     progress.addEventListener("input", function () {
       if (isScrubbing) return;
       if (Number.isFinite(video.duration)) {
         video.currentTime = Number(progress.value);
+        if (isTouchScrubbing && video.duration > 0) {
+          var bar = progress.getBoundingClientRect();
+          showScrubPreview(bar.left + bar.width * Number(progress.value) / video.duration);
+        }
       }
       updateControls();
     });
