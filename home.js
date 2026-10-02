@@ -992,7 +992,11 @@
     }
 
     background.appendChild(backgroundVideo);
-    page.insertBefore(background, page.firstChild);
+    /* Append, never insert at the top: Cargo re-renders the page after this
+       script runs and matches children by position, so a node put in front
+       of its own makes it throw the project list away. The list stays on
+       top through .page-layout's z-index. */
+    page.appendChild(background);
 
     page.querySelectorAll("details.project-item").forEach(function (project) {
       project.addEventListener("toggle", function () {
