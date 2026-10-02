@@ -52,6 +52,7 @@ async function desktop(b) {
   }));
   const intro = await p.evaluate(() => !!document.querySelector('.page-background video'));
   check('desktop: intro reel plays behind list on first visit', intro);
+  check('desktop: intro reel added after Cargo\'s own markup (Cargo re-renders by position)', await p.evaluate(() => { const b = document.querySelector('.page-background'); return !!b && b.parentNode.firstElementChild !== b && !!document.querySelector('.page-layout') && b.compareDocumentPosition(document.querySelector('.page-layout')) === Node.DOCUMENT_POSITION_PRECEDING; }));
 
   // hover full-screen preview
   await p.locator('summary').nth(4).hover(); await wait(p, 500);
