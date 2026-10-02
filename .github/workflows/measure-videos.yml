@@ -1,0 +1,23 @@
+# Measures each project's video size, bitrate and start-up time, and the
+# hover thumbnail sizes. Run by hand: Actions → Measure videos → Run.
+
+name: Measure videos
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths: ["scripts/measure-videos.js"]
+
+permissions:
+  contents: read
+
+jobs:
+  measure:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-node@v5
+        with:
+          node-version: 22
+      - run: node scripts/measure-videos.js
