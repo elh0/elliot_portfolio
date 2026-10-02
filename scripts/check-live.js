@@ -41,6 +41,11 @@ var PAGES = ["https://elliot.onl/", "https://elliot.onl/projects", "https://elli
           rowHit: hit,
           bodyClasses: document.body.className.slice(0, 120),
           pageIds: [].map.call(document.querySelectorAll("[id^=X]"), function (e) { return e.id; }).slice(0, 6),
+          pages: [].map.call(document.querySelectorAll('[id="X1134136285"]'), function (e) {
+            return e.tagName + "." + String(e.className).slice(0, 80) + " children=" + e.children.length +
+              " accordion=" + !!e.querySelector(".project-accordion") + " html=" + e.innerHTML.replace(/\s+/g, " ").slice(0, 700);
+          }),
+          homeScripts: [].map.call(document.querySelectorAll("script[src*=home]"), function (e) { return e.src; }),
           text: document.body.innerText.slice(0, 300).replace(/\s+/g, " ")
         };
       });
