@@ -43,7 +43,7 @@ var PAGES = ["https://elliot.onl/", "https://elliot.onl/projects", "https://elli
           pageIds: [].map.call(document.querySelectorAll("[id^=X]"), function (e) { return e.id; }).slice(0, 6),
           pages: [].map.call(document.querySelectorAll('[id="X1134136285"]'), function (e) {
             return e.tagName + "." + String(e.className).slice(0, 80) + " children=" + e.children.length +
-              " accordion=" + !!e.querySelector(".project-accordion") + " html=" + e.innerHTML.replace(/\s+/g, " ").slice(0, 700);
+              " accordion=" + !!e.querySelector(".project-accordion") + " html=" + e.innerHTML.replace(/<style[^>]*>[\s\S]*?<\/style>/g, function (m) { return "<style " + m.length + " chars: " + m.slice(7, 120) + ">"; }).replace(/<video[\s\S]*?<\/video>/g, "<video/>").replace(/\s+/g, " ").slice(0, 4000);
           }),
           homeScripts: [].map.call(document.querySelectorAll("script[src*=home]"), function (e) { return e.src; }),
           text: document.body.innerText.slice(0, 300).replace(/\s+/g, " ")
