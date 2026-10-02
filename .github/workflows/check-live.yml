@@ -1,0 +1,29 @@
+# Loads the live site on desktop and an iPhone and reports what loads.
+# Run by hand: Actions → Check live site → Run.
+
+name: Check live site
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths: ["scripts/check-live.js"]
+
+permissions:
+  contents: read
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-node@v5
+        with:
+          node-version: 22
+      - run: npm install --no-save playwright && npx playwright install --with-deps chromium
+      - run: node scripts/check-live.js
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: live-check
+          path: live-check/
