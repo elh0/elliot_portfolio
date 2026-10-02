@@ -26,6 +26,7 @@ Elliot Holbrow's cinematography portfolio. Read README.md first for how the site
 - Open project on desktop (Oct 2026): playbar and credits span the full row width; the picture is as big as the screen height allows (wide films fill the width, 4:3 sits centred on black).
 - Desktop: thin tall chevrons, fixed in the side margins at mid-screen, change project. Phones: no chevrons; swipe on the video instead. Multi-video projects (Playing House) swipe through their videos like a slideshow first.
 - Scrub preview: like YouTube, but with square corners and no border, time in white below.
+- Phone rows: number, title and director (the type is in the filters at the top).
 - Phones: the name bar shows only the link to the other page (Contact on the projects page, Work on the contact page), with no underline; filters stay on one line.
 - Landing reel is desktop only; phones go straight to `/projects`.
 

@@ -185,7 +185,7 @@ async function phone(b, name, opts, sideways) {
     const s = document.querySelector('summary');
     return { shown: [...s.children].filter(c => getComputedStyle(c).display !== 'none').map(c => c.textContent), cols: getComputedStyle(document.querySelector('.project-columns')).display, intro: !!document.querySelector('.page-background') };
   });
-  check(name + ': rows show number, title, type', look.shown.join('|') === '01|Polène SS24|Fashion' && look.cols === 'none', look);
+  check(name + ': rows show number, title, director', look.shown.join('|') === '01|Polène SS24|Guillaume Lebel' && look.cols === 'none', look);
   check(name + ': no intro reel', !look.intro);
   check(name + ': no horizontal scroll', !(await state(p)).overflow);
   const bar = await p.evaluate(() => {

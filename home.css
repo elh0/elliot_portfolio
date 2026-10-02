@@ -1414,7 +1414,7 @@ body:has([id="X1134136285"].is-light-theme) {
   padding: 0.35rem 0 0.3rem;
 }
 
-.mobile [id="X1134136285"] .project-director,
+.mobile [id="X1134136285"] .project-category,
 .mobile [id="X1134136285"] .project-format,
 .mobile [id="X1134136285"] .project-time {
   display: none;
@@ -1471,7 +1471,7 @@ body:has([id="X1134136285"].is-light-theme) {
     padding: 0.35rem 0 0.3rem;
   }
 
-  [id="X1134136285"] .project-director,
+  [id="X1134136285"] .project-category,
   [id="X1134136285"] .project-format,
   [id="X1134136285"] .project-time {
     display: none;
@@ -1495,6 +1495,20 @@ body:has([id="X1134136285"].is-light-theme) {
     flex-direction: column;
     gap: 0.1rem;
     margin-top: 3rem;
+  }
+}
+
+/* Phones: the director on the right of each row (the type lives in the
+   filters at the top) */
+.mobile [id="X1134136285"] .project-director {
+  max-width: 22ch;
+  text-align: right;
+}
+
+@media (max-width: 767px), (hover: none) and (pointer: coarse) and (max-height: 500px) {
+  [id="X1134136285"] .project-director {
+    max-width: 22ch;
+    text-align: right;
   }
 }
 
