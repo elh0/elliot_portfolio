@@ -1567,68 +1567,62 @@ body:has([id="X1134136285"].is-light-theme) {
 }
 
 /* Phones: the right of each row shows the director or the type, switched
-   by Dir / Type above the list; the old value slides off to the left and
-   the new one slides in, row by row. */
+   by Dir / Type above the list; row by row, the old value fades, the
+   dotted leader eases to fit and the new one fades in. */
 [id="X1134136285"] .project-detail-switch {
   display: none;
 }
 
 .mobile [id="X1134136285"] .project-item summary {
   overflow: hidden;
+  position: relative;
+  grid-template-columns: 4ch minmax(0, 1fr);
 }
 
+/* Both sit at the right of the row; the title's leader stops short of
+   whichever is showing (--dir-w / --type-w, its length in ch, set by
+   home.js). On a switch the old value fades, the leader eases to the new
+   length, then the new value fades in. */
 .mobile [id="X1134136285"] .project-item summary > .project-director,
 .mobile [id="X1134136285"] .project-item summary > .project-category {
   display: block !important;
-  grid-row: 1;
-  grid-column: 3;
-  justify-self: end;
+  position: absolute;
+  top: 0.35rem;
+  right: 0;
   max-width: 22ch;
   text-align: right;
-  transition:
-    transform 420ms cubic-bezier(0.22, 1, 0.36, 1),
-    opacity 160ms ease;
-  /* the incoming value waits for the outgoing one to fade */
-  transition-delay: calc(var(--row-index, 0) * 22ms + 120ms);
+  transition: opacity 180ms ease;
+  /* the incoming value waits for the leader */
+  transition-delay: calc(var(--row-index, 0) * 12ms + 380ms);
 }
 
 .mobile [id="X1134136285"] .project-item summary > .project-category {
   opacity: 0;
-  transform: translateX(2.5em);
-  transition-delay: calc(var(--row-index, 0) * 22ms);
+  transition-delay: calc(var(--row-index, 0) * 12ms);
 }
 
 .mobile [id="X1134136285"].shows-type .project-item summary > .project-director {
   opacity: 0;
-  transform: translateX(-2.5em);
-  transition-delay: calc(var(--row-index, 0) * 22ms);
+  transition-delay: calc(var(--row-index, 0) * 12ms);
 }
 
 .mobile [id="X1134136285"].shows-type .project-item summary > .project-category {
   opacity: 1;
-  transform: none;
-  transition-delay: calc(var(--row-index, 0) * 22ms + 120ms);
+  transition-delay: calc(var(--row-index, 0) * 12ms + 380ms);
+}
+
+.mobile [id="X1134136285"] .project-item summary > .project-title-text::after {
+  margin-right: calc(var(--dir-w, 0ch) + 0.75ch);
+  transition: margin-right 300ms cubic-bezier(0.65, 0, 0.35, 1);
+  transition-delay: calc(var(--row-index, 0) * 12ms + 110ms);
+}
+
+.mobile [id="X1134136285"].shows-type .project-item summary > .project-title-text::after {
+  margin-right: calc(var(--type-w, 0ch) + 0.75ch);
 }
 
 .mobile [id="X1134136285"] .project-views {
   align-self: stretch;
-}
-
-/* the hidden one of the two leaves the layout, so the title's leader
-   runs right up to the one showing */
-.mobile [id="X1134136285"] .project-item summary {
-  position: relative;
-}
-
-.mobile [id="X1134136285"] .project-item summary > .project-category,
-.mobile [id="X1134136285"].shows-type .project-item summary > .project-director {
-  position: absolute;
-  top: 0.35rem;
-  right: 0;
-}
-
-.mobile [id="X1134136285"].shows-type .project-item summary > .project-category {
-  position: static;
 }
 
 .mobile [id="X1134136285"] .project-item summary > .project-format {
@@ -1651,60 +1645,54 @@ body:has([id="X1134136285"].is-light-theme) {
 @media (max-width: 767px), (hover: none) and (pointer: coarse) and (max-height: 500px) {
   [id="X1134136285"] .project-item summary {
     overflow: hidden;
+    position: relative;
+    grid-template-columns: 4ch minmax(0, 1fr);
   }
 
+  /* Both sit at the right of the row; the title's leader stops short of
+     whichever is showing (--dir-w / --type-w, its length in ch, set by
+     home.js). On a switch the old value fades, the leader eases to the new
+     length, then the new value fades in. */
   [id="X1134136285"] .project-item summary > .project-director,
   [id="X1134136285"] .project-item summary > .project-category {
     display: block !important;
-    grid-row: 1;
-    grid-column: 3;
-    justify-self: end;
+    position: absolute;
+    top: 0.35rem;
+    right: 0;
     max-width: 22ch;
     text-align: right;
-    transition:
-      transform 420ms cubic-bezier(0.22, 1, 0.36, 1),
-      opacity 160ms ease;
-    /* the incoming value waits for the outgoing one to fade */
-    transition-delay: calc(var(--row-index, 0) * 22ms + 120ms);
+    transition: opacity 180ms ease;
+    /* the incoming value waits for the leader */
+    transition-delay: calc(var(--row-index, 0) * 12ms + 380ms);
   }
 
   [id="X1134136285"] .project-item summary > .project-category {
     opacity: 0;
-    transform: translateX(2.5em);
-    transition-delay: calc(var(--row-index, 0) * 22ms);
+    transition-delay: calc(var(--row-index, 0) * 12ms);
   }
 
   [id="X1134136285"].shows-type .project-item summary > .project-director {
     opacity: 0;
-    transform: translateX(-2.5em);
-    transition-delay: calc(var(--row-index, 0) * 22ms);
+    transition-delay: calc(var(--row-index, 0) * 12ms);
   }
 
   [id="X1134136285"].shows-type .project-item summary > .project-category {
     opacity: 1;
-    transform: none;
-    transition-delay: calc(var(--row-index, 0) * 22ms + 120ms);
+    transition-delay: calc(var(--row-index, 0) * 12ms + 380ms);
+  }
+
+  [id="X1134136285"] .project-item summary > .project-title-text::after {
+    margin-right: calc(var(--dir-w, 0ch) + 0.75ch);
+    transition: margin-right 300ms cubic-bezier(0.65, 0, 0.35, 1);
+    transition-delay: calc(var(--row-index, 0) * 12ms + 110ms);
+  }
+
+  [id="X1134136285"].shows-type .project-item summary > .project-title-text::after {
+    margin-right: calc(var(--type-w, 0ch) + 0.75ch);
   }
 
   [id="X1134136285"] .project-views {
     align-self: stretch;
-  }
-
-  /* the hidden one of the two leaves the layout, so the title's leader
-     runs right up to the one showing */
-  [id="X1134136285"] .project-item summary {
-    position: relative;
-  }
-
-  [id="X1134136285"] .project-item summary > .project-category,
-  [id="X1134136285"].shows-type .project-item summary > .project-director {
-    position: absolute;
-    top: 0.35rem;
-    right: 0;
-  }
-
-  [id="X1134136285"].shows-type .project-item summary > .project-category {
-    position: static;
   }
 
   [id="X1134136285"] .project-item summary > .project-format {

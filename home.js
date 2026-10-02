@@ -5,7 +5,7 @@
     for a few minutes after a change. Load the stylesheet this script was
     written for, then drop the plain link. Bump with every home.css change
     the script relies on. */
- var STYLE_VERSION = "2026-10-02-c";
+ var STYLE_VERSION = "2026-10-02-d";
  (function loadMatchingStyles() {
    var script = document.currentScript;
    if (!script || !script.src) return;
@@ -437,6 +437,11 @@
        return span;
      }
      summary.appendChild(cell("project-title-text", project.title));
+     /* Phones: the title's dotted leader stops this far from the right,
+        so it meets the director or type (monospace, so 1 character = 1ch;
+        they're cut off at 22ch). */
+     summary.style.setProperty("--dir-w", Math.min(project.director.length, 22) + "ch");
+     summary.style.setProperty("--type-w", Math.min(project.category.length, 22) + "ch");
      summary.appendChild(cell("project-director", project.director));
      summary.appendChild(cell("project-format", project.format));
      summary.appendChild(cell("project-category", project.category));

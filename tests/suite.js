@@ -207,10 +207,15 @@ async function phone(b, name, opts, sideways) {
   const pl = await p.evaluate(() => { const s = document.querySelector('summary'); const a = (k) => getComputedStyle(s.querySelector(k), '::after'); return { title: a('.project-title-text').borderBottomStyle === 'dotted' && parseFloat(a('.project-title-text').width) > 5, director: a('.project-director').display }; });
   check(name + ': dotted leader from title to director', pl.title && pl.director === 'none', pl);
   if (!sideways) check(name + ': same 20px margin as the contact page', bar.left === 20, bar);
-  // Dir / Type switch slides the right-hand column between director and type
+  const leaderGap = (k) => p.evaluate((k) => [...document.querySelectorAll('summary')].filter(s => s.offsetParent).slice(0, 8).map(s => { const t = s.querySelector('.project-title-text'); const cs = getComputedStyle(t, '::after'); const textEnd = s.getBoundingClientRect().right - parseFloat(cs.marginRight); const shown = s.querySelector(k).querySelector('.cell-text').getBoundingClientRect(); return Math.round(shown.left - textEnd); }), k);
+  const gDir = await leaderGap('.project-director');
+  check(name + ': leader stops just short of the director', gDir.every(g => g >= 3 && g <= 12), gDir);
+  // Dir / Type switch fades the right-hand column between director and type
   await p.locator('.project-detail[data-detail="type"]').tap(); await wait(p, 1200);
   const shown = await p.evaluate(() => { const s = document.querySelectorAll('summary')[2]; return { dir: getComputedStyle(s.querySelector('.project-director')).opacity, type: getComputedStyle(s.querySelector('.project-category')).opacity, text: s.querySelector('.project-category').textContent }; });
-  check(name + ': Type switch slides in the type', shown.dir === '0' && shown.type === '1' && shown.text === 'Music', shown);
+  check(name + ': Type switch fades in the type', shown.dir === '0' && shown.type === '1' && shown.text === 'Music', shown);
+  const gType = await leaderGap('.project-category');
+  check(name + ': leader eases to stop just short of the type, no sliding', gType.every(g => g >= 3 && g <= 12) && await p.evaluate(() => getComputedStyle(document.querySelector('summary .project-category')).transform === 'none'), gType);
   await p.reload(); await wait(p, 800);
   const kept = await p.evaluate(() => document.querySelector('[id="X1134136285"]').classList.contains('shows-type'));
   check(name + ': Dir / Type choice is remembered', kept);

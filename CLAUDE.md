@@ -26,7 +26,7 @@ Elliot Holbrow's cinematography portfolio. Read README.md first for how the site
 - Open project on desktop (Oct 2026): playbar and credits span the full row width; the picture is as big as the screen height allows (wide films fill the width, 4:3 sits centred on black).
 - Desktop: thin tall chevrons, fixed in the side margins at mid-screen, change project. Phones: no chevrons; swipe on the video instead. Multi-video projects (Playing House) swipe through their videos like a slideshow first.
 - Scrub preview: like YouTube, but with square corners and no border, time in white below.
-- Phone rows: number, title and director. A Dir / Type switch above the list slides the right-hand column to the type (row by row) and back; the choice is remembered on the device.
+- Phone rows: number, title and director. A Dir / Type switch above the list fades the right-hand column to the type and back, row by row, with the dotted leader easing to fit in between (Oct 2 2026: fade, not slide); the choice is remembered on the device.
 - Phones: the name bar shows only the link to the other page (Contact on the projects page, Work on the contact page), with no underline; filters stay on one line.
 - Contact page (Oct 2 2026, option A of two mockups): laid out like the project list. "Contact" with a live London clock, numbered rows with dotted leaders and an action (desktop: Copy for email and phone; phones: Email / Call; Open for links), then the directors list with project numbers that open the project, and the same footer. All built by contact.js; its DIRECTORS list must match PROJECTS in home.js (the suite checks).
 - Landing reel is desktop only; phones go straight to `/projects`.
