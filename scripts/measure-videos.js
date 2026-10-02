@@ -21,8 +21,11 @@ async function timeVideo(url) {
   const ttfb = Date.now() - t0;
   const range = response.headers.get("content-range") || "";
   const total = Number(range.split("/")[1]) || Number(response.headers.get("content-length")) || 0;
-  await response.arrayBuffer();
-  return { ttfb, first2mb: Date.now() - t0, total, host: new URL(response.url).host };
+  const head = Buffer.from(await response.arrayBuffer()).toString("latin1");
+  /* "moov" before "mdat" means the player can start before the whole file arrives */
+  const moov = head.indexOf("moov"), mdat = head.indexOf("mdat");
+  const faststart = moov >= 0 && (mdat < 0 || moov < mdat);
+  return { ttfb, first2mb: Date.now() - t0, total, faststart, host: new URL(response.url).host };
 }
 
 async function imageSize(url) {
@@ -45,7 +48,7 @@ async function imageSize(url) {
         }
         lines.push(String(n + 1).padStart(2, "0") + (project.videos.length > 1 ? "." + (k + 1) : "") +
           " " + project.title + ": " + (r.total / 1e6).toFixed(0) + "MB " + mbps + "Mbit/s ttfb=" +
-          r.ttfb + "ms first2MB=" + r.first2mb + "ms" + thumbs);
+          r.ttfb + "ms first2MB=" + r.first2mb + "ms" + (r.faststart ? "" : " NOT-FASTSTART") + thumbs);
       } catch (error) {
         lines.push(String(n + 1).padStart(2, "0") + " " + project.title + ": ERROR " + error.message);
       }
