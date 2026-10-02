@@ -258,3 +258,236 @@ html.mobile .contact-page .site-nav a:hover {
     margin-top: 3.5rem;
   }
 }
+
+/* ---------------------------------------------------------------------
+   Laid out like the project list (built by contact.js): "Contact" and the
+   London time, column headings, numbered rows with dotted leaders and an
+   action on the right, then the directors list and the footer. The
+   columns match the project table, so both pages line up.
+   --------------------------------------------------------------------- */
+
+.contact-page {
+  --row-columns: 4ch minmax(0, 3fr) minmax(0, 2fr) minmax(0, 2fr) minmax(0, 1.2fr) 5ch;
+  --row-dim: #8f8f8f;
+  --row-faint: rgba(255, 255, 255, 0.42);
+  --row-leader: rgba(255, 255, 255, 0.3);
+}
+
+.contact-page .contact-tools {
+  display: flex;
+  justify-content: space-between;
+  gap: 0 3ch;
+  margin-top: clamp(4rem, 14vh, 9rem);
+  padding-bottom: 14px;
+}
+
+.contact-page .contact-clock {
+  color: var(--row-dim) !important;
+  font-variant-numeric: tabular-nums;
+}
+
+html body .contact-page .contact-clock-time {
+  color: #ffffff !important;
+}
+
+.contact-page .contact-list.is-built {
+  gap: 0;
+  margin-top: 0;
+}
+
+.contact-page .contact-columns,
+.contact-page .contact-row {
+  display: grid !important;
+  grid-template-columns: var(--row-columns);
+  column-gap: 2ch;
+  align-items: baseline;
+}
+
+html body .contact-page .contact-columns,
+html body .contact-page .contact-columns * {
+  color: var(--row-faint) !important;
+}
+
+.contact-page .contact-columns {
+  padding-bottom: 6px;
+}
+
+.contact-page .contact-columns span:nth-child(3) {
+  grid-column: 3 / span 2;
+}
+
+.contact-page .contact-columns span:nth-child(4) {
+  grid-column: 5 / span 2;
+  text-align: right;
+}
+
+.contact-page .contact-row {
+  padding: 4px 0 !important;
+}
+
+html body .contact-page .contact-number {
+  grid-column: 1;
+  color: var(--row-dim) !important;
+  font-variant-numeric: tabular-nums;
+}
+
+html body .contact-page .contact-row .contact-label {
+  grid-column: 2;
+  color: #ffffff !important;
+}
+
+.contact-page .contact-row .contact-value {
+  grid-column: 3 / span 2;
+}
+
+.contact-page .contact-row .contact-label,
+.contact-page .contact-row .contact-value {
+  display: flex;
+  align-items: baseline;
+  min-width: 0;
+  overflow-wrap: normal;
+}
+
+.contact-page .cell-text {
+  flex: 0 1 auto;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.contact-page .contact-row .contact-label::after,
+.contact-page .contact-row .contact-value::after {
+  flex: 1 1 0;
+  min-width: 2ch;
+  margin-left: 1ch;
+  border-bottom: 1px dotted var(--row-leader);
+  content: "";
+  transform: translateY(-0.3em);
+}
+
+html body .contact-page .contact-action {
+  grid-column: 5 / span 2;
+  color: var(--row-dim) !important;
+  text-align: right;
+  white-space: nowrap;
+  font-variant-numeric: tabular-nums;
+}
+
+html body .contact-page .contact-row.is-copied .contact-action,
+html body .contact-page .contact-project:hover {
+  color: #ffffff !important;
+}
+
+html body .contact-page .contact-project {
+  color: var(--row-dim) !important;
+}
+
+.contact-page .contact-directors {
+  margin-top: 3.2rem;
+}
+
+.contact-page .contact-director {
+  cursor: default;
+}
+
+.contact-page .contact-footer {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  gap: 6px 3ch;
+  margin-top: 5rem;
+}
+
+html body .contact-page .contact-footer,
+html body .contact-page .contact-footer > span,
+html body .contact-page .contact-footer-label {
+  color: var(--row-dim) !important;
+}
+
+html body .contact-page .contact-footer a {
+  border-bottom: 1px solid rgba(255, 255, 255, 0.4) !important;
+}
+
+/* Hovering fades the other rows back, as on the project list */
+@media (hover: hover) and (pointer: fine) {
+  html body .contact-page .contact-list:hover .contact-row:not(:hover) *,
+  html body .contact-page .contact-directors:hover .contact-director:not(:hover) * {
+    color: var(--row-faint) !important;
+  }
+
+  html body .contact-page .contact-list .contact-row:hover .contact-action {
+    color: #ffffff !important;
+  }
+}
+
+/* Phones: number, the detail itself and the action; directors show their
+   name and project numbers. */
+.mobile .contact-page .contact-tools {
+  margin-top: 3.5rem;
+}
+
+.mobile .contact-page .contact-columns {
+  display: none !important;
+}
+
+.mobile .contact-page .contact-row {
+  grid-template-columns: 4ch minmax(0, 1fr) auto;
+  padding: 0.35rem 0 0.3rem !important;
+}
+
+.mobile .contact-page .contact-list .contact-label,
+.mobile .contact-page .contact-director .contact-value {
+  display: none !important;
+}
+
+.mobile .contact-page .contact-list .contact-value,
+.mobile .contact-page .contact-director .contact-label {
+  grid-column: 2;
+}
+
+html .mobile .contact-page .contact-action,
+html.mobile .contact-page .contact-action {
+  grid-column: 3;
+}
+
+.mobile .contact-page .contact-footer {
+  flex-direction: column;
+  gap: 0.1rem;
+  margin-top: 3rem;
+}
+
+@media (max-width: 767px), (hover: none) and (pointer: coarse) and (max-height: 500px) {
+  .contact-page .contact-tools {
+    margin-top: 3.5rem;
+  }
+
+  .contact-page .contact-columns {
+    display: none !important;
+  }
+
+  .contact-page .contact-row {
+    grid-template-columns: 4ch minmax(0, 1fr) auto;
+    padding: 0.35rem 0 0.3rem !important;
+  }
+
+  .contact-page .contact-list .contact-label,
+  .contact-page .contact-director .contact-value {
+    display: none !important;
+  }
+
+  .contact-page .contact-list .contact-value,
+  .contact-page .contact-director .contact-label {
+    grid-column: 2;
+  }
+
+  html body .contact-page .contact-action {
+    grid-column: 3;
+  }
+
+  .contact-page .contact-footer {
+    flex-direction: column;
+    gap: 0.1rem;
+    margin-top: 3rem;
+  }
+}

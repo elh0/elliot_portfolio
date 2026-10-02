@@ -291,20 +291,52 @@ async function phone(b, name, opts, sideways) {
 }
 
 async function contact(b) {
+  // the directors list in contact.js must match the projects in home.js
+  const fs = require('fs');
+  const homeSrc = fs.readFileSync(path.join(__dirname, '..', 'home.js'), 'utf8');
+  const k = 'var PROJECTS = '; const s0 = homeSrc.indexOf(k + '[') + k.length; let d = 0, e = s0;
+  for (; e < homeSrc.length; e++) { if (homeSrc[e] === '[') d++; if (homeSrc[e] === ']' && !--d) break; }
+  const projects = eval(homeSrc.slice(s0, e + 1));
+  const slug = t => String(t).normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '');
+  const expected = {}; projects.forEach((pr, n) => { if (pr.director === 'Elliot Holbrow') return; (expected[pr.director] = expected[pr.director] || []).push([n + 1, pr.title, pr.slug || slug(pr.title)]); });
+  const cSrc = fs.readFileSync(path.join(__dirname, '..', 'contact.js'), 'utf8');
+  const c0 = cSrc.indexOf('var DIRECTORS = ') + 'var DIRECTORS = '.length; d = 0; e = c0;
+  for (; e < cSrc.length; e++) { if (cSrc[e] === '[') d++; if (cSrc[e] === ']' && !--d) break; }
+  const listed = eval(cSrc.slice(c0, e + 1));
+  check('contact: directors list matches the projects', JSON.stringify(listed) === JSON.stringify(Object.keys(expected).sort().map(n => [n, expected[n]])));
+
   for (const [name, opts] of [['contact desktop', { viewport: { width: 1440, height: 900 } }], ['contact iPhone', devices['iPhone 13']]]) {
+    const desktop = name.includes('desktop');
     const c = await b.newContext(opts); await routes(c, base);
+    if (desktop) await c.grantPermissions(['clipboard-read', 'clipboard-write'], { origin: base });
     const p = await c.newPage(); const errors = []; p.on('pageerror', e => errors.push(e.message));
     await p.goto(base + '/contact'); await wait(p, 800);
     const r = await p.evaluate(() => {
       const h = document.querySelector('.contact-page .index-heading');
-      return { built: h.classList.contains('is-built'), text: h.innerText.replace(/\s+/g, ' '), rows: document.querySelectorAll('.contact-row').length, leaders: [...document.querySelectorAll('.contact-leader')].filter(l => getComputedStyle(l).display !== 'none').length, overflow: document.documentElement.scrollWidth > innerWidth + 1, nameX: Math.round(document.querySelector('.site-name').getBoundingClientRect().left) };
+      const after = el => getComputedStyle(el, '::after');
+      const firstShown = row => [...row.querySelectorAll('.contact-label, .contact-value')].find(x => getComputedStyle(x).display !== 'none');
+      return { built: h.classList.contains('is-built'), text: h.innerText.replace(/\s+/g, ' '),
+        rows: document.querySelectorAll('.contact-list .contact-row').length, directors: document.querySelectorAll('.contact-director').length,
+        dotted: [...document.querySelectorAll('.contact-row')].every(row => after(firstShown(row)).borderBottomStyle === 'dotted'),
+        actions: [...document.querySelectorAll('.contact-list .contact-action')].map(a => a.textContent),
+        clock: document.querySelector('.contact-clock').textContent,
+        link: document.querySelector('.contact-project').getAttribute('href'),
+        overflow: document.documentElement.scrollWidth > innerWidth + 1 };
     });
-    check(name + ': same name bar as projects' + (name.includes('desktop') ? '' : ', Work link only'), r.built && (name.includes('desktop') ? /Elliot Holbrow Cinematographer, London Work Contact/ : /^Elliot Holbrow Work Cinematographer, London$|^Elliot Holbrow Cinematographer, London Work$/).test(r.text.trim()), r);
-    check(name + ': rows without dotted leaders, no sideways scroll', r.rows === 5 && r.leaders === 0 && !r.overflow, r);
-    const lineup = await p.evaluate(() => ({ name: Math.round(document.querySelector('.site-name').getBoundingClientRect().left), label: Math.round(document.querySelector('.contact-label').getBoundingClientRect().left), role: Math.round(document.querySelector('.site-role').getBoundingClientRect().left), value: Math.round(document.querySelector('.contact-value').getBoundingClientRect().left), sizes: [...new Set([...document.querySelectorAll('.contact-page *')].filter(e => e.offsetParent).map(e => getComputedStyle(e).fontSize))] }));
-    check(name + ': labels line up with the name' + (name.includes('desktop') ? ', values with the role' : ''), lineup.label === lineup.name && (!name.includes('desktop') || lineup.value === lineup.role), lineup);
+    check(name + ': same name bar as projects' + (desktop ? '' : ', Work link only'), r.built && (desktop ? /Elliot Holbrow Cinematographer, London Work Contact/ : /^Elliot Holbrow Work Cinematographer, London$|^Elliot Holbrow Cinematographer, London Work$/).test(r.text.trim()), r);
+    check(name + ': 5 numbered contact rows and 12 directors, all with dotted leaders, no sideways scroll', r.rows === 5 && r.directors === 12 && r.dotted && !r.overflow, r);
+    check(name + ': actions on the right', r.actions.join('|') === (desktop ? 'Copy|Copy|Email|Open \u2197|Open \u2197' : 'Email|Call|Email|Open \u2197|Open \u2197'), r.actions);
+    check(name + ': London clock', /^London \d\d:\d\d (BST|GMT)$/.test(r.clock), r.clock);
+    check(name + ': project numbers link to the project', r.link === '/projects#swank-mami-mc69', r.link);
+    const lineup = await p.evaluate(() => ({ name: Math.round(document.querySelector('.site-name').getBoundingClientRect().left), number: Math.round(document.querySelector('.contact-number').getBoundingClientRect().left), title: Math.round(document.querySelector('.contact-tools').getBoundingClientRect().left), sizes: [...new Set([...document.querySelectorAll('.contact-page *')].filter(e => e.offsetParent).map(e => getComputedStyle(e).fontSize))] }));
+    check(name + ': rows line up with the name', lineup.number === lineup.name && lineup.title === lineup.name, lineup);
     check(name + ': all text is 11px', lineup.sizes.length === 1 && lineup.sizes[0] === '11px', lineup.sizes);
-    await p.screenshot({ path: shot(name.replace(/\W+/g, '-') + '') });
+    if (desktop) {
+      await p.locator('.contact-list .contact-row').first().click(); await wait(p, 300);
+      const copied = await p.evaluate(async () => ({ label: document.querySelector('.contact-action').textContent, clip: await navigator.clipboard.readText(), url: location.pathname }));
+      check(name + ': clicking the email copies it', copied.label === 'Copied' && copied.clip === 'elliotholbrow@gmail.com' && copied.url === '/contact', copied);
+    }
+    await p.screenshot({ path: shot(name.replace(/\W+/g, '-') + ''), fullPage: true });
     check(name + ': no script errors', errors.length === 0, errors);
     await c.close();
   }

@@ -28,6 +28,7 @@ Elliot Holbrow's cinematography portfolio. Read README.md first for how the site
 - Scrub preview: like YouTube, but with square corners and no border, time in white below.
 - Phone rows: number, title and director. A Dir / Type switch above the list slides the right-hand column to the type (row by row) and back; the choice is remembered on the device.
 - Phones: the name bar shows only the link to the other page (Contact on the projects page, Work on the contact page), with no underline; filters stay on one line.
+- Contact page (Oct 2 2026, option A of two mockups): laid out like the project list. "Contact" with a live London clock, numbered rows with dotted leaders and an action (desktop: Copy for email and phone; phones: Email / Call; Open for links), then the directors list with project numbers that open the project, and the same footer. All built by contact.js; its DIRECTORS list must match PROJECTS in home.js (the suite checks).
 - Landing reel is desktop only; phones go straight to `/projects`.
 
 ## Testing
