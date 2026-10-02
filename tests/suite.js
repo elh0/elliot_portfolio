@@ -153,6 +153,7 @@ async function desktop(b) {
   const light = await p.evaluate(() => ({ bg: getComputedStyle(document.body).backgroundColor, row: getComputedStyle(document.querySelector('details[open] summary .project-title-text')).color, dim: getComputedStyle(document.querySelector('.project-columns span')).color, name: getComputedStyle(document.querySelector('.site-name')).color }));
   check('desktop: light theme flips table colours', light.bg === 'rgb(248, 248, 248)' && light.row === 'rgb(0, 0, 0)' && light.name === 'rgb(0, 0, 0)' && light.dim === 'rgba(0, 0, 0, 0.35)', light);
   await p.screenshot({ path: shot('light') });
+  check('desktop: no Dir / Type switch, director column stays', await p.evaluate(() => getComputedStyle(document.querySelector('.project-detail-switch')).display === 'none' && getComputedStyle(document.querySelector('summary .project-director')).opacity === '1'));
   check('desktop: no horizontal scroll', !(await state(p)).overflow);
   check('desktop: no script errors', errors.length === 0, errors);
   await c.close();
@@ -183,7 +184,7 @@ async function phone(b, name, opts, sideways) {
   await p.goto(base + '/projects'); await wait(p, 800);
   const look = await p.evaluate(() => {
     const s = document.querySelector('summary');
-    return { shown: [...s.children].filter(c => getComputedStyle(c).display !== 'none').map(c => c.textContent), cols: getComputedStyle(document.querySelector('.project-columns')).display, intro: !!document.querySelector('.page-background') };
+    return { shown: [...s.children].filter(c => getComputedStyle(c).display !== 'none' && getComputedStyle(c).opacity !== '0').map(c => c.textContent), cols: getComputedStyle(document.querySelector('.project-columns')).display, intro: !!document.querySelector('.page-background') };
   });
   check(name + ': rows show number, title, director', look.shown.join('|') === '01|Polène SS24|Guillaume Lebel' && look.cols === 'none', look);
   check(name + ': no intro reel', !look.intro);
@@ -197,6 +198,14 @@ async function phone(b, name, opts, sideways) {
   check(name + ': name bar shows only Contact, on the name line, no underline', bar.links.join() === 'Contact' && bar.sameLine && bar.underline.every(c => c === 'rgba(0, 0, 0, 0)'), bar);
   check(name + ': filters on one line', bar.filterRows === 1, bar);
   if (!sideways) check(name + ': same 20px margin as the contact page', bar.left === 20, bar);
+  // Dir / Type switch slides the right-hand column between director and type
+  await p.locator('.project-detail[data-detail="type"]').tap(); await wait(p, 1200);
+  const shown = await p.evaluate(() => { const s = document.querySelectorAll('summary')[2]; return { dir: getComputedStyle(s.querySelector('.project-director')).opacity, type: getComputedStyle(s.querySelector('.project-category')).opacity, text: s.querySelector('.project-category').textContent }; });
+  check(name + ': Type switch slides in the type', shown.dir === '0' && shown.type === '1' && shown.text === 'Music', shown);
+  await p.reload(); await wait(p, 800);
+  const kept = await p.evaluate(() => document.querySelector('[id="X1134136285"]').classList.contains('shows-type'));
+  check(name + ': Dir / Type choice is remembered', kept);
+  await p.locator('.project-detail[data-detail="director"]').tap(); await wait(p, 800);
   await p.screenshot({ path: shot(name.replace(/\W+/g, '-') + '-list') });
 
   await p.locator('summary').nth(0).tap(); await wait(p, 1500);

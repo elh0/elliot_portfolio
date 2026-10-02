@@ -5,7 +5,7 @@
     for a few minutes after a change. Load the stylesheet this script was
     written for, then drop the plain link. Bump with every home.css change
     the script relies on. */
- var STYLE_VERSION = "2026-10-02-a";
+ var STYLE_VERSION = "2026-10-02-b";
  (function loadMatchingStyles() {
    var script = document.currentScript;
    if (!script || !script.src) return;
@@ -422,6 +422,8 @@
      details.setAttribute("data-slug", project.slug || slugify(project.title));
 
      details.setAttribute("data-category", project.category);
+     /* Staggers the phone Dir / Type slide down the list (home.css). */
+     details.style.setProperty("--row-index", String(index));
 
      /* One table row: number, title, director, format, type, running time.
         Phones show only the number, title and type (home.css). */
@@ -616,6 +618,31 @@
      views.appendChild(button);
    });
    tools.appendChild(filters);
+   /* Phones: what the right-hand column shows, director or type. The
+      choice is remembered on this device. */
+   var DETAIL_KEY = "elliotRowDetail";
+   function setRowDetail(detail) {
+     page.classList.toggle("shows-type", detail === "type");
+     page.querySelectorAll(".project-detail").forEach(function (button) {
+       button.setAttribute("aria-pressed",
+         String(button.getAttribute("data-detail") === detail));
+     });
+     try { window.localStorage.setItem(DETAIL_KEY, detail); } catch (error) {}
+   }
+   var detailSwitch = el("div", "project-detail-switch");
+   detailSwitch.setAttribute("role", "group");
+   detailSwitch.setAttribute("aria-label", "Show in each row");
+   [["director", "Dir"], ["type", "Type"]].forEach(function (detail, i) {
+     if (i) detailSwitch.appendChild(el("span", "project-detail-slash", "/"));
+     var button = el("button", "project-detail", detail[1]);
+     button.type = "button";
+     button.setAttribute("data-detail", detail[0]);
+     button.addEventListener("click", function () {
+       setRowDetail(detail[0]);
+     });
+     detailSwitch.appendChild(button);
+   });
+   views.appendChild(detailSwitch);
    tools.appendChild(views);
 
    var columns = el("div", "project-columns");
@@ -662,6 +689,9 @@
 
    setProjectFilter("All");
    setProjectView("list");
+   var savedDetail = null;
+   try { savedDetail = window.localStorage.getItem(DETAIL_KEY); } catch (error) {}
+   setRowDetail(savedDetail === "type" ? "type" : "director");
  }
 
  renderProjects();
