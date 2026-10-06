@@ -19,6 +19,7 @@ const server = http.createServer((req, res) => {
   const u = new URL(req.url, 'http://x');
   if (u.pathname === '/projects') { res.writeHead(200, {'content-type': 'text/html'}); return res.end(page('home.html', 'X1134136285')); }
   if (u.pathname === '/contact') { res.writeHead(200, {'content-type': 'text/html'}); return res.end(page('contact.html', 'X999')); }
+  if (u.pathname === '/release') { res.writeHead(200, {'content-type': 'text/html'}); return res.end(page('release.html', 'X998')); }
   if (u.pathname === '/clip.mp4') {
     const file = path.join(T, 'clip.webm'); const size = fs.statSync(file).size;
     const range = req.headers.range;

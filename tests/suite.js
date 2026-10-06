@@ -1,4 +1,4 @@
-/* Checks the projects and contact pages in Chromium on desktop, an iPhone,
+/* Checks the projects, contact and release pages in Chromium on desktop, an iPhone,
    and iPhones held sideways. Run: node tests/suite.js (needs Playwright).
    Real-iPhone behaviour (sound, gestures) still needs a check on a phone. */
 const { chromium, devices } = require('playwright');
@@ -351,6 +351,46 @@ async function contact(b) {
   }
 }
 
+async function release(b) {
+  const q = '/release?type=person&date=10 Oct 2026&place=Brecon Beacons&what=Walking a ridge at dawn';
+  for (const [name, opts] of [['release desktop', { viewport: { width: 1440, height: 900 } }], ['release iPhone', devices['iPhone 13']], ['release iPhone sideways', devices['iPhone 13 landscape']]]) {
+    const c = await b.newContext(opts); await routes(c, base);
+    let posted = null;
+    await c.route(/formsubmit\.co/, async (route) => { posted = { url: route.request().url(), body: route.request().postDataBuffer() }; await route.fulfill({ status: 302, headers: { location: base + '/release?signed=1' } }); });
+    const p = await c.newPage(); const errors = []; p.on('pageerror', e => errors.push(e.message));
+    await p.goto(base + q); await wait(p, 800);
+    const r = await p.evaluate(() => ({
+      phone: document.querySelector('.release-page').classList.contains('is-phone'),
+      fields: document.querySelectorAll('.release-field .release-number').length, // 9 numbered (2 for under-18s only), agree, date
+      prefilled: ['shoot_date', 'shoot_place', 'shoot_what'].map(n => document.querySelector('input[name="' + n + '"]').value),
+      terms: document.querySelectorAll('.release-term-text').length, // in return, 10 terms, 8 explainer rows
+      sizes: [...new Set([...document.querySelectorAll('.release-page *')].filter(e => e.offsetParent).map(e => getComputedStyle(e).fontSize))],
+      dotted: getComputedStyle(document.querySelector('.release-label'), '::after').borderBottomStyle,
+      overflow: document.documentElement.scrollWidth > innerWidth + 1 }));
+    check(name + ': numbered fields, shoot details from the link, terms, dotted leaders', r.fields === 11 && r.prefilled.join('|') === '10 Oct 2026|Brecon Beacons|Walking a ridge at dawn' && r.terms === 19 && r.dotted === 'dotted', r);
+    check(name + ': phone layout only on phones, no sideways scroll, all 11px', r.phone === !name.includes('desktop') && !r.overflow && r.sizes.join() === '11px', r);
+    await p.locator('.release-send').click(); await wait(p, 200);
+    const e1 = await p.textContent('.release-error');
+    await p.fill('input[name=name]', 'Test Person'); await p.fill('input[name=address]', '1 Street'); await p.fill('input[name=email]', 'test@example.com');
+    await p.locator('.release-choice', { hasText: 'Under 18' }).click();
+    const guardian = await p.locator('input[name=guardian_name]').isVisible();
+    await p.locator('.release-choice', { hasText: '18 or over' }).click();
+    await p.locator('.release-send').click(); await wait(p, 200);
+    const e2 = await p.textContent('.release-error');
+    await p.locator('.release-choice', { hasText: "I've read" }).click();
+    await p.locator('.release-pad').scrollIntoViewIfNeeded();
+    const box = await p.locator('.release-pad canvas').boundingBox();
+    await p.mouse.move(box.x + 20, box.y + box.height * 0.6); await p.mouse.down();
+    await p.mouse.move(box.x + 120, box.y + box.height * 0.3, { steps: 10 }); await p.mouse.up();
+    await p.locator('.release-send').click(); await wait(p, 1500);
+    check(name + ': asks for missing details, agreement and shows the guardian rows for under-18s', e1 === 'Please fill in full name.' && e2 === 'Please tap to agree.' && guardian, { e1, e2, guardian });
+    const body = posted ? posted.body.toString('latin1') : '';
+    check(name + ': sends to FormSubmit with the signature attached, then says thanks', !!posted && posted.url === 'https://formsubmit.co/elliotholbrow@gmail.com' && body.includes('Test Person') && body.includes('filename="signature.png"') && body.includes('person-release v1.1') && /\/release\?signed=1$/.test(p.url()) && (await p.textContent('.release-form')).startsWith('Signed'), posted && posted.url);
+    check(name + ': no script errors', errors.length === 0, errors);
+    await c.close();
+  }
+}
+
 server.listen(8123, async () => {
   const b = await chromium.launch({ args: ['--autoplay-policy=no-user-gesture-required'] });
   try {
@@ -359,6 +399,7 @@ server.listen(8123, async () => {
     await phone(b, 'iPhone 13 sideways', devices['iPhone 13 landscape'], true);
     await phone(b, 'iPhone Pro Max sideways', devices['iPhone 14 Pro Max landscape'], true);
     await contact(b);
+    await release(b);
   } catch (e) { fail++; console.log('FAIL crashed: ' + e.stack); }
   console.log(`\n${pass} passed, ${fail} failed`);
   await b.close(); server.close();

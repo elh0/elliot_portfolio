@@ -1,0 +1,482 @@
+/* Release page (elliot.onl/release): a form people open from a link, fill
+   in, sign with a finger and send. Built by release.js, laid out like the
+   contact page: numbered rows with dotted leaders, the field in the
+   details column and its action on the right. Phones get .is-phone from
+   release.js (same PHONE_QUERY as home.js), so there's one set of rules. */
+
+body:has(.release-page) {
+  background: #000000 !important;
+  color: #ffffff !important;
+}
+
+.page:has(.release-page) {
+  min-height: auto !important;
+  padding: 0 !important;
+}
+
+.page-layout:has(.release-page) {
+  width: 100% !important;
+  max-width: 100% !important;
+  padding: 0 !important;
+  align-items: flex-start !important;
+  align-content: flex-start !important;
+  justify-content: flex-start !important;
+}
+
+.page-content:has(.release-page) {
+  align-self: flex-start !important;
+  box-sizing: border-box !important;
+  width: 100% !important;
+  max-width: none !important;
+  margin: 0 !important;
+  padding: 18px clamp(24px, 4.5vw, 72px) 4rem !important;
+  text-align: left !important;
+  background: transparent !important;
+}
+
+html body .release-page,
+html body .release-page * {
+  box-sizing: border-box;
+  color: #ffffff;
+  font-family: ui-monospace, "SFMono-Regular", Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace !important;
+  font-size: 11px !important;
+  font-weight: 400 !important;
+  font-style: normal !important;
+  line-height: 1.65 !important;
+  letter-spacing: 0 !important;
+  -webkit-text-size-adjust: 100%;
+  text-size-adjust: 100%;
+}
+
+html body .release-page a,
+html body .release-page a:hover,
+html body .release-page a:active {
+  border: 0 !important;
+  box-shadow: none !important;
+  background: none !important;
+  text-decoration: none !important;
+}
+
+.release-page [hidden] {
+  display: none !important;
+}
+
+.release-page {
+  --row-columns: 4ch minmax(0, 3fr) minmax(0, 2fr) minmax(0, 2fr) minmax(0, 1.2fr) 5ch;
+  --row-dim: #8f8f8f;
+  --row-faint: rgba(255, 255, 255, 0.42);
+  --row-leader: rgba(255, 255, 255, 0.3);
+}
+
+/* Name bar, as on the other pages */
+
+.release-page .index-heading.is-built {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 0 2ch;
+  align-items: baseline;
+  margin: 0;
+}
+
+html body .release-page .site-role {
+  color: var(--row-dim) !important;
+}
+
+.release-page .site-nav {
+  display: flex;
+  justify-self: end;
+  gap: 2.5ch;
+}
+
+html body .release-page .site-nav a {
+  border-bottom: 1px solid transparent !important;
+}
+
+html body .release-page .site-nav a:hover {
+  border-bottom-color: #ffffff !important;
+}
+
+/* "Person release" and the explainer link, like "Contact" and the clock */
+
+.release-page .release-tools {
+  display: flex;
+  justify-content: space-between;
+  gap: 0 3ch;
+  margin-top: clamp(4rem, 14vh, 9rem);
+}
+
+html body .release-page .release-tools a,
+html body .release-page .release-intro {
+  color: var(--row-dim) !important;
+}
+
+html body .release-page .release-tools a:hover {
+  color: #ffffff !important;
+}
+
+.release-page .release-intro {
+  max-width: 62ch;
+  margin: 0 0 14px;
+}
+
+/* Rows */
+
+.release-page .release-section {
+  margin-top: 2.4rem;
+}
+
+.release-page .release-columns,
+.release-page .release-row {
+  display: grid;
+  grid-template-columns: var(--row-columns);
+  column-gap: 2ch;
+  align-items: baseline;
+}
+
+html body .release-page .release-columns,
+html body .release-page .release-columns * {
+  color: var(--row-faint) !important;
+}
+
+.release-page .release-columns {
+  padding-bottom: 6px;
+}
+
+.release-page .release-columns span:nth-child(3) {
+  grid-column: 3 / span 2;
+}
+
+.release-page .release-row {
+  padding: 4px 0;
+}
+
+html body .release-page .release-number {
+  grid-column: 1;
+  color: var(--row-dim) !important;
+  font-variant-numeric: tabular-nums;
+}
+
+.release-page .release-label,
+.release-page .release-value {
+  display: flex;
+  align-items: baseline;
+  min-width: 0;
+}
+
+.release-page .release-label {
+  grid-column: 2;
+}
+
+.release-page .release-value {
+  grid-column: 3 / span 2;
+}
+
+.release-page .release-label::after,
+.release-page .release-value::after {
+  flex: 1 1 0;
+  min-width: 2ch;
+  margin-left: 1ch;
+  border-bottom: 1px dotted var(--row-leader);
+  content: "";
+  transform: translateY(-0.3em);
+  transition: border-color 240ms ease;
+}
+
+.release-page .release-label-text {
+  flex: 0 1 auto;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+html body .release-page .release-action {
+  grid-column: 5 / span 2;
+  color: var(--row-dim) !important;
+  text-align: right;
+  white-space: nowrap;
+}
+
+/* Typed fields: no box, just the text, sized to what's in it so the
+   leader runs on after it. */
+
+html body .release-page input {
+  flex: 0 1 auto;
+  min-width: 0;
+  max-width: 100%;
+  height: auto;
+  margin: 0;
+  padding: 0;
+  border: 0 !important;
+  border-radius: 0;
+  outline: 0;
+  background: transparent !important;
+  box-shadow: none !important;
+  color: #ffffff !important;
+  caret-color: #ffffff;
+  -webkit-appearance: none;
+  appearance: none;
+}
+
+html body .release-page input::placeholder {
+  color: var(--row-faint) !important;
+  opacity: 1;
+}
+
+.release-page .release-row.is-focus .release-value::after,
+.release-page .release-row.is-focus .release-label::after {
+  border-bottom-color: rgba(255, 255, 255, 0.85);
+}
+
+html body .release-page .release-row.is-missing .release-action {
+  color: #ffffff !important;
+}
+
+/* Choices (age, agree): words, the chosen one white, like the filters */
+
+html body .release-page .release-choice {
+  margin: 0 2ch 0 0;
+  padding: 0;
+  border: 0;
+  background: none;
+  color: var(--row-faint) !important;
+  cursor: pointer;
+}
+
+html body .release-page .release-choice.is-on,
+html body .release-page .release-choice:hover {
+  color: #ffffff !important;
+}
+
+.release-page .release-choices {
+  grid-column: 3 / span 2;
+}
+
+/* Terms: lettered, label then the words, wrapping */
+
+html body .release-page .release-term-text {
+  grid-column: 3 / span 4;
+  max-width: 78ch;
+  color: #d6d6d6 !important;
+}
+
+.release-page .release-term {
+  padding: 5px 0;
+}
+
+/* Signature: a dotted line to sign on, Clear on the right */
+
+.release-page .release-pad {
+  position: relative;
+  grid-column: 3 / span 2;
+  align-self: end;
+  height: 120px;
+  touch-action: none;
+  cursor: crosshair;
+}
+
+.release-page .release-pad::after {
+  position: absolute;
+  right: 0;
+  bottom: 0;
+  left: 0;
+  border-bottom: 1px dotted rgba(255, 255, 255, 0.55);
+  content: "";
+  pointer-events: none;
+}
+
+.release-page .release-pad canvas {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+}
+
+html body .release-page .release-pad-hint {
+  position: absolute;
+  bottom: 6px;
+  left: 0;
+  color: var(--row-faint) !important;
+  pointer-events: none;
+}
+
+.release-page .release-row.release-sign {
+  align-items: end;
+}
+
+.release-page .release-sign .release-label {
+  padding-bottom: 4px;
+}
+
+html body .release-page .release-sign .release-action {
+  padding-bottom: 4px;
+}
+
+html body .release-page button.release-action {
+  justify-self: end;
+  margin: 0;
+  padding: 0;
+  border: 0;
+  background: none;
+  cursor: pointer;
+}
+
+html body .release-page button.release-action:hover {
+  color: #ffffff !important;
+}
+
+/* Send: the whole row is the button */
+
+html body .release-page .release-send {
+  display: grid;
+  grid-template-columns: var(--row-columns);
+  column-gap: 2ch;
+  align-items: baseline;
+  width: 100%;
+  margin: 2rem 0 0;
+  padding: 10px 0;
+  border: 0;
+  background: none;
+  text-align: left;
+  cursor: pointer;
+}
+
+.release-page .release-send .release-label {
+  grid-column: 2 / span 4;
+}
+
+html body .release-page .release-send .release-action {
+  grid-column: 6;
+  color: #ffffff !important;
+}
+
+.release-page .release-send:hover .release-label::after {
+  border-bottom-color: rgba(255, 255, 255, 0.85);
+}
+
+html body .release-page .release-send[disabled] * {
+  color: var(--row-faint) !important;
+}
+
+html body .release-page .release-error {
+  grid-column: 2 / span 5;
+  min-height: 1.65em;
+  color: #ffffff !important;
+}
+
+/* Hovering fades the other rows back, as on the other pages */
+@media (hover: hover) and (pointer: fine) {
+  html body .release-page .release-fields:hover .release-row:not(:hover):not(.is-focus) .release-label-text {
+    color: var(--row-faint) !important;
+  }
+}
+
+.release-page .release-footer {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  gap: 6px 3ch;
+  margin-top: 5rem;
+}
+
+html body .release-page .release-footer,
+html body .release-page .release-footer * {
+  color: var(--row-dim) !important;
+}
+
+/* ---------------------------------------------------------------------
+   Phones: name bar on one line with just Work; each row is the number,
+   the label with its leader and the action, then the field below it.
+   --------------------------------------------------------------------- */
+
+.page-content:has(.release-page.is-phone) {
+  padding: 16px 20px 3rem !important;
+}
+
+.release-page.is-phone .index-heading.is-built {
+  grid-template-columns: minmax(0, 1fr) auto;
+}
+
+.release-page.is-phone .site-role {
+  grid-row: 2;
+  grid-column: 1;
+}
+
+.release-page.is-phone .site-nav {
+  grid-row: 1;
+  grid-column: 2;
+}
+
+.release-page.is-phone .site-nav .is-contact {
+  display: none !important;
+}
+
+.release-page.is-phone .release-tools {
+  margin-top: 3.5rem;
+}
+
+.release-page.is-phone .release-columns {
+  grid-template-columns: 4ch minmax(0, 1fr);
+}
+
+.release-page.is-phone .release-columns span:nth-child(3) {
+  display: none;
+}
+
+.release-page.is-phone .release-row {
+  grid-template-columns: 4ch minmax(0, 1fr) auto;
+  padding: 0.35rem 0 0.3rem;
+}
+
+.release-page.is-phone .release-label {
+  grid-column: 2;
+  grid-row: 1;
+}
+
+html body .release-page.is-phone .release-field .release-label-text {
+  color: var(--row-dim) !important;
+}
+
+html body .release-page.is-phone .release-action {
+  grid-column: 3;
+  grid-row: 1;
+}
+
+.release-page.is-phone .release-value,
+.release-page.is-phone .release-choices,
+.release-page.is-phone .release-term-text,
+.release-page.is-phone .release-pad {
+  grid-column: 2 / span 2;
+  grid-row: 2;
+}
+
+.release-page.is-phone .release-pad {
+  height: 140px;
+}
+
+.release-page.is-phone .release-sign .release-label {
+  padding-bottom: 0;
+}
+
+.release-page.is-phone .release-send .release-label {
+  grid-column: 2;
+}
+
+html body .release-page.is-phone .release-send .release-action {
+  grid-column: 3;
+}
+
+.release-page.is-phone .release-send {
+  grid-template-columns: 4ch minmax(0, 1fr) auto;
+  padding: 14px 0;
+}
+
+.release-page.is-phone .release-error {
+  grid-column: 2 / span 2;
+}
+
+.release-page.is-phone .release-footer {
+  flex-direction: column;
+  gap: 0.1rem;
+  margin-top: 3rem;
+}
