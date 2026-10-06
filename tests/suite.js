@@ -367,10 +367,12 @@ async function release(b) {
       sizes: [...new Set([...document.querySelectorAll('.release-page *')].filter(e => e.offsetParent).map(e => getComputedStyle(e).fontSize))],
       dotted: [...document.querySelectorAll('.release-row .release-label')].filter(l => l.offsetParent).every(l => getComputedStyle(l, '::after').borderBottomStyle === 'dotted'),
       underlined: [...document.querySelectorAll('.release-page input')].filter(i => i.offsetParent).some(i => getComputedStyle(i).borderBottomStyle !== 'none'),
-      stars: document.querySelectorAll('.release-star').length, actions: [...document.querySelectorAll('.release-action')].map(a => a.textContent).filter(Boolean),
+      stars: document.querySelectorAll('.release-choices .release-star').length + ['name', 'address', 'email'].filter(n => document.querySelector('input[name=' + n + ']').placeholder.endsWith('*')).length + (document.querySelector('.release-pad-hint').textContent.endsWith('*') ? 1 : 0), actions: [...document.querySelectorAll('.release-action')].map(a => a.textContent).filter(Boolean),
       overflow: document.documentElement.scrollWidth > innerWidth + 1 }));
-    check(name + ': numbered fields, shoot details from the link, terms, dotted leaders, no underlines, asterisks not Required', r.fields === 12 && r.prefilled.join('|') === '10 Oct 2026|Brecon Beacons|Walking a ridge at dawn' && r.terms === 19 && r.dotted && !r.underlined && r.stars >= 6 && r.actions.join() === 'Clear', r);
+    check(name + ': numbered fields, shoot details from the link, terms, dotted leaders, no underlines, asterisks on the grey hints, not Required', r.fields === 12 && r.prefilled.join('|') === '10 Oct 2026|Brecon Beacons|Walking a ridge at dawn' && r.terms === 19 && r.dotted && !r.underlined && r.stars === 6 && r.actions.join() === 'Clear', r);
     check(name + ': phone layout only on phones, no sideways scroll, all 11px', r.phone === !name.includes('desktop') && !r.overflow && r.sizes.join() === '11px', r);
+    await p.evaluate(() => { document.querySelectorAll('.release-page .index-heading, .release-page .release-form').forEach(n => { while (n.firstChild) n.firstChild.remove(); }); }); await wait(p, 300);
+    check(name + ': rebuilds the form if Cargo redraws the page', await p.evaluate(() => !!document.querySelector('.release-page .site-name') && document.querySelectorAll('.release-field .release-number').length === 12));
     await p.locator('.release-send').click(); await wait(p, 200);
     const e1 = await p.textContent('.release-error');
     await p.fill('input[name=name]', 'Test Person'); await p.fill('input[name=address]', '1 Street'); await p.fill('input[name=email]', 'test@example.com');

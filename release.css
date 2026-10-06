@@ -228,10 +228,11 @@ html body .release-page input::placeholder {
   border-bottom-color: rgba(255, 255, 255, 0.85);
 }
 
-/* Asterisk right on the end of the label, "Full name*" */
+/* Required: an asterisk on the end of the grey hint (in the placeholder
+   for typed fields; after the choices for age and agree) */
 html body .release-page .release-star {
-  flex: 0 0 auto;
-  margin-left: 0;
+  margin-left: -2ch;
+  color: var(--row-faint) !important;
 }
 
 html body .release-page .release-row.is-missing .release-star {
