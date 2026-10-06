@@ -22,7 +22,12 @@
      all). replace() keeps the back button from bouncing back here.
      Everything below is the old full-screen landing, kept in case it's
      wanted again: delete this block to bring it back. */
-  window.location.replace("/projects");
+  /* Not inside Cargo's editor, though: there the redirect stops the editor
+     loading ("Redirect encountered"). */
+  var inEditor = /^\/edit(\/|$)/.test(window.location.pathname) ||
+    /[?&]redirected\b/.test(window.location.search);
+  try { inEditor = inEditor || window.self !== window.top; } catch (error) { inEditor = true; }
+  if (!inEditor) window.location.replace("/projects");
   return;
 
   /* Change these to swap the landing video or where its links lead. */
