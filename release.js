@@ -15,7 +15,7 @@
 
   /* Load the release.css this script was written for, in case GitHub Pages
      still has an older copy cached (as contact.js does). Bump with changes. */
-  var STYLE_VERSION = "2026-10-06-e";
+  var STYLE_VERSION = "2026-10-06-f";
   (function loadMatchingStyles() {
     var script = document.currentScript;
     if (!script || !script.src) return;
@@ -501,25 +501,29 @@
           photoCell.appendChild(thumb);
           photoCell.appendChild(picker);
           row.appendChild(photoCell);
-          action = make("button", "release-action", "Add photo");
-          action.type = "button";
-          field.action = action;
+          /* No button on the right (6 Oct 2026): tap the note, or the
+             photo once it's added, to pick one */
           field.input = { value: "" };
+          photoNote.setAttribute("role", "button");
+          photoNote.tabIndex = 0;
           var choose = function () { picker.click(); };
-          action.addEventListener("click", choose);
           photoNote.addEventListener("click", choose);
+          photoNote.addEventListener("keydown", function (event) {
+            if (event.key === "Enter" || event.key === " ") { event.preventDefault(); choose(); }
+          });
           thumb.addEventListener("click", choose);
+          row.querySelector(".release-label").addEventListener("click", choose);
           picker.addEventListener("change", function () {
             if (!picker.files || !picker.files[0]) return;
-            action.textContent = "Loading";
+            photoNote.textContent = "Loading";
             shrinkPhoto(picker.files[0], function (shot) {
               picker.value = "";
-              if (!shot) { action.textContent = "Add photo"; errorText.textContent = "That photo couldn't be opened. Please try another."; return; }
+              photoNote.textContent = field.note;
+              if (!shot) { errorText.textContent = "That photo couldn't be opened. Please try another."; return; }
               photo = shot;
               thumb.src = shot.dataUrl;
               thumb.hidden = false;
               photoNote.hidden = true;
-              action.textContent = "Change";
             });
           });
         } else if (field.choices) {

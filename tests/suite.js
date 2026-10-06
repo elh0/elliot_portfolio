@@ -369,7 +369,7 @@ async function release(b) {
       underlined: [...document.querySelectorAll('.release-page input')].filter(i => i.offsetParent).some(i => getComputedStyle(i).borderBottomStyle !== 'none'),
       stars: document.querySelectorAll('.release-star').length, actions: [...document.querySelectorAll('.release-action')].map(a => a.textContent).filter(Boolean),
       overflow: document.documentElement.scrollWidth > innerWidth + 1 }));
-    check(name + ': numbered fields, shoot details from the link, terms, dotted leaders, no underlines, asterisks not Required', r.fields === 12 && r.prefilled.join('|') === '10 Oct 2026|Brecon Beacons|Walking a ridge at dawn' && r.terms === 19 && r.dotted && !r.underlined && r.stars >= 6 && r.actions.join() === 'Add photo,Clear', r);
+    check(name + ': numbered fields, shoot details from the link, terms, dotted leaders, no underlines, asterisks not Required', r.fields === 12 && r.prefilled.join('|') === '10 Oct 2026|Brecon Beacons|Walking a ridge at dawn' && r.terms === 19 && r.dotted && !r.underlined && r.stars >= 6 && r.actions.join() === 'Clear', r);
     check(name + ': phone layout only on phones, no sideways scroll, all 11px', r.phone === !name.includes('desktop') && !r.overflow && r.sizes.join() === '11px', r);
     await p.locator('.release-send').click(); await wait(p, 200);
     const e1 = await p.textContent('.release-error');
@@ -379,9 +379,11 @@ async function release(b) {
     await p.locator('.release-choice', { hasText: '18 or over' }).click();
     await p.locator('.release-send').click(); await wait(p, 200);
     const e2 = await p.textContent('.release-error');
+    const [chooser] = await Promise.all([p.waitForEvent('filechooser'), p.locator('.release-photo-note').click()]);
+    check(name + ': tapping the photo note opens the picker', !!chooser);
     await p.locator('.release-photo input[type=file]').setInputFiles(path.join(__dirname, '..', 'previews', '486365701.jpg')); await wait(p, 600);
-    const photo = await p.evaluate(() => ({ shown: !document.querySelector('.release-photo-thumb').hidden, action: document.querySelector('.release-photo').parentNode.querySelector('.release-action').textContent }));
-    check(name + ': adding a photo shows it in the form', photo.shown && photo.action === 'Change', photo);
+    const photo = await p.evaluate(() => ({ shown: !document.querySelector('.release-photo-thumb').hidden, noteHidden: document.querySelector('.release-photo-note').hidden }));
+    check(name + ': adding a photo shows it in the form', photo.shown && photo.noteHidden, photo);
     await p.locator('.release-choice', { hasText: "I've read" }).click();
     await p.locator('.release-pad').scrollIntoViewIfNeeded();
     const box = await p.locator('.release-pad canvas').boundingBox();

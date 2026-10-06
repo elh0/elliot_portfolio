@@ -505,7 +505,14 @@ html body .release-page.is-lines .release-row.is-focus .release-label-text {
 
 html body .release-page .release-photo-note {
   color: var(--row-faint) !important;
+  white-space: normal;
   cursor: pointer;
+}
+
+html body .release-page .release-photo-note:hover,
+html body .release-page .release-photo-note:focus-visible {
+  color: #ffffff !important;
+  outline: 0;
 }
 
 .release-page .release-photo .release-photo-thumb {
