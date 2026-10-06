@@ -365,9 +365,11 @@ async function release(b) {
       prefilled: ['shoot_date', 'shoot_place', 'shoot_what'].map(n => document.querySelector('input[name="' + n + '"]').value),
       terms: document.querySelectorAll('.release-term-text').length, // in return, 10 terms, 8 explainer rows
       sizes: [...new Set([...document.querySelectorAll('.release-page *')].filter(e => e.offsetParent).map(e => getComputedStyle(e).fontSize))],
-      dotted: [...document.querySelectorAll('.release-row')].filter(r => r.offsetParent).map(r => { const l = r.querySelector('.release-label'); const a = l && getComputedStyle(l, '::after'); return [!!r.querySelector('input[type=text], input[type=email], input[type=tel]'), !!a && a.borderBottomStyle === 'dotted' && a.borderBottomColor !== 'rgba(0, 0, 0, 0)']; }),
+      dotted: [...document.querySelectorAll('.release-row .release-label')].filter(l => l.offsetParent).every(l => getComputedStyle(l, '::after').borderBottomStyle === 'dotted'),
+      underlined: [...document.querySelectorAll('.release-page input')].filter(i => i.offsetParent).some(i => getComputedStyle(i).borderBottomStyle !== 'none'),
+      stars: document.querySelectorAll('.release-star').length, actions: [...document.querySelectorAll('.release-action')].map(a => a.textContent).filter(Boolean),
       overflow: document.documentElement.scrollWidth > innerWidth + 1 }));
-    check(name + ': numbered fields, shoot details from the link, terms, dotted leaders only on rows you do not type in', r.fields === 12 && r.prefilled.join('|') === '10 Oct 2026|Brecon Beacons|Walking a ridge at dawn' && r.terms === 19 && r.dotted.some(d => d[1]) && r.dotted.every(d => !(d[0] && d[1])), r);
+    check(name + ': numbered fields, shoot details from the link, terms, dotted leaders, no underlines, asterisks not Required', r.fields === 12 && r.prefilled.join('|') === '10 Oct 2026|Brecon Beacons|Walking a ridge at dawn' && r.terms === 19 && r.dotted && !r.underlined && r.stars >= 6 && r.actions.join() === 'Add photo,Clear', r);
     check(name + ': phone layout only on phones, no sideways scroll, all 11px', r.phone === !name.includes('desktop') && !r.overflow && r.sizes.join() === '11px', r);
     await p.locator('.release-send').click(); await wait(p, 200);
     const e1 = await p.textContent('.release-error');

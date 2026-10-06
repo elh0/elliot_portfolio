@@ -228,6 +228,16 @@ html body .release-page input::placeholder {
   border-bottom-color: rgba(255, 255, 255, 0.85);
 }
 
+html body .release-page .release-star {
+  flex: 0 0 auto;
+  margin-left: 0.5ch;
+  color: var(--row-dim) !important;
+}
+
+html body .release-page .release-row.is-missing .release-star {
+  color: #ffffff !important;
+}
+
 html body .release-page .release-row.is-missing .release-action {
   color: #ffffff !important;
 }
@@ -264,12 +274,12 @@ html body .release-page .release-term-text {
   padding: 5px 0;
 }
 
-/* Signature: a dotted line to sign on, Clear on the right */
+/* Signature: a faint line to sign above, Clear on the right */
 
 .release-page .release-pad {
   position: relative;
   grid-column: 3 / span 2;
-  align-self: end;
+  align-self: start;
   height: 120px;
   touch-action: none;
   cursor: crosshair;
@@ -280,7 +290,7 @@ html body .release-page .release-term-text {
   right: 0;
   bottom: 0;
   left: 0;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.55);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.2);
   content: "";
   pointer-events: none;
 }
@@ -294,22 +304,15 @@ html body .release-page .release-term-text {
 
 html body .release-page .release-pad-hint {
   position: absolute;
-  bottom: 6px;
+  top: 0;
   left: 0;
   color: var(--row-faint) !important;
   pointer-events: none;
 }
 
+/* Label, hint and Clear share the top line, like the other rows */
 .release-page .release-row.release-sign {
-  align-items: end;
-}
-
-.release-page .release-sign .release-label {
-  padding-bottom: 4px;
-}
-
-html body .release-page .release-sign .release-action {
-  padding-bottom: 4px;
+  align-items: start;
 }
 
 html body .release-page button.release-action {
@@ -325,15 +328,11 @@ html body .release-page button.release-action:hover {
   color: #ffffff !important;
 }
 
-/* Send: the whole row is the button */
-
+/* Send: just "Sign and send →" in the label column (6 Oct 2026) */
 html body .release-page .release-send {
-  display: grid;
-  grid-template-columns: var(--row-columns);
-  column-gap: 2ch;
-  align-items: baseline;
-  width: 100%;
-  margin: 2rem 0 0;
+  display: inline-block;
+  width: auto;
+  margin: 2rem 0 0 6ch;
   padding: 10px 0;
   border: 0;
   background: none;
@@ -341,17 +340,14 @@ html body .release-page .release-send {
   cursor: pointer;
 }
 
-.release-page .release-send .release-label {
-  grid-column: 2 / span 4;
+html body .release-page .release-send-arrow {
+  display: inline-block;
+  margin-left: 1ch;
+  transition: transform 240ms ease;
 }
 
-html body .release-page .release-send .release-action {
-  grid-column: 6;
-  color: #ffffff !important;
-}
-
-.release-page .release-send:hover .release-label::after {
-  border-bottom-color: rgba(255, 255, 255, 0.85);
+.release-page .release-send:hover .release-send-arrow {
+  transform: translateX(0.5ch);
 }
 
 html body .release-page .release-send[disabled] * {
@@ -458,16 +454,7 @@ html body .release-page.is-phone .release-action {
   padding-bottom: 0;
 }
 
-.release-page.is-phone .release-send .release-label {
-  grid-column: 2;
-}
-
-html body .release-page.is-phone .release-send .release-action {
-  grid-column: 3;
-}
-
 .release-page.is-phone .release-send {
-  grid-template-columns: 4ch minmax(0, 1fr) auto;
   padding: 14px 0;
 }
 
@@ -485,34 +472,25 @@ html body .release-page.is-phone .release-send .release-action {
    Writing lines (option B, picked 6 Oct 2026; release.js adds .is-lines):
    each typed field gets a full-width line to write on, brighter while
    you're typing in it, instead of the text sitting in the dotted leader.
+   Since 6 Oct 2026 the lines themselves are gone: the field just fills
+   the details column.
    --------------------------------------------------------------------- */
 
 html body .release-page.is-lines input {
   flex: 1 1 auto;
   width: 100% !important;
-  padding: 2px 0 3px;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.28) !important;
-  transition: border-color 240ms ease;
 }
 
-html body .release-page.is-lines .release-row.is-focus input,
-html body .release-page.is-lines input:hover {
-  border-bottom-color: #ffffff !important;
-}
-
-html body .release-page.is-lines .release-row.is-missing input {
-  border-bottom-color: #ffffff !important;
+/* No underline either (6 Oct 2026): you just type, lined up with the
+   other rows' text; a missing field's placeholder turns white. */
+html body .release-page.is-lines .release-row.is-missing input::placeholder {
+  color: #ffffff !important;
 }
 
 .release-page.is-lines .release-field .release-value::after {
   display: none;
 }
 
-/* No leader on rows you type into, where it read as part of the writing
-   line (6 Oct 2026); the other rows keep theirs. */
-.release-page .release-row:has(input[type="text"], input[type="email"], input[type="tel"]) .release-label::after {
-  border-bottom-color: transparent !important;
-}
 
 html body .release-page.is-lines .release-row.is-focus .release-label-text {
   color: #ffffff !important;

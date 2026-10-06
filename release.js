@@ -15,7 +15,7 @@
 
   /* Load the release.css this script was written for, in case GitHub Pages
      still has an older copy cached (as contact.js does). Bump with changes. */
-  var STYLE_VERSION = "2026-10-06-d";
+  var STYLE_VERSION = "2026-10-06-e";
   (function loadMatchingStyles() {
     var script = document.currentScript;
     if (!script || !script.src) return;
@@ -139,9 +139,11 @@
     return (number < 10 ? "0" : "") + number;
   }
 
-  function labelCell(text) {
+  function labelCell(text, required) {
     var label = make("span", "release-label");
     label.appendChild(make("span", "release-label-text", text));
+    /* Required fields get an asterisk by the label (6 Oct 2026) */
+    if (required) label.appendChild(make("span", "release-star", "*"));
     return label;
   }
 
@@ -480,8 +482,8 @@
         number += 1;
         var row = make("div", "release-row release-field");
         row.appendChild(make("span", "release-number", pad(number)));
-        row.appendChild(labelCell(field.label));
-        var action = make("span", "release-action", field.required ? "Required" : "");
+        row.appendChild(labelCell(field.label, field.required || field.guardian));
+        var action = make("span", "release-action", "");
         field.row = row;
         field.action = action;
 
@@ -560,9 +562,6 @@
             if (input.value.trim()) {
               if (row.classList.contains("is-missing")) errorText.textContent = "";
               row.classList.remove("is-missing");
-              if (field.required) action.textContent = "";
-            } else if (field.required) {
-              action.textContent = "Required";
             }
           });
           input.addEventListener("focus", function () { row.classList.add("is-focus"); });
@@ -592,7 +591,6 @@
       guardianRows.forEach(function (field) {
         field.row.hidden = !minor;
         field.required = minor;
-        field.action.textContent = minor && !field.input.value.trim() ? "Required" : "";
       });
       agreeText.textContent = minor
         ? "I'm their parent or guardian, I've read this and I agree on their behalf."
@@ -620,7 +618,7 @@
 
     var agreeRow = make("div", "release-row release-field");
     agreeRow.appendChild(make("span", "release-number", ""));
-    agreeRow.appendChild(labelCell("Agree"));
+    agreeRow.appendChild(labelCell("Agree", true));
     var agreeChoices = make("span", "release-choices");
     var agreeButton = make("button", "release-choice");
     agreeButton.type = "button";
@@ -628,14 +626,11 @@
     agreeButton.appendChild(agreeText);
     agreeChoices.appendChild(agreeButton);
     agreeRow.appendChild(agreeChoices);
-    var agreeAction = make("span", "release-action", "Tap to agree");
-    agreeRow.appendChild(agreeAction);
     var agreed = false;
     function toggleAgree() {
       agreed = !agreed;
       agreeButton.classList.toggle("is-on", agreed);
       agreeButton.setAttribute("aria-pressed", agreed ? "true" : "false");
-      agreeAction.textContent = agreed ? "Agreed" : "Tap to agree";
       agreeRow.classList.remove("is-missing");
       errorText.textContent = "";
     }
@@ -646,7 +641,7 @@
 
     var signRow = make("div", "release-row release-sign");
     signRow.appendChild(make("span", "release-number", ""));
-    var signLabel = labelCell("Signature");
+    var signLabel = labelCell("Signature", true);
     sigLabel = signLabel.firstChild;
     signRow.appendChild(signLabel);
     var padBox = make("span", "release-pad");
@@ -671,8 +666,9 @@
 
     var send = make("button", "release-send");
     send.type = "submit";
-    send.appendChild(labelCell("Sign and send"));
-    var sendArrow = make("span", "release-action", "→");
+    /* Just the words and an arrow, no leader (6 Oct 2026) */
+    send.appendChild(make("span", "release-label-text", "Sign and send"));
+    var sendArrow = make("span", "release-send-arrow", "→");
     send.appendChild(sendArrow);
     signBlock.appendChild(send);
     var error = make("div", "release-row");
