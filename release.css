@@ -116,7 +116,7 @@ html body .release-page .release-tools a:hover {
 
 .release-page .release-intro {
   max-width: 62ch;
-  margin: 0 0 14px;
+  margin: 0 0 6px;
 }
 
 /* Rows */
@@ -482,9 +482,9 @@ html body .release-page.is-phone .release-send .release-action {
 }
 
 /* ---------------------------------------------------------------------
-   Option B ("writing lines"): each typed field gets a full-width line to
-   write on, brighter while you're typing in it, instead of the text
-   sitting in the dotted leader.
+   Writing lines (option B, picked 6 Oct 2026; release.js adds .is-lines):
+   each typed field gets a full-width line to write on, brighter while
+   you're typing in it, instead of the text sitting in the dotted leader.
    --------------------------------------------------------------------- */
 
 html body .release-page.is-lines input {
@@ -542,4 +542,17 @@ html body .release-page .release-photo-note {
 
 html body .release-page .release-copy .release-action {
   color: #ffffff !important;
+}
+
+/* The explainer link, under the intro: white and underlined, so it reads
+   as a link */
+html body .release-page .release-explain-link {
+  display: inline-block;
+  margin-bottom: 14px;
+  color: #ffffff !important;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.6) !important;
+}
+
+html body .release-page .release-explain-link:hover {
+  border-bottom-color: #ffffff !important;
 }

@@ -15,7 +15,7 @@
 
   /* Load the release.css this script was written for, in case GitHub Pages
      still has an older copy cached (as contact.js does). Bump with changes. */
-  var STYLE_VERSION = "2026-10-06-b";
+  var STYLE_VERSION = "2026-10-06-c";
   (function loadMatchingStyles() {
     var script = document.currentScript;
     if (!script || !script.src) return;
@@ -214,7 +214,7 @@
      paragraphs: [[heading, text]], terms: [[name, text]], signature,
      signedLines: [[label, value]], footer }. Images are { bytes, width, height } JPEGs. */
   function makePdf(doc) {
-    var W = 595.28, H = 841.89, M = 48, SIZE = 8.5, LEAD = 11.4, CHAR = SIZE * 0.6;
+    var W = 595.28, H = 841.89, M = 42, SIZE = 8.5, LEAD = 11.2, CHAR = SIZE * 0.6;
     var COLS = Math.floor((W - 2 * M) / CHAR);
     var KEY = 22;
     var pages = [];
@@ -257,8 +257,9 @@
       var cols = COLS;
       var photoBottom = null;
       if (section[2]) {
-        need(170);
-        photoBottom = y - image(section[2], W - M - 120, 120);
+        var photoWidth = Math.min(120, 100 * section[2].width / section[2].height);
+        need(110);
+        photoBottom = y - image(section[2], W - M - photoWidth, photoWidth);
         cols = COLS - Math.ceil(132 / CHAR);
       }
       pairs(section[1], cols);
@@ -279,16 +280,17 @@
       });
       y -= 3;
     });
+    var sigWidth = 170;
+    var sigHeight = sigWidth * doc.signature.height / doc.signature.width;
+    need(sigHeight + LEAD * 8);  /* keep the signing block together */
     heading("Signed");
     pairs(doc.signedLines.slice(0, 1), COLS);
-    var sigWidth = 220;
-    need(sigWidth * doc.signature.height / doc.signature.width + LEAD * 2);
-    gap(0.5);
+    gap(0.2);
     y -= image(doc.signature, M + KEY * CHAR, sigWidth);
     ops.push("0.6 G 0.5 w " + (M + KEY * CHAR).toFixed(2) + " " + y.toFixed(2) + " m " +
       (M + KEY * CHAR + sigWidth).toFixed(2) + " " + y.toFixed(2) + " l S");
     put(M, "Signature", false, true);
-    gap(0.4);
+    gap(0.2);
     pairs(doc.signedLines.slice(1), COLS);
 
     /* footer on every page */
@@ -404,6 +406,8 @@
         phoneQuery.matches || !!document.querySelector(".mobile"));
     }
     phoneCheck();
+    /* Typed fields sit on their own writing lines (option B, picked 6 Oct 2026) */
+    page.classList.add("is-lines");
     if (phoneQuery.addEventListener) phoneQuery.addEventListener("change", phoneCheck);
 
     /* iPhones zoom into any field set under 16px when it's tapped; this
@@ -457,11 +461,12 @@
 
     var tools = make("div", "release-tools");
     tools.appendChild(make("span", "", spec.title));
-    var explainLink = make("a", "", "Where your footage goes");
-    explainLink.href = "#footage";
-    tools.appendChild(explainLink);
     form.appendChild(tools);
     form.appendChild(make("p", "release-intro", spec.intro));
+    /* the explainer link sits under the intro, where people read it */
+    var explainLink = make("a", "release-explain-link", "Where does my footage go?");
+    explainLink.href = "#footage";
+    form.appendChild(explainLink);
 
     /* Numbered rows: label, leader, field, leader, action */
     var number = 0;
@@ -711,7 +716,7 @@
     var explainer = make("div", "release-explainer");
     explainer.hidden = true;
     var explainTools = make("div", "release-tools");
-    explainTools.appendChild(make("span", "", "Where your footage goes"));
+    explainTools.appendChild(make("span", "", "Where does my footage go?"));
     var back = make("a", "", "← Back to the form");
     back.href = "#";
     explainTools.appendChild(back);
@@ -922,6 +927,10 @@
         fileInput.remove();
         extraInputs.signature_png.value = out.toDataURL("image/png");
       }
+      /* leave blank fields (guardian, the text fallback) out of the email */
+      Array.prototype.forEach.call(form.elements, function (el) {
+        if (el.name && el.type !== "file" && !el.value) el.disabled = true;
+      });
       sending = true;
       if (window._releaseSent) { window._releaseSent(form, pdf, filename); return; }
       HTMLFormElement.prototype.submit.call(form);
