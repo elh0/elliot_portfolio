@@ -15,7 +15,7 @@
 
   /* Load the release.css this script was written for, in case GitHub Pages
      still has an older copy cached (as contact.js does). Bump with changes. */
-  var STYLE_VERSION = "2026-10-06-j";
+  var STYLE_VERSION = "2026-10-06-k";
   (function loadMatchingStyles() {
     var script = document.currentScript;
     if (!script || !script.src) return;
@@ -667,15 +667,17 @@
       signRow.appendChild(signLabel);
       var padBox = make("span", "release-pad");
       var canvas = make("canvas");
-      var hint = make("span", "release-pad-hint", "Sign here with your finger or mouse");
+      /* The hint sits on the Signature line like any other row's grey
+         text; the box to sign in is squared up underneath it */
+      var hint = make("span", "release-value release-pad-hint", "Sign here with your finger or mouse");
       hint.appendChild(make("span", "release-star", "*"));
       /* A box to sign in, with an × in its corner to clear it */
       var clear = make("button", "release-pad-clear", "×");
       clear.type = "button";
       clear.setAttribute("aria-label", "Clear signature");
       padBox.appendChild(canvas);
-      padBox.appendChild(hint);
       padBox.appendChild(clear);
+      signRow.appendChild(hint);
       signRow.appendChild(padBox);
       signBlock.appendChild(signRow);
 
@@ -808,7 +810,6 @@
         last = p;
         if (!drawn) {
           drawn = true;
-          hint.hidden = true;
           signRow.classList.remove("is-missing");
           errorText.textContent = "";
         }
@@ -819,7 +820,6 @@
       clear.addEventListener("click", function () {
         context.clearRect(0, 0, canvas.width, canvas.height);
         drawn = false;
-        hint.hidden = false;
       });
       /* Re-measure whenever the pad changes size, including when the
          stylesheet arrives after this script has run. */

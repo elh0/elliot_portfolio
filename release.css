@@ -298,15 +298,17 @@ html body .release-page .release-term-text {
   padding: 5px 0;
 }
 
-/* Signature: a box to sign in (Elliot's ask, 6 Oct 2026), the hint in
-   its top left and an × to clear it in its top right */
+/* Signature: the hint on the Signature line like other rows, then a box
+   to sign in (Elliot's ask, 6 Oct 2026) underneath, from the details
+   column to the right edge, with an × to clear it in its corner */
 
 .release-page .release-pad {
   position: relative;
-  grid-column: 3 / span 2;
-  align-self: start;
+  grid-column: 3 / -1;
+  grid-row: 2;
   height: 120px;
-  border: 1px solid rgba(255, 255, 255, 0.28);
+  margin-top: 8px;
+  border: 1px solid rgba(255, 255, 255, 0.22);
   touch-action: none;
   cursor: crosshair;
 }
@@ -319,26 +321,20 @@ html body .release-page .release-term-text {
 }
 
 html body .release-page .release-pad-hint {
-  position: absolute;
-  top: 5px;
-  left: 1ch;
   color: var(--row-faint) !important;
-  pointer-events: none;
 }
 
-/* Label and hint share the top line, like the other rows */
+.release-page .release-pad-hint::after {
+  display: none;
+}
+
 .release-page .release-row.release-sign {
-  align-items: start;
   padding-bottom: 12px;
-}
-
-.release-page .release-sign .release-label {
-  padding-top: 6px;
 }
 
 html body .release-page .release-pad-clear {
   position: absolute;
-  top: 5px;
+  top: 4px;
   right: 1ch;
   margin: 0;
   padding: 0 2px;
@@ -484,6 +480,7 @@ html body .release-page.is-phone .release-action {
 }
 
 .release-page.is-phone .release-pad {
+  grid-row: 3;
   height: 140px;
 }
 
