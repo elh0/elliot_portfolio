@@ -280,7 +280,7 @@ html body .release-page .release-term-text {
   right: 0;
   bottom: 0;
   left: 0;
-  border-bottom: 1px dotted rgba(255, 255, 255, 0.55);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.55);
   content: "";
   pointer-events: none;
 }
@@ -506,6 +506,12 @@ html body .release-page.is-lines .release-row.is-missing input {
 
 .release-page.is-lines .release-field .release-value::after {
   display: none;
+}
+
+/* No leader on rows you type into, where it read as part of the writing
+   line (6 Oct 2026); the other rows keep theirs. */
+.release-page .release-row:has(input[type="text"], input[type="email"], input[type="tel"]) .release-label::after {
+  border-bottom-color: transparent !important;
 }
 
 html body .release-page.is-lines .release-row.is-focus .release-label-text {

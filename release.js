@@ -15,7 +15,7 @@
 
   /* Load the release.css this script was written for, in case GitHub Pages
      still has an older copy cached (as contact.js does). Bump with changes. */
-  var STYLE_VERSION = "2026-10-06-c";
+  var STYLE_VERSION = "2026-10-06-d";
   (function loadMatchingStyles() {
     var script = document.currentScript;
     if (!script || !script.src) return;
