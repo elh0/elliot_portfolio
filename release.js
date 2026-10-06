@@ -15,7 +15,7 @@
 
   /* Load the release.css this script was written for, in case GitHub Pages
      still has an older copy cached (as contact.js does). Bump with changes. */
-  var STYLE_VERSION = "2026-10-06-h";
+  var STYLE_VERSION = "2026-10-06-j";
   (function loadMatchingStyles() {
     var script = document.currentScript;
     if (!script || !script.src) return;
@@ -553,6 +553,7 @@
               choices.appendChild(button);
             });
             if (field.required) choices.appendChild(make("span", "release-star", "*"));
+            /* (the asterisk sits right on the last choice) */
             choices.appendChild(hiddenInput);
             row.appendChild(choices);
           } else {
@@ -561,9 +562,7 @@
             input.type = field.type || "text";
             input.name = field.name;
             if (field.auto) input.autocomplete = field.auto;
-            /* Required fields end their grey hint with an asterisk */
-            input.placeholder = (field.placeholder || "Type here") +
-              (field.required || field.guardian ? "*" : "");
+            input.placeholder = field.placeholder || "Type here";
             if (field.query && params.get(field.query)) input.value = params.get(field.query);
             var fit = function () {
               var length = Math.max(input.value.length, input.placeholder.length) + 1;
@@ -581,6 +580,15 @@
             fit();
             field.input = input;
             value.appendChild(input);
+            /* Required fields end their grey hint with a small raised
+               asterisk, drawn over the end of the placeholder (which
+               can't be styled) and hidden once something is typed */
+            if (field.required || field.guardian) {
+              var starAt = make("span", "release-star-at");
+              starAt.style.left = input.placeholder.length + "ch";
+              starAt.appendChild(make("span", "release-star", "*"));
+              value.appendChild(starAt);
+            }
             row.appendChild(value);
             /* the label is a tap target for the field too */
             row.querySelector(".release-label").addEventListener("click", function () { input.focus(); });
@@ -636,8 +644,8 @@
       agreeButton.type = "button";
       agreeText = make("span", "", "I've read this and I agree.");
       agreeButton.appendChild(agreeText);
+      agreeButton.appendChild(make("span", "release-star", "*"));
       agreeChoices.appendChild(agreeButton);
-      agreeChoices.appendChild(make("span", "release-star", "*"));
       agreeRow.appendChild(agreeChoices);
       var agreed = false;
       function toggleAgree() {
@@ -659,13 +667,16 @@
       signRow.appendChild(signLabel);
       var padBox = make("span", "release-pad");
       var canvas = make("canvas");
-      var hint = make("span", "release-pad-hint", "Sign here with your finger or mouse*");
+      var hint = make("span", "release-pad-hint", "Sign here with your finger or mouse");
+      hint.appendChild(make("span", "release-star", "*"));
+      /* A box to sign in, with an × in its corner to clear it */
+      var clear = make("button", "release-pad-clear", "×");
+      clear.type = "button";
+      clear.setAttribute("aria-label", "Clear signature");
       padBox.appendChild(canvas);
       padBox.appendChild(hint);
+      padBox.appendChild(clear);
       signRow.appendChild(padBox);
-      var clear = make("button", "release-action", "Clear");
-      clear.type = "button";
-      signRow.appendChild(clear);
       signBlock.appendChild(signRow);
 
       var dateRow = make("div", "release-row release-field");

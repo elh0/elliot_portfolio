@@ -228,11 +228,34 @@ html body .release-page input::placeholder {
   border-bottom-color: rgba(255, 255, 255, 0.85);
 }
 
-/* Required: an asterisk on the end of the grey hint (in the placeholder
-   for typed fields; after the choices for age and agree) */
+/* Required: a small raised asterisk on the end of the grey hint, like a
+   normal one. On typed fields it's drawn over the end of the placeholder
+   and goes once something is typed. */
 html body .release-page .release-star {
-  margin-left: -2ch;
+  display: inline-block;
+  margin-left: 1px;
   color: var(--row-faint) !important;
+  font-size: 9px !important;
+  line-height: 0 !important;
+  vertical-align: 0.45em;
+}
+
+html body .release-page .release-choice:has(+ .release-star) {
+  margin-right: 0;
+}
+
+.release-page .release-value {
+  position: relative;
+}
+
+html body .release-page .release-star-at {
+  position: absolute;
+  top: 0;
+  pointer-events: none;
+}
+
+.release-page .release-value:has(input:not(:placeholder-shown)) .release-star-at {
+  display: none;
 }
 
 html body .release-page .release-row.is-missing .release-star {
@@ -275,13 +298,15 @@ html body .release-page .release-term-text {
   padding: 5px 0;
 }
 
-/* Signature: a space to sign in under the hint (no line), Clear on the right */
+/* Signature: a box to sign in (Elliot's ask, 6 Oct 2026), the hint in
+   its top left and an × to clear it in its top right */
 
 .release-page .release-pad {
   position: relative;
   grid-column: 3 / span 2;
   align-self: start;
   height: 120px;
+  border: 1px solid rgba(255, 255, 255, 0.28);
   touch-action: none;
   cursor: crosshair;
 }
@@ -295,15 +320,36 @@ html body .release-page .release-term-text {
 
 html body .release-page .release-pad-hint {
   position: absolute;
-  top: 0;
-  left: 0;
+  top: 5px;
+  left: 1ch;
   color: var(--row-faint) !important;
   pointer-events: none;
 }
 
-/* Label, hint and Clear share the top line, like the other rows */
+/* Label and hint share the top line, like the other rows */
 .release-page .release-row.release-sign {
   align-items: start;
+  padding-bottom: 12px;
+}
+
+.release-page .release-sign .release-label {
+  padding-top: 6px;
+}
+
+html body .release-page .release-pad-clear {
+  position: absolute;
+  top: 5px;
+  right: 1ch;
+  margin: 0;
+  padding: 0 2px;
+  border: 0;
+  background: none;
+  color: var(--row-dim) !important;
+  cursor: pointer;
+}
+
+html body .release-page .release-pad-clear:hover {
+  color: #ffffff !important;
 }
 
 html body .release-page button.release-action {
