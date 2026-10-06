@@ -393,12 +393,14 @@ async function release(b) {
     check(name + ': rebuilds the form if Cargo redraws the page', await p.evaluate(() => !!document.querySelector('.release-page .site-name') && document.querySelectorAll('.release-field .release-number').length === 12));
     await p.locator('.release-send').click(); await wait(p, 200);
     const e1 = await p.textContent('.release-error');
+    const red1 = await p.evaluate(() => ({ rows: document.querySelectorAll('.release-row.is-missing').length, agree: getComputedStyle(document.querySelector('.release-row.is-missing .release-choice span')).color }));
     await p.fill('input[name=name]', 'Test Person'); await p.fill('input[name=address]', '1 Street'); await p.fill('input[name=email]', 'test@example.com');
     await p.locator('.release-choice', { hasText: 'Under 18' }).click();
     const guardian = await p.locator('input[name=guardian_name]').isVisible();
     await p.locator('.release-choice', { hasText: '18 or over' }).click();
     await p.locator('.release-send').click(); await wait(p, 200);
     const e2 = await p.textContent('.release-error');
+    const red2 = await p.evaluate(() => document.querySelectorAll('.release-row.is-missing').length);
     const [chooser] = await Promise.all([p.waitForEvent('filechooser'), p.locator('.release-photo-note').click()]);
     check(name + ': tapping the photo note opens the picker', !!chooser);
     await p.locator('.release-photo input[type=file]').setInputFiles(path.join(__dirname, '..', 'previews', '486365701.jpg')); await wait(p, 600);
@@ -410,7 +412,7 @@ async function release(b) {
     await p.mouse.move(box.x + 20, box.y + box.height * 0.6); await p.mouse.down();
     await p.mouse.move(box.x + 120, box.y + box.height * 0.3, { steps: 10 }); await p.mouse.up();
     await p.locator('.release-send').click(); await wait(p, 1500);
-    check(name + ': asks for missing details, agreement and shows the guardian rows for under-18s', e1 === 'Please fill in full name.' && e2 === 'Please tap to agree.' && guardian, { e1, e2, guardian });
+    check(name + ': turns everything still needed red, and shows the guardian rows for under-18s', e1 === 'Please fill in the parts in red.' && red1.rows === 6 && red1.agree === 'rgb(255, 90, 79)' && e2 === 'Please fill in the parts in red.' && red2 === 2 && guardian, { e1, red1, e2, red2, guardian });
     const body = posted ? posted.body.toString('latin1') : '';
     check(name + ': sends to FormSubmit with the signed PDF attached, then says thanks', !!posted && posted.url === 'https://formsubmit.co/elliotholbrow@gmail.com' && body.includes('Test Person') && /filename="release_person_test-person_\d{4}-\d\d-\d\d\.pdf"/.test(body) && body.includes('%PDF-1.4') && body.includes('/DCTDecode') && body.includes('person-release v1.1') && /\/release\?signed=1$/.test(p.url()) && (await p.textContent('.release-form')).startsWith('Signed'), posted && posted.url);
     if (posted) require('fs').writeFileSync(shot(name.replace(/\W+/g, '-')).replace(/png$/, 'pdf'), Buffer.from(body.slice(body.indexOf('%PDF'), body.indexOf('%%EOF') + 6), 'latin1'));

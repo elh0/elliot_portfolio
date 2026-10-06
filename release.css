@@ -395,7 +395,7 @@ html body .release-page .release-error {
 
 /* Hovering fades the other rows back, as on the other pages */
 @media (hover: hover) and (pointer: fine) {
-  html body .release-page .release-fields:hover .release-row:not(:hover):not(.is-focus) .release-label-text {
+  html body .release-page .release-fields:hover .release-row:not(:hover):not(.is-focus):not(.is-missing) .release-label-text {
     color: var(--row-faint) !important;
   }
 }
@@ -561,12 +561,9 @@ html body .release-page .release-photo-note:focus-visible {
   display: none;
 }
 
-.release-page .release-copy {
-  margin-top: 1.4rem;
-}
-
-html body .release-page .release-copy .release-action {
-  color: #ffffff !important;
+/* Signed page: the save link sits under the thanks */
+html body .release-page .release-copy {
+  margin-top: 1rem;
 }
 
 /* The explainer link, under the intro: white and underlined, so it reads
@@ -632,4 +629,32 @@ html body .release-page .release-explain-close:hover {
   .release-page .release-explainer-inner {
     transition: none !important;
   }
+}
+
+/* Anything still needed when Send is pressed turns red, label and grey
+   hint alike (6 Oct 2026), until it's done */
+.release-page {
+  --row-missing: #ff5a4f;
+}
+
+html body .release-page .release-row.is-missing .release-label-text,
+html body .release-page .release-row.is-missing .release-star,
+html body .release-page .release-row.is-missing .release-choice,
+html body .release-page .release-row.is-missing .release-choice span,
+html body .release-page .release-row.is-missing .release-pad-hint,
+html body .release-page .release-row.is-missing .release-pad-clear,
+html body .release-page .release-error {
+  color: var(--row-missing) !important;
+}
+
+html body .release-page.is-lines .release-row.is-missing input::placeholder {
+  color: var(--row-missing) !important;
+}
+
+.release-page .release-row.is-missing .release-label::after {
+  border-bottom-color: var(--row-missing);
+}
+
+.release-page .release-row.is-missing .release-pad {
+  border-color: var(--row-missing);
 }

@@ -15,7 +15,7 @@
 
   /* Load the release.css this script was written for, in case GitHub Pages
      still has an older copy cached (as contact.js does). Bump with changes. */
-  var STYLE_VERSION = "2026-10-06-l";
+  var STYLE_VERSION = "2026-10-06-m";
   (function loadMatchingStyles() {
     var script = document.currentScript;
     if (!script || !script.src) return;
@@ -505,12 +505,10 @@
           var binary = atob(saved.pdf);
           var bytes = new Uint8Array(binary.length);
           for (var i = 0; i < binary.length; i++) bytes[i] = binary.charCodeAt(i);
-          var copy = make("a", "release-row release-copy");
+          /* a plain link under the thanks, like the explainer link */
+          var copy = make("a", "release-explain-link release-copy", "Save your signed copy (PDF) \u2193");
           copy.href = URL.createObjectURL(new Blob([bytes], { type: "application/pdf" }));
           copy.download = saved.name;
-          copy.appendChild(make("span", "release-number", ""));
-          copy.appendChild(labelCell("Your signed copy (PDF)"));
-          copy.appendChild(make("span", "release-action", "Save"));
           holder.appendChild(copy);
         }
         holder.appendChild(footer());
@@ -616,8 +614,7 @@
                   b.classList.toggle("is-on", b === button);
                 });
                 action.textContent = "";
-                if (row.classList.contains("is-missing")) errorText.textContent = "";
-                row.classList.remove("is-missing");
+                settled(row);
                 if (field.name === "age") setMinor(choice === "Under 18");
               });
               choices.appendChild(button);
@@ -642,8 +639,7 @@
             input.addEventListener("input", function () {
               fit();
               if (input.value.trim()) {
-                if (row.classList.contains("is-missing")) errorText.textContent = "";
-                row.classList.remove("is-missing");
+                settled(row);
               }
             });
             input.addEventListener("focus", function () { row.classList.add("is-focus"); });
@@ -723,8 +719,7 @@
         agreed = !agreed;
         agreeButton.classList.toggle("is-on", agreed);
         agreeButton.setAttribute("aria-pressed", agreed ? "true" : "false");
-        agreeRow.classList.remove("is-missing");
-        errorText.textContent = "";
+        settled(agreeRow);
       }
       agreeButton.setAttribute("aria-pressed", "false");
       agreeButton.addEventListener("click", toggleAgree);
@@ -869,8 +864,7 @@
         last = p;
         if (!drawn) {
           drawn = true;
-          signRow.classList.remove("is-missing");
-          errorText.textContent = "";
+          settled(signRow);
         }
       });
       ["pointerup", "pointercancel"].forEach(function (name) {
@@ -946,35 +940,47 @@
 
       /* Check, then send */
       var sending = false;
-      function fail(message, row) {
+      /* Anything still needed turns red, all at once, and the page
+         scrolls to the first; each goes back as it's done (6 Oct 2026,
+         after Elliot missed the agree line) */
+      function fail(message, rows) {
         errorText.textContent = message;
-        if (row) {
-          row.classList.add("is-missing");
-          row.scrollIntoView({ block: "center" });
-        }
+        rows.forEach(function (row) { row.classList.add("is-missing"); });
+        if (rows[0]) rows[0].scrollIntoView({ block: "center" });
+      }
+      function settled(row) {
+        row.classList.remove("is-missing");
+        if (!form.querySelector(".is-missing")) errorText.textContent = "";
       }
       form.addEventListener("submit", function (event) {
         if (sending) return;
         event.preventDefault();
         errorText.textContent = "";
-        var missing = null;
+        var missing = [];
+        var names = [];
         fields.forEach(function (field) {
           if (!field.required || field.row.hidden) return;
           if (field.input.value.trim()) return;
-          field.row.classList.add("is-missing");
-          if (!missing) missing = field;
+          missing.push(field.row);
+          names.push(field.label.toLowerCase());
         });
-        if (missing) {
-          fail("Please fill in " + missing.label.toLowerCase() + ".", missing.row);
-          return;
-        }
         var email = form.querySelector('input[name="email"]');
-        if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email.value.trim())) {
-          fail("Please check your email address.", email.closest(".release-row"));
+        if (email.value.trim() && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email.value.trim())) {
+          missing.push(email.closest(".release-row"));
+          names.push("a full email address");
+        }
+        if (!agreed) { missing.push(agreeRow); names.push("tap to agree"); }
+        if (!drawn) { missing.push(signRow); names.push("sign in the box"); }
+        if (missing.length) {
+          /* in page order, so the scroll goes to the first */
+          missing.sort(function (a, b) {
+            return a.compareDocumentPosition(b) & Node.DOCUMENT_POSITION_FOLLOWING ? -1 : 1;
+          });
+          fail(names.length === 1
+            ? "Please " + (/^(tap|sign|a )/.test(names[0]) ? "" : "fill in ") + names[0].replace(/^a full/, "enter a full") + "."
+            : "Please fill in the parts in red.", missing);
           return;
         }
-        if (!agreed) { fail("Please tap to agree.", agreeRow); return; }
-        if (!drawn) { fail("Please sign on the line first.", signRow); return; }
 
         extraInputs.agree.value = "yes";
         extraInputs.signed_at.value = new Date().toISOString();
