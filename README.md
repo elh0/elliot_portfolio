@@ -38,7 +38,7 @@ Each project has its own link, which opens it and starts it playing: `elliot.onl
 
 ## Testing
 
-`node tests/suite.js` checks the projects and contact pages in Chromium on desktop, an iPhone and iPhones held sideways: the layout, filters, contact sheet, hover thumbnails, autoplay, chevrons, arrow keys, double-tap skipping, swiping and project links. It needs Playwright. Sound and gestures on a real iPhone still need checking on a phone.
+`node tests/suite.js` checks the projects and contact pages in Chromium on desktop, an iPhone and iPhones held sideways: the layout, filters, contact sheet, hover thumbnails, autoplay, chevrons, arrow keys, double-tap skipping, swiping and project links. It needs Playwright. Sound and gestures on a real iPhone still need checking on a phone. GitHub also runs it on every push to `main` that changes the site's code (Actions → Test site).
 
 ## Automatic jobs (GitHub Actions)
 

@@ -1,0 +1,25 @@
+# Runs the test suite (tests/suite.js) on every push to main, or by hand
+# (Actions → Test site → Run). A failure emails you from GitHub.
+
+name: Test site
+
+on:
+  push:
+    branches: [main]
+    paths: ["*.js", "*.css", "*.html", "tests/**"]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-node@v5
+        with:
+          node-version: 22
+      - run: npm install --no-save playwright && npx playwright install --with-deps chromium
+      - run: node tests/suite.js

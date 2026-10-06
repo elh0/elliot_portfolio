@@ -362,4 +362,5 @@ server.listen(8123, async () => {
   } catch (e) { fail++; console.log('FAIL crashed: ' + e.stack); }
   console.log(`\n${pass} passed, ${fail} failed`);
   await b.close(); server.close();
+  if (fail) process.exitCode = 1;
 });
