@@ -480,3 +480,66 @@ html body .release-page.is-phone .release-send .release-action {
   gap: 0.1rem;
   margin-top: 3rem;
 }
+
+/* ---------------------------------------------------------------------
+   Option B ("writing lines"): each typed field gets a full-width line to
+   write on, brighter while you're typing in it, instead of the text
+   sitting in the dotted leader.
+   --------------------------------------------------------------------- */
+
+html body .release-page.is-lines input {
+  flex: 1 1 auto;
+  width: 100% !important;
+  padding: 2px 0 3px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.28) !important;
+  transition: border-color 240ms ease;
+}
+
+html body .release-page.is-lines .release-row.is-focus input,
+html body .release-page.is-lines input:hover {
+  border-bottom-color: #ffffff !important;
+}
+
+html body .release-page.is-lines .release-row.is-missing input {
+  border-bottom-color: #ffffff !important;
+}
+
+.release-page.is-lines .release-field .release-value::after {
+  display: none;
+}
+
+html body .release-page.is-lines .release-row.is-focus .release-label-text {
+  color: #ffffff !important;
+}
+
+.release-page.is-lines.is-phone .release-value {
+  padding-top: 2px;
+}
+
+/* Optional photo of the person or place: a note until one is added, then
+   a small thumbnail (tap it, or Change, to pick another) */
+
+html body .release-page .release-photo-note {
+  color: var(--row-faint) !important;
+  cursor: pointer;
+}
+
+.release-page .release-photo .release-photo-thumb {
+  display: block;
+  height: 72px;
+  width: auto;
+  max-width: 100%;
+  cursor: pointer;
+}
+
+.release-page .release-field .release-photo::after {
+  display: none;
+}
+
+.release-page .release-copy {
+  margin-top: 1.4rem;
+}
+
+html body .release-page .release-copy .release-action {
+  color: #ffffff !important;
+}

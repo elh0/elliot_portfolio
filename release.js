@@ -15,7 +15,7 @@
 
   /* Load the release.css this script was written for, in case GitHub Pages
      still has an older copy cached (as contact.js does). Bump with changes. */
-  var STYLE_VERSION = "2026-10-06-a";
+  var STYLE_VERSION = "2026-10-06-b";
   (function loadMatchingStyles() {
     var script = document.currentScript;
     if (!script || !script.src) return;
@@ -67,12 +67,13 @@
           { name: "shoot_place", label: "Place", query: "place" },
           { name: "shoot_what", label: "What we filmed", query: "what" }]],
         ["You", [
-          { name: "name", label: "Full name", auto: "name", required: true },
-          { name: "address", label: "Address", auto: "street-address", required: true },
-          { name: "email", label: "Email", type: "email", auto: "email", required: true },
+          { name: "name", label: "Full name", auto: "name", placeholder: "Your full name", required: true },
+          { name: "address", label: "Address", auto: "street-address", placeholder: "Street, town, postcode", required: true },
+          { name: "email", label: "Email", type: "email", auto: "email", placeholder: "you@example.com", required: true },
           { name: "age", label: "Age", choices: ["18 or over", "Under 18"], required: true },
-          { name: "guardian_name", label: "Parent or guardian", guardian: true },
-          { name: "guardian_relationship", label: "Relationship", guardian: true }]]
+          { name: "photo", label: "Photo", photo: true, note: "Optional: a photo of you, to match this release to the footage" },
+          { name: "guardian_name", label: "Parent or guardian", placeholder: "Their full name", guardian: true },
+          { name: "guardian_relationship", label: "Relationship", placeholder: "Mother, father\u2026", guardian: true }]]
       ],
       inReturn: "A copy of the clips you're in, for your own use.",
       terms: [
@@ -98,9 +99,10 @@
           { name: "place_what", label: "What we can film", query: "what" },
           { name: "place_dates", label: "Dates and times", query: "date" }]],
         ["You", [
-          { name: "name", label: "Full name", auto: "name", required: true },
+          { name: "name", label: "Full name", auto: "name", placeholder: "Your full name", required: true },
           { name: "role", label: "Role", placeholder: "Owner, manager…", required: true },
-          { name: "email", label: "Email", type: "email", auto: "email", required: true }]]
+          { name: "email", label: "Email", type: "email", auto: "email", placeholder: "you@example.com", required: true },
+          { name: "photo", label: "Photo of the place", photo: true, note: "Optional: e.g. the entrance or a sign" }]]
       ],
       inReturn: "A copy of the clips filmed there, for your own use.",
       terms: [
@@ -163,6 +165,216 @@
     parent.appendChild(heads);
   }
 
+  /* ---------------------------------------------------------------------
+     The signed copy: a plain A4 PDF made here in the browser (Courier, the
+     full wording, the details, the photo and the signature), attached to
+     the email and offered to the signer to save.
+     --------------------------------------------------------------------- */
+  var WIN_ANSI = { 8216: 145, 8217: 146, 8220: 147, 8221: 148, 8226: 149, 8211: 150, 8212: 151, 8230: 133, 8364: 128 };
+
+  /* PDF string bytes (Windows-1252), with ( ) \ escaped */
+  function pdfString(text) {
+    var out = "";
+    for (var i = 0; i < text.length; i++) {
+      var code = text.charCodeAt(i);
+      var ch = code < 256 ? text.charAt(i) : WIN_ANSI[code] ? String.fromCharCode(WIN_ANSI[code]) : "?";
+      if (ch === "(" || ch === ")" || ch === "\\") ch = "\\" + ch;
+      out += ch;
+    }
+    return "(" + out + ")";
+  }
+
+  function wrapText(text, width) {
+    var lines = [];
+    String(text).split("\n").forEach(function (paragraph) {
+      var line = "";
+      paragraph.split(" ").forEach(function (word) {
+        while (word.length > width) {
+          if (line) { lines.push(line); line = ""; }
+          lines.push(word.slice(0, width));
+          word = word.slice(width);
+        }
+        if (!line) line = word;
+        else if (line.length + 1 + word.length <= width) line += " " + word;
+        else { lines.push(line); line = word; }
+      });
+      lines.push(line);
+    });
+    return lines;
+  }
+
+  function dataUrlBytes(dataUrl) {
+    var binary = atob(dataUrl.split(",")[1]);
+    var bytes = new Uint8Array(binary.length);
+    for (var i = 0; i < binary.length; i++) bytes[i] = binary.charCodeAt(i);
+    return bytes;
+  }
+
+  /* doc: { title, subtitle, sections: [[heading, [[label, value]], photo?]],
+     paragraphs: [[heading, text]], terms: [[name, text]], signature,
+     signedLines: [[label, value]], footer }. Images are { bytes, width, height } JPEGs. */
+  function makePdf(doc) {
+    var W = 595.28, H = 841.89, M = 48, SIZE = 8.5, LEAD = 11.4, CHAR = SIZE * 0.6;
+    var COLS = Math.floor((W - 2 * M) / CHAR);
+    var KEY = 22;
+    var pages = [];
+    var ops, y;
+    function newPage() { ops = []; pages.push(ops); y = H - M; }
+    function need(height) { if (y - height < M + 20) newPage(); }
+    function put(x, text, bold, grey, size) {
+      ops.push((grey ? "0.45 g" : "0 g") + " BT /" + (bold ? "F2 " : "F1 ") + (size || SIZE) +
+        " Tf " + x.toFixed(2) + " " + y.toFixed(2) + " Td " + pdfString(text) + " Tj ET");
+    }
+    function line(x, text, bold, grey, size) { need(LEAD); y -= LEAD; put(x, text, bold, grey, size); }
+    function gap(lines) { y -= LEAD * (lines || 1); }
+    function heading(text) { gap(); need(LEAD * 3); line(M, text.toUpperCase(), true); gap(0.3); }
+    function pairs(rows, cols) {
+      rows.forEach(function (row) {
+        var lines = wrapText(row[1] || "-", cols - KEY);
+        need(LEAD * lines.length);
+        lines.forEach(function (text, i) {
+          y -= LEAD;
+          if (!i) put(M, row[0], false, true);
+          put(M + KEY * CHAR, text);
+        });
+      });
+    }
+    var images = [];
+    function image(img, x, width) {
+      var height = width * img.height / img.width;
+      images.push(img);
+      ops.push("q " + width.toFixed(2) + " 0 0 " + height.toFixed(2) + " " + x.toFixed(2) + " " +
+        (y - height).toFixed(2) + " cm /Im" + images.length + " Do Q");
+      return height;
+    }
+
+    newPage();
+    line(M, doc.title.toUpperCase(), true, false, 12);
+    gap(0.4);
+    wrapText(doc.subtitle, COLS).forEach(function (text) { line(M, text, false, true); });
+    doc.sections.forEach(function (section) {
+      heading(section[0]);
+      var cols = COLS;
+      var photoBottom = null;
+      if (section[2]) {
+        need(170);
+        photoBottom = y - image(section[2], W - M - 120, 120);
+        cols = COLS - Math.ceil(132 / CHAR);
+      }
+      pairs(section[1], cols);
+      if (photoBottom !== null && photoBottom < y) y = photoBottom;
+    });
+    doc.paragraphs.forEach(function (paragraph) {
+      heading(paragraph[0]);
+      wrapText(paragraph[1], COLS).forEach(function (text) { line(M, text); });
+    });
+    heading("What you agree to");
+    doc.terms.forEach(function (term, i) {
+      var lines = wrapText(term[0] + ". " + term[1], COLS - 4);
+      need(LEAD * lines.length + 4);
+      lines.forEach(function (text, n) {
+        y -= LEAD;
+        if (!n) put(M, String.fromCharCode(65 + i), false, true);
+        put(M + 4 * CHAR, text);
+      });
+      y -= 3;
+    });
+    heading("Signed");
+    pairs(doc.signedLines.slice(0, 1), COLS);
+    var sigWidth = 220;
+    need(sigWidth * doc.signature.height / doc.signature.width + LEAD * 2);
+    gap(0.5);
+    y -= image(doc.signature, M + KEY * CHAR, sigWidth);
+    ops.push("0.6 G 0.5 w " + (M + KEY * CHAR).toFixed(2) + " " + y.toFixed(2) + " m " +
+      (M + KEY * CHAR + sigWidth).toFixed(2) + " " + y.toFixed(2) + " l S");
+    put(M, "Signature", false, true);
+    gap(0.4);
+    pairs(doc.signedLines.slice(1), COLS);
+
+    /* footer on every page */
+    pages.forEach(function (pageOps, i) {
+      ops = pageOps;
+      y = M - 6;
+      put(M, doc.footer, false, true, 7.5);
+      var count = "Page " + (i + 1) + " of " + pages.length;
+      put(W - M - count.length * 7.5 * 0.6, count, false, true, 7.5);
+    });
+
+    /* objects: 1 catalog, 2 pages, 3-4 fonts, images, then each page and its content */
+    var chunks = [];
+    var length = 0;
+    var offsets = [];
+    function add(part) {
+      if (typeof part === "string") {
+        var bytes = new Uint8Array(part.length);
+        for (var i = 0; i < part.length; i++) bytes[i] = part.charCodeAt(i) & 255;
+        part = bytes;
+      }
+      chunks.push(part);
+      length += part.length;
+    }
+    function object(number, body, stream) {
+      offsets[number] = length;
+      add(number + " 0 obj\n" + body);
+      if (stream) {
+        add("\nstream\n");
+        add(stream);
+        add("\nendstream");
+      }
+      add("\nendobj\n");
+    }
+    var firstPage = 5 + images.length;
+    add("%PDF-1.4\n%âãÏÓ\n");
+    object(1, "<< /Type /Catalog /Pages 2 0 R >>");
+    object(2, "<< /Type /Pages /Count " + pages.length + " /Kids [" + pages.map(function (p, i) {
+      return (firstPage + i * 2) + " 0 R";
+    }).join(" ") + "] >>");
+    object(3, "<< /Type /Font /Subtype /Type1 /BaseFont /Courier /Encoding /WinAnsiEncoding >>");
+    object(4, "<< /Type /Font /Subtype /Type1 /BaseFont /Courier-Bold /Encoding /WinAnsiEncoding >>");
+    var xobjects = images.map(function (img, i) {
+      object(5 + i, "<< /Type /XObject /Subtype /Image /Width " + img.width + " /Height " + img.height +
+        " /ColorSpace /DeviceRGB /BitsPerComponent 8 /Filter /DCTDecode /Length " + img.bytes.length + " >>", img.bytes);
+      return "/Im" + (i + 1) + " " + (5 + i) + " 0 R";
+    }).join(" ");
+    pages.forEach(function (pageOps, i) {
+      var content = pageOps.join("\n");
+      object(firstPage + i * 2, "<< /Type /Page /Parent 2 0 R /MediaBox [0 0 " + W + " " + H + "]" +
+        " /Resources << /Font << /F1 3 0 R /F2 4 0 R >> /XObject << " + xobjects + " >> >>" +
+        " /Contents " + (firstPage + i * 2 + 1) + " 0 R >>");
+      object(firstPage + i * 2 + 1, "<< /Length " + content.length + " >>", content);
+    });
+    var total = firstPage + pages.length * 2;
+    var xref = length;
+    var table = "xref\n0 " + total + "\n0000000000 65535 f \n";
+    for (var n = 1; n < total; n++) table += ("000000000" + offsets[n]).slice(-10) + " 00000 n \n";
+    add(table + "trailer\n<< /Size " + total + " /Root 1 0 R >>\nstartxref\n" + xref + "\n%%EOF\n");
+    var pdf = new Uint8Array(length);
+    var at = 0;
+    chunks.forEach(function (part) { pdf.set(part, at); at += part.length; });
+    return pdf;
+  }
+
+  /* Phone photos come in big; shrink to a JPEG that emails easily */
+  function shrinkPhoto(file, done) {
+    var url = URL.createObjectURL(file);
+    var img = new Image();
+    img.onload = function () {
+      var scale = Math.min(1, 1200 / Math.max(img.naturalWidth, img.naturalHeight));
+      var c = document.createElement("canvas");
+      c.width = Math.round(img.naturalWidth * scale);
+      c.height = Math.round(img.naturalHeight * scale);
+      var g = c.getContext("2d");
+      g.fillStyle = "#ffffff";
+      g.fillRect(0, 0, c.width, c.height);
+      g.drawImage(img, 0, 0, c.width, c.height);
+      URL.revokeObjectURL(url);
+      var dataUrl = c.toDataURL("image/jpeg", 0.85);
+      done({ dataUrl: dataUrl, bytes: dataUrlBytes(dataUrl), width: c.width, height: c.height });
+    };
+    img.onerror = function () { URL.revokeObjectURL(url); done(null); };
+    img.src = url;
+  }
+
   /* Name bar, as on the contact page */
   document.querySelectorAll(".release-page .index-heading").forEach(function (heading) {
     if (heading.classList.contains("is-built")) return;
@@ -219,6 +431,20 @@
       holder.appendChild(done);
       holder.appendChild(make("p", "release-intro",
         "Thank you. A copy has come to me, and I'll send you the clips you're in. Any questions, email " + EMAIL + "."));
+      var saved = null;
+      try { saved = JSON.parse(window.sessionStorage.getItem("elliotRelease")); } catch (error) { saved = null; }
+      if (saved && saved.pdf) {
+        var binary = atob(saved.pdf);
+        var bytes = new Uint8Array(binary.length);
+        for (var i = 0; i < binary.length; i++) bytes[i] = binary.charCodeAt(i);
+        var copy = make("a", "release-row release-copy");
+        copy.href = URL.createObjectURL(new Blob([bytes], { type: "application/pdf" }));
+        copy.download = saved.name;
+        copy.appendChild(make("span", "release-number", ""));
+        copy.appendChild(labelCell("Your signed copy (PDF)"));
+        copy.appendChild(make("span", "release-action", "Save"));
+        holder.appendChild(copy);
+      }
       holder.appendChild(footer());
       return;
     }
@@ -240,6 +466,7 @@
     /* Numbered rows: label, leader, field, leader, action */
     var number = 0;
     var fields = [];
+    var photo = null;
     var guardianRows = [];
     spec.sections.forEach(function (section, s) {
       var block = make("div", "release-section");
@@ -253,7 +480,42 @@
         field.row = row;
         field.action = action;
 
-        if (field.choices) {
+        if (field.photo) {
+          var photoCell = make("span", "release-value release-photo");
+          var photoNote = make("span", "release-photo-note", field.note);
+          var thumb = make("img", "release-photo-thumb");
+          thumb.alt = field.label;
+          thumb.hidden = true;
+          var picker = make("input");
+          picker.type = "file";
+          picker.accept = "image/*";
+          picker.hidden = true;
+          photoCell.appendChild(photoNote);
+          photoCell.appendChild(thumb);
+          photoCell.appendChild(picker);
+          row.appendChild(photoCell);
+          action = make("button", "release-action", "Add photo");
+          action.type = "button";
+          field.action = action;
+          field.input = { value: "" };
+          var choose = function () { picker.click(); };
+          action.addEventListener("click", choose);
+          photoNote.addEventListener("click", choose);
+          thumb.addEventListener("click", choose);
+          picker.addEventListener("change", function () {
+            if (!picker.files || !picker.files[0]) return;
+            action.textContent = "Loading";
+            shrinkPhoto(picker.files[0], function (shot) {
+              picker.value = "";
+              if (!shot) { action.textContent = "Add photo"; errorText.textContent = "That photo couldn't be opened. Please try another."; return; }
+              photo = shot;
+              thumb.src = shot.dataUrl;
+              thumb.hidden = false;
+              photoNote.hidden = true;
+              action.textContent = "Change";
+            });
+          });
+        } else if (field.choices) {
           var choices = make("span", "release-choices");
           var hiddenInput = make("input");
           hiddenInput.type = "hidden";
@@ -439,7 +701,7 @@
     });
     var fileInput = make("input");
     fileInput.type = "file";
-    fileInput.name = "signature";
+    fileInput.name = "attachment";
     fileInput.hidden = true;
     form.appendChild(fileInput);
 
@@ -560,6 +822,44 @@
       return out;
     }
 
+    /* Everything on the signed PDF, in the order it reads on the page */
+    function releaseDocument(signature) {
+      var value = function (n) {
+        var input = form.querySelector('input[name="' + n + '"]');
+        return input ? input.value.trim() : "";
+      };
+      var signedAt = new Date(extraInputs.signed_at.value);
+      var london = signedAt.toLocaleString("en-GB", { timeZone: "Europe/London", day: "numeric",
+        month: "long", year: "numeric", hour: "2-digit", minute: "2-digit", timeZoneName: "short" });
+      return {
+        title: spec.title,
+        subtitle: spec.intro.replace("Please read it all, and ask anything before you sign.", "") +
+          "Between Elliot Holbrow (" + EMAIL + ") and the person signing below. Terms: " + TERMS_VERSION[type] + ".",
+        sections: spec.sections.map(function (section) {
+          var rows = [];
+          var sectionPhoto = null;
+          section[1].forEach(function (field) {
+            if (field.row.hidden) return;
+            if (field.photo) { sectionPhoto = photo; return; }
+            rows.push([field.label, value(field.name)]);
+          });
+          return [section[0], rows, sectionPhoto];
+        }),
+        paragraphs: [["In return", spec.inReturn + " No fee is paid."]],
+        terms: spec.terms,
+        signature: signature,
+        signedLines: [
+          ["Agreed", agreeText.textContent],
+          ["Signed by", value("guardian_name") && !form.querySelector('input[name="guardian_name"]').closest(".release-row").hidden
+            ? value("guardian_name") + " (" + (value("guardian_relationship") || "parent or guardian") + "), for " + value("name")
+            : value("name")],
+          ["Date and time", london + " (" + extraInputs.signed_at.value + ")"],
+          ["Signed on", "elliot.onl/release, " + navigator.userAgent]
+        ],
+        footer: spec.title + " \u00b7 Elliot Holbrow \u00b7 elliot.onl"
+      };
+    }
+
     /* Check, then send */
     var sending = false;
     function fail(message, row) {
@@ -600,20 +900,31 @@
       send.querySelector(".release-label-text").textContent = "Sending";
       sendArrow.textContent = "…";
       var out = exportCanvas();
-      var dataUrl = out.toDataURL("image/png");
-      out.toBlob(function (blob) {
-        try {
-          var transfer = new DataTransfer();
-          transfer.items.add(new File([blob], "signature.png", { type: "image/png" }));
-          fileInput.files = transfer.files;
-        } catch (error) {
-          /* older browsers: send the picture as text instead */
-          fileInput.remove();
-          extraInputs.signature_png.value = dataUrl;
+      var sigUrl = out.toDataURL("image/jpeg", 0.92);
+      var pdf = makePdf(releaseDocument({ dataUrl: sigUrl, bytes: dataUrlBytes(sigUrl), width: out.width, height: out.height }));
+      var name = form.querySelector('input[name="name"]').value.trim();
+      var filename = "release_" + type + "_" + (name.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "") || "signed") +
+        "_" + extraInputs.signed_at.value.slice(0, 10) + ".pdf";
+      /* keep a copy for the "Save your copy" link on the page they come back to */
+      try {
+        var binary = "";
+        for (var b = 0; b < pdf.length; b += 32768) {
+          binary += String.fromCharCode.apply(null, pdf.subarray(b, b + 32768));
         }
-        sending = true;
-        HTMLFormElement.prototype.submit.call(form);
-      }, "image/png");
+        window.sessionStorage.setItem("elliotRelease", JSON.stringify({ name: filename, pdf: btoa(binary) }));
+      } catch (error) { /* private browsing: no copy to offer, the email still goes */ }
+      try {
+        var transfer = new DataTransfer();
+        transfer.items.add(new File([pdf], filename, { type: "application/pdf" }));
+        fileInput.files = transfer.files;
+      } catch (error) {
+        /* older browsers can't attach a file: send the signature as text instead */
+        fileInput.remove();
+        extraInputs.signature_png.value = out.toDataURL("image/png");
+      }
+      sending = true;
+      if (window._releaseSent) { window._releaseSent(form, pdf, filename); return; }
+      HTMLFormElement.prototype.submit.call(form);
     });
   });
 })();

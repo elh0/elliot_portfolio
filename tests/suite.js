@@ -361,13 +361,13 @@ async function release(b) {
     await p.goto(base + q); await wait(p, 800);
     const r = await p.evaluate(() => ({
       phone: document.querySelector('.release-page').classList.contains('is-phone'),
-      fields: document.querySelectorAll('.release-field .release-number').length, // 9 numbered (2 for under-18s only), agree, date
+      fields: document.querySelectorAll('.release-field .release-number').length, // 10 numbered (2 for under-18s only), agree, date
       prefilled: ['shoot_date', 'shoot_place', 'shoot_what'].map(n => document.querySelector('input[name="' + n + '"]').value),
       terms: document.querySelectorAll('.release-term-text').length, // in return, 10 terms, 8 explainer rows
       sizes: [...new Set([...document.querySelectorAll('.release-page *')].filter(e => e.offsetParent).map(e => getComputedStyle(e).fontSize))],
       dotted: getComputedStyle(document.querySelector('.release-label'), '::after').borderBottomStyle,
       overflow: document.documentElement.scrollWidth > innerWidth + 1 }));
-    check(name + ': numbered fields, shoot details from the link, terms, dotted leaders', r.fields === 11 && r.prefilled.join('|') === '10 Oct 2026|Brecon Beacons|Walking a ridge at dawn' && r.terms === 19 && r.dotted === 'dotted', r);
+    check(name + ': numbered fields, shoot details from the link, terms, dotted leaders', r.fields === 12 && r.prefilled.join('|') === '10 Oct 2026|Brecon Beacons|Walking a ridge at dawn' && r.terms === 19 && r.dotted === 'dotted', r);
     check(name + ': phone layout only on phones, no sideways scroll, all 11px', r.phone === !name.includes('desktop') && !r.overflow && r.sizes.join() === '11px', r);
     await p.locator('.release-send').click(); await wait(p, 200);
     const e1 = await p.textContent('.release-error');
@@ -377,6 +377,9 @@ async function release(b) {
     await p.locator('.release-choice', { hasText: '18 or over' }).click();
     await p.locator('.release-send').click(); await wait(p, 200);
     const e2 = await p.textContent('.release-error');
+    await p.locator('.release-photo input[type=file]').setInputFiles(path.join(__dirname, '..', 'previews', '486365701.jpg')); await wait(p, 600);
+    const photo = await p.evaluate(() => ({ shown: !document.querySelector('.release-photo-thumb').hidden, action: document.querySelector('.release-photo').parentNode.querySelector('.release-action').textContent }));
+    check(name + ': adding a photo shows it in the form', photo.shown && photo.action === 'Change', photo);
     await p.locator('.release-choice', { hasText: "I've read" }).click();
     await p.locator('.release-pad').scrollIntoViewIfNeeded();
     const box = await p.locator('.release-pad canvas').boundingBox();
@@ -385,7 +388,10 @@ async function release(b) {
     await p.locator('.release-send').click(); await wait(p, 1500);
     check(name + ': asks for missing details, agreement and shows the guardian rows for under-18s', e1 === 'Please fill in full name.' && e2 === 'Please tap to agree.' && guardian, { e1, e2, guardian });
     const body = posted ? posted.body.toString('latin1') : '';
-    check(name + ': sends to FormSubmit with the signature attached, then says thanks', !!posted && posted.url === 'https://formsubmit.co/elliotholbrow@gmail.com' && body.includes('Test Person') && body.includes('filename="signature.png"') && body.includes('person-release v1.1') && /\/release\?signed=1$/.test(p.url()) && (await p.textContent('.release-form')).startsWith('Signed'), posted && posted.url);
+    check(name + ': sends to FormSubmit with the signed PDF attached, then says thanks', !!posted && posted.url === 'https://formsubmit.co/elliotholbrow@gmail.com' && body.includes('Test Person') && /filename="release_person_test-person_\d{4}-\d\d-\d\d\.pdf"/.test(body) && body.includes('%PDF-1.4') && body.includes('/DCTDecode') && body.includes('person-release v1.1') && /\/release\?signed=1$/.test(p.url()) && (await p.textContent('.release-form')).startsWith('Signed'), posted && posted.url);
+    if (posted) require('fs').writeFileSync(shot(name.replace(/\W+/g, '-')).replace(/png$/, 'pdf'), Buffer.from(body.slice(body.indexOf('%PDF'), body.indexOf('%%EOF') + 6), 'latin1'));
+    const copy = await p.evaluate(() => { const a = document.querySelector('.release-copy'); return a && { file: a.download, href: a.href.slice(0, 5) }; });
+    check(name + ': signer can save their signed copy', !!copy && /\.pdf$/.test(copy.file) && copy.href === 'blob:', copy);
     check(name + ': no script errors', errors.length === 0, errors);
     await c.close();
   }
