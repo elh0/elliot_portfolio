@@ -228,10 +228,10 @@ html body .release-page input::placeholder {
   border-bottom-color: rgba(255, 255, 255, 0.85);
 }
 
+/* Asterisk right on the end of the label, "Full name*" */
 html body .release-page .release-star {
   flex: 0 0 auto;
-  margin-left: 0.5ch;
-  color: var(--row-dim) !important;
+  margin-left: 0;
 }
 
 html body .release-page .release-row.is-missing .release-star {
@@ -274,7 +274,7 @@ html body .release-page .release-term-text {
   padding: 5px 0;
 }
 
-/* Signature: a faint line to sign above, Clear on the right */
+/* Signature: a space to sign in under the hint (no line), Clear on the right */
 
 .release-page .release-pad {
   position: relative;
@@ -283,16 +283,6 @@ html body .release-page .release-term-text {
   height: 120px;
   touch-action: none;
   cursor: crosshair;
-}
-
-.release-page .release-pad::after {
-  position: absolute;
-  right: 0;
-  bottom: 0;
-  left: 0;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.2);
-  content: "";
-  pointer-events: none;
 }
 
 .release-page .release-pad canvas {
