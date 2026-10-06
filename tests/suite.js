@@ -352,6 +352,18 @@ async function contact(b) {
 }
 
 async function release(b) {
+  {
+    /* Shoot details with nothing from the link: suggestions on tap */
+    const c = await b.newContext({ viewport: { width: 1440, height: 900 }, permissions: ['geolocation'], geolocation: { latitude: 51.8842, longitude: -3.4362 } }); await routes(c, base);
+    await c.route(/api\.bigdatacloud\.net/, (route) => route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify({ locality: 'Brecon', principalSubdivision: 'Wales', postcode: 'LD3' }) }));
+    const p = await c.newPage(); await p.goto(base + '/release'); await wait(p, 800);
+    const holders = await p.evaluate(() => ['shoot_date', 'shoot_place', 'shoot_what'].map(n => document.querySelector('input[name=' + n + ']').placeholder));
+    await p.click('input[name=shoot_date]'); await p.click('input[name=shoot_what]'); await p.click('input[name=shoot_place]'); await wait(p, 800);
+    const got = await p.evaluate(() => ['shoot_date', 'shoot_place', 'shoot_what', 'shoot_gps'].map(n => document.querySelector('input[name=' + n + ']').value));
+    const today = new Date().toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric' });
+    check('release: empty shoot details suggest today, your location and a generic line on tap', holders.join('|') === "Tap for today's date|Tap to use your location|e.g. Everyday moments, for stock footage" && got.join('|') === today + '|Brecon, Wales|Everyday moments, for stock footage|51.88420, -3.43620', { holders, got });
+    await c.close();
+  }
   const q = '/release?type=person&date=10 Oct 2026&place=Brecon Beacons&what=Walking a ridge at dawn';
   for (const [name, opts] of [['release desktop', { viewport: { width: 1440, height: 900 } }], ['release iPhone', devices['iPhone 13']], ['release iPhone sideways', devices['iPhone 13 landscape']]]) {
     const c = await b.newContext(opts); await routes(c, base);

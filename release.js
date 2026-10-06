@@ -63,9 +63,9 @@
       intro: "Permission to film you and sell the footage as stock. Please read it all, and ask anything before you sign.",
       sections: [
         ["The shoot", [
-          { name: "shoot_date", label: "Date", query: "date" },
-          { name: "shoot_place", label: "Place", query: "place" },
-          { name: "shoot_what", label: "What we filmed", query: "what" }]],
+          { name: "shoot_date", label: "Date", query: "date", suggest: "today" },
+          { name: "shoot_place", label: "Place", query: "place", suggest: "location" },
+          { name: "shoot_what", label: "What we filmed", query: "what", suggest: "Everyday moments, for stock footage" }]],
         ["You", [
           { name: "name", label: "Full name", auto: "name", placeholder: "Your full name", required: true },
           { name: "address", label: "Address", auto: "street-address", placeholder: "Street, town, postcode", required: true },
@@ -95,9 +95,9 @@
       sections: [
         ["The place", [
           { name: "place_name", label: "Name of place", query: "place" },
-          { name: "place_address", label: "Address", query: "address" },
-          { name: "place_what", label: "What we can film", query: "what" },
-          { name: "place_dates", label: "Dates and times", query: "date" }]],
+          { name: "place_address", label: "Address", query: "address", suggest: "location" },
+          { name: "place_what", label: "What we can film", query: "what", suggest: "The place, inside and out" },
+          { name: "place_dates", label: "Dates and times", query: "date", suggest: "today" }]],
         ["You", [
           { name: "name", label: "Full name", auto: "name", placeholder: "Your full name", required: true },
           { name: "role", label: "Role", placeholder: "Owner, manager…", required: true },
@@ -382,6 +382,63 @@
      6 Oct 2026). So build whatever is missing, now and whenever the page
      changes. */
   var builds = 0;
+
+  /* Shoot details not filled in from the link get a suggestion when
+     tapped, to make signing quicker (6 Oct 2026): today's date, the
+     signer's location (if they allow it), or a generic line. Each lands
+     selected, so typing replaces it. */
+  function todayText() {
+    return new Date().toLocaleDateString("en-GB", { day: "numeric", month: "long", year: "numeric" });
+  }
+
+  function suggestOnTap(field, input) {
+    if (field.suggest === "today") input.placeholder = "Tap for today's date";
+    else if (field.suggest === "location") input.placeholder = "Tap to use your location";
+    else input.placeholder = "e.g. " + field.suggest;
+    function fill(text) {
+      if (input.value) return;
+      input.value = text;
+      input.dispatchEvent(new Event("input"));
+      if (document.activeElement === input) input.select();
+    }
+    input.addEventListener("focus", function () {
+      if (input.value) return;
+      if (field.suggest === "today") fill(todayText());
+      else if (field.suggest !== "location") fill(field.suggest);
+      else if (!field.located && navigator.geolocation) {
+        field.located = true;
+        input.placeholder = "Finding you\u2026";
+        navigator.geolocation.getCurrentPosition(function (position) {
+          var lat = position.coords.latitude.toFixed(5);
+          var lon = position.coords.longitude.toFixed(5);
+          var gps = input.form && input.form.querySelector('input[name="shoot_gps"]');
+          if (gps) gps.value = lat + ", " + lon;
+          input.placeholder = "Type the place";
+          /* a place name for the coordinates (BigDataCloud's free
+             lookup, no key); the bare coordinates if that fails */
+          var request = new XMLHttpRequest();
+          request.open("GET", "https://api.bigdatacloud.net/data/reverse-geocode-client?latitude=" +
+            lat + "&longitude=" + lon + "&localityLanguage=en");
+          request.timeout = 6000;
+          request.onload = function () {
+            var place = null;
+            try { place = JSON.parse(request.responseText); } catch (error) { place = null; }
+            var name = place ? [place.locality || place.city, place.principalSubdivision]
+              .filter(function (part, i, all) { return part && all.indexOf(part) === i; }).join(", ") : "";
+            if (name && field.suggest === "location" && place.postcode && field.name === "place_address") {
+              name += " " + place.postcode;
+            }
+            fill(name || lat + ", " + lon);
+          };
+          request.onerror = request.ontimeout = function () { fill(lat + ", " + lon); };
+          request.send();
+        }, function () {
+          input.placeholder = "Type the place";
+        }, { enableHighAccuracy: false, timeout: 10000, maximumAge: 600000 });
+      }
+    });
+  }
+
   function build() {
     /* Name bar, as on the contact page */
     document.querySelectorAll(".release-page .index-heading").forEach(function (heading) {
@@ -576,6 +633,7 @@
             input.name = field.name;
             if (field.auto) input.autocomplete = field.auto;
             input.placeholder = field.placeholder || "Type here";
+            if (field.suggest) suggestOnTap(field, input);
             if (field.query && params.get(field.query)) input.value = params.get(field.query);
             var fit = function () {
               var length = Math.max(input.value.length, input.placeholder.length) + 1;
@@ -728,7 +786,8 @@
         signed_at: "",
         terms_version: "",
         device: "",
-        signature_png: ""
+        signature_png: "",
+        shoot_gps: ""
       };
       var extraInputs = {};
       Object.keys(extra).forEach(function (key) {
