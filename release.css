@@ -581,3 +581,55 @@ html body .release-page .release-explain-link {
 html body .release-page .release-explain-link:hover {
   border-bottom-color: #ffffff !important;
 }
+
+/* The answer opens under the link, sliding down from behind it */
+.release-page .release-explainer {
+  display: grid;
+  grid-template-rows: 0fr;
+  transition: grid-template-rows 420ms ease;
+}
+
+.release-page .release-explainer.is-open {
+  grid-template-rows: 1fr;
+}
+
+.release-page .release-explainer-inner {
+  min-height: 0;
+  overflow: hidden;
+  opacity: 0;
+  transform: translateY(-8px);
+  transition: opacity 320ms ease, transform 420ms ease, visibility 0s linear 420ms;
+  visibility: hidden;
+}
+
+.release-page .release-explainer.is-open .release-explainer-inner {
+  opacity: 1;
+  transform: none;
+  transition: opacity 320ms ease 80ms, transform 420ms ease;
+  visibility: visible;
+}
+
+.release-page .release-explainer .release-section {
+  margin-top: 0.6rem;
+}
+
+html body .release-page .release-explain-close {
+  display: inline-block;
+  margin: 0.8rem 0 0.4rem calc(4ch + 2ch);
+  color: var(--row-dim) !important;
+}
+
+html body .release-page .release-explain-close:hover {
+  color: #ffffff !important;
+}
+
+.release-page.is-phone .release-explain-close {
+  margin-left: calc(4ch + 2ch);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .release-page .release-explainer,
+  .release-page .release-explainer-inner {
+    transition: none !important;
+  }
+}

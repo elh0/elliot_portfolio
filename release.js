@@ -15,7 +15,7 @@
 
   /* Load the release.css this script was written for, in case GitHub Pages
      still has an older copy cached (as contact.js does). Bump with changes. */
-  var STYLE_VERSION = "2026-10-06-k";
+  var STYLE_VERSION = "2026-10-06-l";
   (function loadMatchingStyles() {
     var script = document.currentScript;
     if (!script || !script.src) return;
@@ -473,7 +473,20 @@
       /* the explainer link sits under the intro, where people read it */
       var explainLink = make("a", "release-explain-link", "Where does my footage go?");
       explainLink.href = "#footage";
+      explainLink.setAttribute("aria-expanded", "false");
       form.appendChild(explainLink);
+      /* ...and opens the answer right there, sliding down from behind it,
+         instead of taking people off the form (6 Oct 2026) */
+      var explainer = make("div", "release-explainer");
+      var explainInner = make("div", "release-explainer-inner");
+      var explainBlock = make("div", "release-section");
+      wordRows(explainBlock, EXPLAINER);
+      explainInner.appendChild(explainBlock);
+      var explainClose = make("a", "release-explain-close", "Close \u2191");
+      explainClose.href = "#";
+      explainInner.appendChild(explainClose);
+      explainer.appendChild(explainInner);
+      form.appendChild(explainer);
 
       /* Numbered rows: label, leader, field, leader, action */
       var number = 0;
@@ -734,35 +747,22 @@
 
       holder.appendChild(form);
 
-      /* The explainer, swapped in for the form */
-      var explainer = make("div", "release-explainer");
-      explainer.hidden = true;
-      var explainTools = make("div", "release-tools");
-      explainTools.appendChild(make("span", "", "Where does my footage go?"));
-      var back = make("a", "", "← Back to the form");
-      back.href = "#";
-      explainTools.appendChild(back);
-      explainer.appendChild(explainTools);
-      explainer.appendChild(make("p", "release-intro", "What happens to the clips you're in."));
-      var explainBlock = make("div", "release-section");
-      wordRows(explainBlock, EXPLAINER);
-      explainer.appendChild(explainBlock);
-      holder.appendChild(explainer);
       holder.appendChild(footer());
 
       function showExplainer(show) {
-        explainer.hidden = !show;
-        form.hidden = show;
-        page.scrollIntoView();
-        if (!show) sizeCanvas();
+        explainer.classList.toggle("is-open", show);
+        explainLink.setAttribute("aria-expanded", show ? "true" : "false");
       }
       explainLink.addEventListener("click", function (event) {
         event.preventDefault();
-        showExplainer(true);
+        showExplainer(!explainer.classList.contains("is-open"));
       });
-      back.addEventListener("click", function (event) {
+      explainClose.addEventListener("click", function (event) {
         event.preventDefault();
         showExplainer(false);
+        if (explainLink.getBoundingClientRect().top < 0) {
+          explainLink.scrollIntoView({ block: "center" });
+        }
       });
 
       /* Signature pad: white ink on the page; sent as black on white */

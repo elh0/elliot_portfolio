@@ -371,6 +371,12 @@ async function release(b) {
       overflow: document.documentElement.scrollWidth > innerWidth + 1 }));
     check(name + ': numbered fields, shoot details from the link, terms, dotted leaders, no underlines, asterisks on the grey hints, signature box with ×', r.fields === 12 && r.prefilled.join('|') === '10 Oct 2026|Brecon Beacons|Walking a ridge at dawn' && r.terms === 19 && r.dotted && !r.underlined && r.stars === 6 && r.actions.join() === '' && r.box, r);
     check(name + ': phone layout only on phones, no sideways scroll, all 11px', r.phone === !name.includes('desktop') && !r.overflow && r.sizes.join() === '11px', r);
+    const shut = await p.evaluate(() => getComputedStyle(document.querySelector('.release-explainer-inner')).visibility);
+    await p.locator('.release-explain-link').click(); await wait(p, 600);
+    const open = await p.evaluate(() => ({ vis: getComputedStyle(document.querySelector('.release-explainer-inner')).visibility, h: document.querySelector('.release-explainer').getBoundingClientRect().height, form: !!document.querySelector('.release-fields').offsetParent }));
+    await p.locator('.release-explain-close').click(); await wait(p, 600);
+    const closed = await p.evaluate(() => document.querySelector('.release-explainer').getBoundingClientRect().height);
+    check(name + ': "Where does my footage go?" opens under the link and closes again, staying on the form', shut === 'hidden' && open.vis === 'visible' && open.h > 100 && open.form && closed < 1, { shut, open, closed });
     await p.evaluate(() => { document.querySelectorAll('.release-page .index-heading, .release-page .release-form').forEach(n => { while (n.firstChild) n.firstChild.remove(); }); }); await wait(p, 300);
     check(name + ': rebuilds the form if Cargo redraws the page', await p.evaluate(() => !!document.querySelector('.release-page .site-name') && document.querySelectorAll('.release-field .release-number').length === 12));
     await p.locator('.release-send').click(); await wait(p, 200);
