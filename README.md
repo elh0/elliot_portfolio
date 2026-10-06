@@ -11,6 +11,7 @@ Cargo holds only a few lines of HTML per page. The styling, the video player and
 | Landing (homepage) | `/` | `landing.html` | `landing.js` (styles are inside it) |
 | Projects | `/projects` | `home.html` | `home.css`, `home.js` |
 | Contact | `/contact` | `contact.html` | `contact.css`, `contact.js` |
+| Release (hidden, not in the menu) | `/release` | `release.html` | `release.css`, `release.js` |
 
 `landing.css` is an empty placeholder kept so the existing `<link>` in Cargo doesn't 404.
 
@@ -31,6 +32,10 @@ Cargo holds only a few lines of HTML per page. The styling, the video player and
 - **Player:** tap/click plays and pauses; double-tap/double-click the left or right side skips 5s; F is fullscreen. A video plays round twice the first time, then shows its thumbnail and Replay. Hovering or dragging the timeline shows a preview frame.
 - **Moving between projects:** on desktop, the chevrons either side of the screen or the ← → keys; on phones, swipe sideways on the video (in multi-video projects, swipes go through its videos first). With a type filter on, these move through that type only.
 - **Contact:** the same name bar (Work goes back to `/projects`), with each label in the projects' title column and its value in the director column.
+
+## Release page
+
+`/release` is a stock footage release people sign on their phone (see `release.js` for the wording; bump `TERMS_VERSION` when it changes). Send links with the shoot filled in, e.g. `elliot.onl/release?date=10 Oct 2026&place=Brecon Beacons&what=Walking a ridge at dawn`, or `?type=location&place=...&address=...` for a location. Each signature is emailed through FormSubmit to the address in `EMAIL`, with a one-page signed PDF (full wording, details, optional photo, signature) attached; the signer can save the same PDF afterwards.
 
 ## Project links
 
