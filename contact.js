@@ -2,7 +2,7 @@
 
   /* Load the contact.css this script was written for, in case GitHub Pages
      still has an older copy cached (as home.js does). Bump with changes. */
-  var STYLE_VERSION = "2026-10-08-c";
+  var STYLE_VERSION = "2026-10-08-d";
   (function loadMatchingStyles() {
     var script = document.currentScript;
     if (!script || !script.src) return;
@@ -176,9 +176,9 @@
     return node;
   }
 
-  /* A director whose titles don't fit on their row gets them on a line of
-     their own underneath, wrapping if need be, so every title can be
-     clicked (phones always show them underneath). */
+  /* A director whose titles don't fit their column has them wrap onto a
+     second line within it, so every title can be clicked (phones always
+     show them underneath the name). */
   function fitTitles(row, strip) {
     function update() {
       row.classList.remove("is-long");

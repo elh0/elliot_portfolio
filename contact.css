@@ -384,13 +384,8 @@ html body .contact-page .contact-project {
 }
 
 /* Directors' project titles: each one a link. A list too long for its
-   row moves to a line of its own underneath and wraps (is-long, set by
-   contact.js), so nothing is cut off. */
-.contact-page .contact-director.is-long .contact-value {
-  grid-row: 2;
-  grid-column: 3 / -1;
-  padding-top: 0.15rem;
-}
+   column stays on its row and wraps onto the next line within the column
+   (is-long, set by contact.js), so nothing is cut off. */
 
 .contact-page .contact-director.is-long .contact-value::after {
   display: none;
