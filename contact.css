@@ -395,6 +395,16 @@ html body .contact-page .contact-project {
   white-space: normal;
 }
 
+.contact-page .contact-titles::-webkit-scrollbar {
+  display: none;
+}
+
+/* Phones: a long line of titles fades out at the right until swiped. */
+.contact-page .contact-titles.is-cut-right {
+  -webkit-mask-image: linear-gradient(to right, #000 calc(100% - 4ch), transparent);
+  mask-image: linear-gradient(to right, #000 calc(100% - 4ch), transparent);
+}
+
 html body .contact-page a.contact-title {
   white-space: nowrap;
   border-bottom: 0 !important;
@@ -482,7 +492,11 @@ html body .contact-page .contact-footer a {
 }
 
 .mobile .contact-page .contact-director .contact-titles {
-  white-space: normal;
+  overflow-x: auto;
+  overflow-y: hidden;
+  text-overflow: clip;
+  scrollbar-width: none;
+  -webkit-overflow-scrolling: touch;
 }
 
 .mobile .contact-page .contact-list .contact-value,
@@ -520,7 +534,7 @@ html.mobile .contact-page .contact-action {
   }
 
   /* Directors: their project titles on a line of their own underneath,
-     each one a link, wrapping when it runs long. */
+     each one a link, on one line that swipes sideways when it runs long. */
   .contact-page .contact-director .contact-value {
     grid-row: 2;
     grid-column: 2 / span 2;
@@ -532,7 +546,11 @@ html.mobile .contact-page .contact-action {
   }
 
   .contact-page .contact-director .contact-titles {
-    white-space: normal;
+    overflow-x: auto;
+    overflow-y: hidden;
+    text-overflow: clip;
+    scrollbar-width: none;
+    -webkit-overflow-scrolling: touch;
   }
 
   .contact-page .contact-list .contact-value,
