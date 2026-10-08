@@ -395,16 +395,6 @@ html body .contact-page .contact-project {
   white-space: normal;
 }
 
-.contact-page .contact-titles::-webkit-scrollbar {
-  display: none;
-}
-
-/* Phones: a long line of titles fades out at the right until swiped. */
-.contact-page .contact-titles.is-cut-right {
-  -webkit-mask-image: linear-gradient(to right, #000 calc(100% - 4ch), transparent);
-  mask-image: linear-gradient(to right, #000 calc(100% - 4ch), transparent);
-}
-
 html body .contact-page a.contact-title {
   white-space: nowrap;
   border-bottom: 0 !important;
@@ -482,21 +472,7 @@ html body .contact-page .contact-footer a {
 }
 
 .mobile .contact-page .contact-director .contact-value {
-  grid-row: 2;
-  grid-column: 2 / span 2;
-  padding-top: 0.15rem;
-}
-
-.mobile .contact-page .contact-director .contact-value::after {
-  display: none;
-}
-
-.mobile .contact-page .contact-director .contact-titles {
-  overflow-x: auto;
-  overflow-y: hidden;
-  text-overflow: clip;
-  scrollbar-width: none;
-  -webkit-overflow-scrolling: touch;
+  display: none !important;
 }
 
 .mobile .contact-page .contact-list .contact-value,
@@ -533,24 +509,10 @@ html.mobile .contact-page .contact-action {
     display: none !important;
   }
 
-  /* Directors: their project titles on a line of their own underneath,
-     each one a link, on one line that swipes sideways when it runs long. */
+  /* Directors: just the name and the project numbers (Elliot, Oct 8 2026:
+     the titles broke the line). */
   .contact-page .contact-director .contact-value {
-    grid-row: 2;
-    grid-column: 2 / span 2;
-    padding-top: 0.15rem;
-  }
-
-  .contact-page .contact-director .contact-value::after {
-    display: none;
-  }
-
-  .contact-page .contact-director .contact-titles {
-    overflow-x: auto;
-    overflow-y: hidden;
-    text-overflow: clip;
-    scrollbar-width: none;
-    -webkit-overflow-scrolling: touch;
+    display: none !important;
   }
 
   .contact-page .contact-list .contact-value,

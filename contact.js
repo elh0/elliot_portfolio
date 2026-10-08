@@ -2,7 +2,7 @@
 
   /* Load the contact.css this script was written for, in case GitHub Pages
      still has an older copy cached (as home.js does). Bump with changes. */
-  var STYLE_VERSION = "2026-10-08-e";
+  var STYLE_VERSION = "2026-10-08-f";
   (function loadMatchingStyles() {
     var script = document.currentScript;
     if (!script || !script.src) return;
@@ -177,23 +177,13 @@
   }
 
   /* A director whose titles don't fit their column has them wrap onto a
-     second line within it, so every title can be clicked. Phones show the
-     titles on one line under the name instead, swiped sideways when long,
-     with the cut-off end faded. */
+     second line within it, so every title can be clicked. (Phones show
+     only the name and project numbers.) */
   function fitTitles(row, strip) {
-    function phone() {
-      return getComputedStyle(strip.parentNode).gridRowStart === "2";
-    }
-    function fade() {
-      strip.classList.toggle("is-cut-right", phone() &&
-        strip.scrollWidth - strip.clientWidth - strip.scrollLeft > 1);
-    }
     function update() {
       row.classList.remove("is-long");
-      if (!phone() && strip.scrollWidth > strip.clientWidth + 1) row.classList.add("is-long");
-      fade();
+      if (strip.offsetParent && strip.scrollWidth > strip.clientWidth + 1) row.classList.add("is-long");
     }
-    strip.addEventListener("scroll", fade, { passive: true });
     window.addEventListener("resize", update);
     setTimeout(update, 0);
     if (document.fonts && document.fonts.ready) document.fonts.ready.then(update);
