@@ -2,7 +2,7 @@
 
   /* Load the contact.css this script was written for, in case GitHub Pages
      still has an older copy cached (as home.js does). Bump with changes. */
-  var STYLE_VERSION = "2026-10-08-b";
+  var STYLE_VERSION = "2026-10-08-c";
   (function loadMatchingStyles() {
     var script = document.currentScript;
     if (!script || !script.src) return;
@@ -176,26 +176,16 @@
     return node;
   }
 
-  /* A strip wider than its cell scrolls sideways: trackpads and swipes do
-     this natively, and a mouse wheel over it scrolls it until it reaches
-     the end, then lets the page scroll on. A fade marks hidden titles. */
-  function scrollSideways(strip) {
+  /* A director whose titles don't fit on their row gets them on a line of
+     their own underneath, wrapping if need be, so every title can be
+     clicked (phones always show them underneath). */
+  function fitTitles(row, strip) {
     function update() {
-      var more = strip.scrollWidth - strip.clientWidth - strip.scrollLeft;
-      strip.classList.toggle("is-cut-right", more > 1);
-      strip.classList.toggle("is-cut-left", strip.scrollLeft > 1);
+      row.classList.remove("is-long");
+      if (getComputedStyle(strip).whiteSpace === "normal") return; /* phones */
+      if (strip.scrollWidth > strip.clientWidth + 1) row.classList.add("is-long");
     }
-    strip.addEventListener("scroll", update, { passive: true });
     window.addEventListener("resize", update);
-    strip.addEventListener("wheel", function (event) {
-      if (!event.deltaY || Math.abs(event.deltaX) > Math.abs(event.deltaY)) return;
-      var max = strip.scrollWidth - strip.clientWidth;
-      if (max <= 0) return;
-      if ((event.deltaY > 0 && strip.scrollLeft >= max - 1) ||
-          (event.deltaY < 0 && strip.scrollLeft <= 0)) return;
-      event.preventDefault();
-      strip.scrollLeft += event.deltaY;
-    }, { passive: false });
     setTimeout(update, 0);
     if (document.fonts && document.fonts.ready) document.fonts.ready.then(update);
   }
@@ -306,7 +296,7 @@
       var name = make("span", "contact-label");
       name.appendChild(make("span", "cell-text", director[0]));
       row.appendChild(name);
-      /* Each title opens its project; a long list scrolls sideways. */
+      /* Each title opens its project. */
       var titles = make("span", "contact-value");
       var strip = make("span", "cell-text contact-titles");
       director[1].forEach(function (project, i) {
@@ -315,7 +305,7 @@
         link.href = INDEX_URL + "#" + project[2];
         strip.appendChild(link);
       });
-      scrollSideways(strip);
+      fitTitles(row, strip);
       titles.appendChild(strip);
       row.appendChild(titles);
       var numbers = make("span", "contact-action");
