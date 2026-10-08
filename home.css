@@ -28,7 +28,8 @@ body:has([id="X1134136285"]) {
   --site-type-size: 11px;
   position: relative;
   box-sizing: border-box;
-  --page-gutter: clamp(24px, 4.5vw, 72px);
+  /* Wide black margins either side, like georgedommpower.com (Oct 8 2026). */
+  --page-gutter: clamp(24px, 16.5vw, 560px);
   width: 100%;
   max-width: none;
   min-width: 0;
@@ -1272,21 +1273,14 @@ body:has([id="X1134136285"].is-light-theme) {
 }
 
 /* Open project (desktop): the playbar and credits run the full width of
-   the rows, like the name bar. The picture is as big as the screen height
-   allows: wide films fill the width, 4:3 and 3:2 sit centred with black
-   either side. The chevrons sit in the side margins. */
+   the rows, like the name bar, and every film fills that width at its own
+   shape (no black bars either side). The chevrons sit in the side margins. */
 @media (min-width: 768px) and (min-height: 501px), (min-width: 768px) and (hover: hover) {
   [id="X1134136285"] .project-content > .project-carousel,
   [id="X1134136285"] .project-content > .project-meta {
     max-width: none;
     margin-right: 0;
     margin-left: 0;
-  }
-
-  [id="X1134136285"] .project-content .video-stage {
-    aspect-ratio: auto;
-    height: min(calc(100vh - 7rem), calc((100vw - 2 * var(--page-gutter)) / (var(--video-ratio, 16 / 9))));
-    height: min(calc(100svh - 7rem), calc((100vw - 2 * var(--page-gutter)) / (var(--video-ratio, 16 / 9))));
   }
 
   [id="X1134136285"] .project-content .video-stage video {

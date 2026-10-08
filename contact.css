@@ -30,7 +30,7 @@ body:has(.contact-page) {
   width: 100% !important;
   max-width: none !important;
   margin: 0 !important;
-  padding: 18px clamp(24px, 4.5vw, 72px) 4rem !important;
+  padding: 18px clamp(24px, 16.5vw, 560px) 4rem !important;
   text-align: left !important;
   background: transparent !important;
 }

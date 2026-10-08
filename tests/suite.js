@@ -82,6 +82,9 @@ async function desktop(b) {
   check('desktop: opening a project ends the intro reel', await p.evaluate(() => !document.querySelector('.page-background')));
   const fit = await p.evaluate(() => { const w = document.querySelector('details[open] .video-wrap').getBoundingClientRect(); const c = document.querySelector('details[open] .video-controls').getBoundingClientRect(); return { h: w.height, ctl: c.bottom - w.top, vh: innerHeight }; });
   check('desktop: video and playbar fit the screen height', fit.ctl <= fit.vh, fit);
+  const fill = await p.evaluate(() => { const st = document.querySelector('details[open] .video-stage').getBoundingClientRect(); const c = document.querySelector('details[open] .video-controls').getBoundingClientRect(); const v = document.querySelector('details[open] video.project-video'); return { stage: Math.round(st.width), bar: Math.round(c.width), shape: +(st.width / st.height).toFixed(2), film: +(v.videoWidth / v.videoHeight).toFixed(2) }; });
+  check('desktop: film fills the playbar width at its own shape (no black bars)', Math.abs(fill.stage - fill.bar) <= 1 && Math.abs(fill.shape - fill.film) <= 0.02, fill);
+  check('desktop: wide side margins (about a sixth each side)', await p.evaluate(() => { const a = document.querySelector('.project-accordion').getBoundingClientRect(); return Math.abs(a.left - innerWidth * 0.165) <= 2; }));
   const centre = await p.evaluate(() => { const r = document.querySelector('details[open] .project-carousel').getBoundingClientRect(); const a = document.querySelector('.project-accordion').getBoundingClientRect(); return { video: Math.round(r.left + r.width / 2), list: Math.round(a.left + a.width / 2), w: Math.round(r.width) }; });
   await p.locator('summary').nth(5).hover(); await wait(p, 400);
   check('desktop: no hover thumbnail while a project is open', await p.evaluate(() => !document.querySelector('.project-hover-preview').classList.contains('is-visible')));

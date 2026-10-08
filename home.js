@@ -5,7 +5,7 @@
     for a few minutes after a change. Load the stylesheet this script was
     written for, then drop the plain link. Bump with every home.css change
     the script relies on. */
- var STYLE_VERSION = "2026-10-02-e";
+ var STYLE_VERSION = "2026-10-08-a";
  (function loadMatchingStyles() {
    var script = document.currentScript;
    if (!script || !script.src) return;
