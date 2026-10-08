@@ -2,7 +2,7 @@
 
   /* Load the contact.css this script was written for, in case GitHub Pages
      still has an older copy cached (as home.js does). Bump with changes. */
-  var STYLE_VERSION = "2026-10-08-a";
+  var STYLE_VERSION = "2026-10-08-b";
   (function loadMatchingStyles() {
     var script = document.currentScript;
     if (!script || !script.src) return;
@@ -176,6 +176,30 @@
     return node;
   }
 
+  /* A strip wider than its cell scrolls sideways: trackpads and swipes do
+     this natively, and a mouse wheel over it scrolls it until it reaches
+     the end, then lets the page scroll on. A fade marks hidden titles. */
+  function scrollSideways(strip) {
+    function update() {
+      var more = strip.scrollWidth - strip.clientWidth - strip.scrollLeft;
+      strip.classList.toggle("is-cut-right", more > 1);
+      strip.classList.toggle("is-cut-left", strip.scrollLeft > 1);
+    }
+    strip.addEventListener("scroll", update, { passive: true });
+    window.addEventListener("resize", update);
+    strip.addEventListener("wheel", function (event) {
+      if (!event.deltaY || Math.abs(event.deltaX) > Math.abs(event.deltaY)) return;
+      var max = strip.scrollWidth - strip.clientWidth;
+      if (max <= 0) return;
+      if ((event.deltaY > 0 && strip.scrollLeft >= max - 1) ||
+          (event.deltaY < 0 && strip.scrollLeft <= 0)) return;
+      event.preventDefault();
+      strip.scrollLeft += event.deltaY;
+    }, { passive: false });
+    setTimeout(update, 0);
+    if (document.fonts && document.fonts.ready) document.fonts.ready.then(update);
+  }
+
   function pad(number) {
     return String(number).padStart(2, "0");
   }
@@ -282,10 +306,17 @@
       var name = make("span", "contact-label");
       name.appendChild(make("span", "cell-text", director[0]));
       row.appendChild(name);
+      /* Each title opens its project; a long list scrolls sideways. */
       var titles = make("span", "contact-value");
-      titles.appendChild(make("span", "cell-text", director[1].map(function (project) {
-        return project[1];
-      }).join(", ")));
+      var strip = make("span", "cell-text contact-titles");
+      director[1].forEach(function (project, i) {
+        if (i) strip.appendChild(document.createTextNode(", "));
+        var link = make("a", "contact-title", project[1]);
+        link.href = INDEX_URL + "#" + project[2];
+        strip.appendChild(link);
+      });
+      scrollSideways(strip);
+      titles.appendChild(strip);
       row.appendChild(titles);
       var numbers = make("span", "contact-action");
       director[1].forEach(function (project, i) {
