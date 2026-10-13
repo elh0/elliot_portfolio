@@ -2,7 +2,7 @@
 
   /* Load the contact.css this script was written for, in case GitHub Pages
      still has an older copy cached (as home.js does). Bump with changes. */
-  var STYLE_VERSION = "2026-10-08-f";
+  var STYLE_VERSION = "2026-10-13-a";
   (function loadMatchingStyles() {
     var script = document.currentScript;
     if (!script || !script.src) return;
@@ -299,7 +299,7 @@
       var titles = make("span", "contact-value");
       var strip = make("span", "cell-text contact-titles");
       director[1].forEach(function (project, i) {
-        if (i) strip.appendChild(document.createTextNode(", "));
+        if (i) strip.appendChild(make("span", "contact-sep", ", "));
         var link = make("a", "contact-title", project[1]);
         link.href = INDEX_URL + "#" + project[2];
         strip.appendChild(link);

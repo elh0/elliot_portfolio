@@ -341,6 +341,13 @@ async function contact(b) {
     check(name + ': London clock', /^London \d\d:\d\d (BST|GMT)$/.test(r.clock), r.clock);
     check(name + ': project numbers link to the project', r.link === '/projects#swank-mami-mc69', r.link);
     const titles = await p.evaluate(() => { const strips = [...document.querySelectorAll('.contact-titles')]; const last = strips[strips.length - 1]; const shown = strips.every(s => !!s.offsetParent && s.getBoundingClientRect().width > 0); const hidden = strips.every(s => !s.offsetParent); const box = last.getBoundingClientRect(); const lastLink = [...last.querySelectorAll('a')].pop().getBoundingClientRect(); return { shown, hidden, links: strips.map(s => s.querySelectorAll('a.contact-title').length).join(''), last: [...last.querySelectorAll('a')].map(a => a.getAttribute('href')), fits: strips.every(s => s.scrollWidth <= s.clientWidth + 1) && lastLink.right <= box.right + 1, oneLine: Math.round(last.getBoundingClientRect().height) <= Math.ceil(parseFloat(getComputedStyle(last).lineHeight) || 20), swipes: (last.scrollLeft = 9999, last.scrollLeft > 0), wide: document.documentElement.scrollWidth > innerWidth + 1 }; });
+    if (desktop) {
+      const hov = p.locator('.contact-director a.contact-title', { hasText: 'The North Face' });
+      await hov.hover(); await wait(p, 200);
+      const cols = await p.evaluate(() => { const a = [...document.querySelectorAll('a.contact-title')].find(x => x.textContent === 'The North Face'); const strip = a.parentNode; return { link: getComputedStyle(a).color, sep: getComputedStyle(strip.querySelector('.contact-sep')).color, other: getComputedStyle(strip.querySelector('a')).color }; });
+      check(name + ': pointing at a title lights only that title, not the comma', cols.link === 'rgb(255, 255, 255)' && cols.sep !== cols.link && cols.sep === cols.other, cols);
+      await p.mouse.move(1, 1);
+    }
     if (desktop) check(name + ': each director\'s project titles show and link separately', titles.shown && titles.links === '211211112114' && titles.last.join(' ') === '/projects#joe-james-papercuts /projects#oasis-x-spotify /projects#corteiz-lundun /projects#rotator', titles);
     if (desktop) check(name + ': a long title list wraps within its column, nothing cut off', titles.fits && !titles.wide, titles);
     else check(name + ': directors show just the name and project numbers, no titles', titles.hidden && !titles.wide, titles);

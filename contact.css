@@ -405,7 +405,8 @@ html body .contact-page a.contact-title {
 /* Pointing at one title: it stays white, the row's other titles go grey,
    so it's clear which project opens. */
 @media (hover: hover) and (pointer: fine) {
-  html body .contact-page .contact-titles:hover a.contact-title {
+  html body .contact-page .contact-titles:hover a.contact-title,
+  html body .contact-page .contact-titles:hover .contact-sep {
     color: var(--row-dim) !important;
   }
 
