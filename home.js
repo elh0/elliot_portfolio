@@ -155,24 +155,9 @@
       director: "Jack Davison",
       format: "Digital, Standard 16",
       videos: [
-      { src: "https://player.vimeo.com/progressive_redirect/playback/1236465203/rendition/1080p/file.mp4%20%281080p%29.mp4?loc=external&log_user=0&signature=d82e82ab928b4a3b666c4641b6b1858a1c78b4fe025cf90b547af45122c97d7a",
-        poster: "https://i.vimeocdn.com/video/2213009959-20bd5e9fa454a11fb546010311681a38df846cd9e60033cb417cf626f9bb8170-d_1280?region=us&mw=1920&q=90",
-        ratio: "1440 / 1080", time: "0:15", duration: 15.06 },
-      { src: "https://player.vimeo.com/progressive_redirect/playback/1236465291/rendition/1080p/file.mp4%20%281080p%29.mp4?loc=external&log_user=0&signature=8a1cd1de51ef2d138e9fda06b62cdf253f208ba6aea951b53b01286006a40eaf",
-        poster: "https://i.vimeocdn.com/video/2213009691-896e2f5df44b69cc8e2c7c4bdcd2de192acabef6d936c1ca7f0d127f28f942a8-d_1280?region=us&mw=1920&q=90",
-        ratio: "1440 / 1080", time: "0:15", duration: 15.06 },
-      { src: "https://player.vimeo.com/progressive_redirect/playback/1236465363/rendition/1080p/file.mp4%20%281080p%29.mp4?loc=external&log_user=0&signature=08b3846f122bbf2e0dd5cc5faea6786ec5a804c790e494a14bf5ae016643402e",
-        poster: "https://i.vimeocdn.com/video/2213009410-c5dcdede2962e65dfa0eff290f9fb12544280c5f3d3b610186b39c2731a42658-d_1280?region=us&mw=1920&q=90",
-        ratio: "1440 / 1080", time: "0:15", duration: 15.06 },
-      { src: "https://player.vimeo.com/progressive_redirect/playback/1236465441/rendition/1080p/file.mp4%20%281080p%29.mp4?loc=external&log_user=0&signature=30854aac83b7e3eb74e433cba9516d9872c9e0079fbee11170e8edb54b50b410",
-        poster: "https://i.vimeocdn.com/video/2213008802-7264255ac054dede516372cc7f4e3c1b1dba901af8219f8399099969f1e05215-d_1280?region=us&mw=1920&q=90",
-        ratio: "1440 / 1080", time: "0:15", duration: 15.06 },
-      { src: "https://player.vimeo.com/progressive_redirect/playback/1236465669/rendition/1080p/file.mp4%20%281080p%29.mp4?loc=external&log_user=0&signature=a9c5c9cada78b9edfa53247061bce7936bba56f55b0f4f9ddee228d3de040146",
-        poster: "https://i.vimeocdn.com/video/2213008635-da40cd015479e75b9a5ab39df1493443579253537e2c42f2c897358e84937eec-d_1280?region=us&mw=1920&q=90",
-        ratio: "1440 / 1080", time: "0:06", duration: 6.058333 },
-      { src: "https://player.vimeo.com/progressive_redirect/playback/1236465593/rendition/1080p/file.mp4%20%281080p%29.mp4?loc=external&log_user=0&signature=dc4d747ea235cb572c2d9bb6191bfd3ca0fa4e4c46298c47aac9c83229a294d4",
-        poster: "https://i.vimeocdn.com/video/2213008518-d3fc35fa96d805acc1ceb12fc53cf313fd1643620328b013c5be1487c154350c-d_1280?region=us&mw=1920&q=90",
-        ratio: "1440 / 1080", time: "0:30", duration: 30.058333 }
+      { src: "https://player.vimeo.com/progressive_redirect/playback/1242428568/rendition/1080p/file.mp4%20%281080p%29.mp4?loc=external&log_user=0&signature=736d8bb5564ed8bc6a480efca480e46135547e6d36f6c3b4ee5665422fba0dc0",
+        poster: "https://i.vimeocdn.com/video/2221169552-a55177efb01b7f5ef62b3dc57eb6d76dde35388e0ad96fa98d346c8dc522ccff-d_1280?region=us&mw=1920&q=90",
+        ratio: "1440 / 1080", time: "0:30", duration: 30.015 }
       ]
     },
     {

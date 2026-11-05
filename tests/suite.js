@@ -42,7 +42,7 @@ async function desktop(b) {
   const rows = await p.evaluate(() => [...document.querySelectorAll('summary')].map(s => [...s.children].map(c => getComputedStyle(c).display !== 'none' ? c.textContent : null)));
   check('desktop: 20 rows', rows.length === 20, rows.length);
   check('desktop: rows show 6 columns', rows.every(r => r.length === 6 && r.every(x => x !== null && x !== '')), rows.filter(r => r.some(x => !x)));
-  check('desktop: row 1 reads right', rows[0].join('|') === '01|On x Sky High Goods FW26|Jack Davison|Digital, Standard 16|Fashion|1:36', rows[0].join('|'));
+  check('desktop: row 1 reads right', rows[0].join('|') === '01|On x Sky High Goods FW26|Jack Davison|Digital, Standard 16|Fashion|0:30', rows[0].join('|'));
   check('desktop: Playing House shows total time', rows[7][5] === '0:44', rows[7]);
   check('desktop: no dotted leaders', await p.evaluate(() => !document.querySelector('.project-leader') && [...document.querySelectorAll('summary')].every(s => getComputedStyle(s, '::after').borderBottomStyle !== 'dotted' && getComputedStyle(s, '::before').content === 'none' || getComputedStyle(s, '::before').content === 'normal')));
   check('desktop: columns aligned with headings', await p.evaluate(() => {
