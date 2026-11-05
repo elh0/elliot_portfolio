@@ -197,58 +197,13 @@
   "format": 2,
   "version": "mupkgn9z"
  },
- "1236465203": {
-  "count": 16,
-  "interval": 0.9413,
-  "columns": 10,
-  "width": 320,
-  "height": 240,
-  "format": 2,
-  "version": "mw3bmcgv"
- },
- "1236465291": {
-  "count": 16,
-  "interval": 0.9413,
-  "columns": 10,
-  "width": 320,
-  "height": 240,
-  "format": 2,
-  "version": "mw3bmdyk"
- },
- "1236465363": {
-  "count": 16,
-  "interval": 0.9413,
-  "columns": 10,
-  "width": 320,
-  "height": 240,
-  "format": 2,
-  "version": "mw3bmfdi"
- },
- "1236465441": {
-  "count": 16,
-  "interval": 0.9413,
-  "columns": 10,
-  "width": 320,
-  "height": 240,
-  "format": 2,
-  "version": "mw3bmgts"
- },
- "1236465593": {
+ "1242428568": {
   "count": 31,
-  "interval": 0.9697,
+  "interval": 0.9684,
   "columns": 10,
   "width": 320,
   "height": 240,
   "format": 2,
-  "version": "mw3bmk5j"
- },
- "1236465669": {
-  "count": 7,
-  "interval": 0.8657,
-  "columns": 10,
-  "width": 320,
-  "height": 240,
-  "format": 2,
-  "version": "mw3bmhys"
+  "version": "mw3f9n94"
  }
 }
