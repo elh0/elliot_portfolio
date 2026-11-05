@@ -161,6 +161,17 @@
       ]
     },
     {
+      title: "Skepta - Pandora’s Box",
+      category: "Music",
+      director: "Hugh Mulhern",
+      format: "Super 16",
+      videos: [
+      { src: "https://player.vimeo.com/progressive_redirect/playback/1243880338/rendition/1080p/file.mp4%20%281080p%29.mp4?loc=external&log_user=0&signature=301fc0191141c417f6b9f412349cec575c9385039c3cc3ac774b55a265f0f8a6",
+        poster: "https://i.vimeocdn.com/video/2222544173-b1f106a0ec54219a94aca7c54274764842f595a32b2a5c589f772c813502499c-d_1280?region=us&mw=1920&q=90",
+        ratio: "1920 / 1080", time: "3:30", duration: 210.046667 }
+      ]
+    },
+    {
       title: "Polène SS24",
       category: "Fashion",
       director: "Guillaume Lebel",

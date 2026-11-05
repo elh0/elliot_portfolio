@@ -138,37 +138,39 @@
      step with PROJECTS in home.js (tests/suite.js checks it). */
   var DIRECTORS = [
     ["Claryn Chong", [
-      [18, "Swank Mami - MC69", "swank-mami-mc69"],
-      [19, "Unflirt - Seasong", "unflirt-seasong"]]],
+      [19, "Swank Mami - MC69", "swank-mami-mc69"],
+      [20, "Unflirt - Seasong", "unflirt-seasong"]]],
     ["Dominic Chew", [
-      [14, "Adidas ‘Tug of War’", "adidas-tug-of-war"]]],
+      [15, "Adidas ‘Tug of War’", "adidas-tug-of-war"]]],
     ["Erika Kamano", [
-      [13, "Xiaoqiao - Lethe", "xiaoqiao-lethe"]]],
+      [14, "Xiaoqiao - Lethe", "xiaoqiao-lethe"]]],
     ["Guillaume Lebel", [
-      [2, "Polène SS24", "polene-ss24"],
-      [6, "Pléi", "plei"]]],
+      [3, "Polène SS24", "polene-ss24"],
+      [7, "Pléi", "plei"]]],
     ["Hannan Hussain", [
-      [3, "Adidas ‘Return of the 15’", "adidas-return-of-the-15"]]],
+      [4, "Adidas ‘Return of the 15’", "adidas-return-of-the-15"]]],
+    ["Hugh Mulhern", [
+      [2, "Skepta - Pandora’s Box", "skepta-pandora-s-box"]]],
     ["Jack Davison", [
       [1, "On x Sky High Goods FW26", "on-x-sky-high-goods-fw26"]]],
     ["Jess Madavo", [
-      [5, "T Magazine", "t-magazine"]]],
+      [6, "T Magazine", "t-magazine"]]],
     ["Joe Ward", [
-      [9, "Bladee - Blondie", "bladee-blondie"]]],
+      [10, "Bladee - Blondie", "bladee-blondie"]]],
     ["Lydia Garnett", [
-      [8, "Playing House", "playing-house"]]],
+      [9, "Playing House", "playing-house"]]],
     ["Tayler Prince-Fraser", [
-      [10, "Art of Movement", "art-of-movement"],
-      [16, "The North Face", "the-north-face"]]],
+      [11, "Art of Movement", "art-of-movement"],
+      [17, "The North Face", "the-north-face"]]],
     ["Theo Cottle", [
-      [15, "CP x Barbour", "cp-x-barbour"]]],
+      [16, "CP x Barbour", "cp-x-barbour"]]],
     ["Tom Silvester", [
-      [7, "Helinox ‘Zero’ S/S26", "helinox-zero-s-s26"]]],
+      [8, "Helinox ‘Zero’ S/S26", "helinox-zero-s-s26"]]],
     ["Uncanny", [
-      [4, "Joe James - Papercuts", "joe-james-papercuts"],
-      [11, "Oasis x Spotify", "oasis-x-spotify"],
-      [12, "Corteiz ‘Lundun’", "corteiz-lundun"],
-      [20, "Rotator", "rotator"]]]
+      [5, "Joe James - Papercuts", "joe-james-papercuts"],
+      [12, "Oasis x Spotify", "oasis-x-spotify"],
+      [13, "Corteiz ‘Lundun’", "corteiz-lundun"],
+      [21, "Rotator", "rotator"]]]
   ];
 
   function make(tag, className, text) {

@@ -40,10 +40,10 @@ async function desktop(b) {
   check('desktop: Contact link keeps Cargo href', head.contact === '/contact', head.contact);
 
   const rows = await p.evaluate(() => [...document.querySelectorAll('summary')].map(s => [...s.children].map(c => getComputedStyle(c).display !== 'none' ? c.textContent : null)));
-  check('desktop: 20 rows', rows.length === 20, rows.length);
+  check('desktop: 21 rows', rows.length === 21, rows.length);
   check('desktop: rows show 6 columns', rows.every(r => r.length === 6 && r.every(x => x !== null && x !== '')), rows.filter(r => r.some(x => !x)));
   check('desktop: row 1 reads right', rows[0].join('|') === '01|On x Sky High Goods FW26|Jack Davison|Digital, Standard 16|Fashion|0:30', rows[0].join('|'));
-  check('desktop: Playing House shows total time', rows[7][5] === '0:44', rows[7]);
+  check('desktop: Playing House shows total time', rows[8][5] === '0:44', rows[8]);
   check('desktop: no dotted leaders', await p.evaluate(() => !document.querySelector('.project-leader') && [...document.querySelectorAll('summary')].every(s => getComputedStyle(s, '::after').borderBottomStyle !== 'dotted' && getComputedStyle(s, '::before').content === 'none' || getComputedStyle(s, '::before').content === 'normal')));
   check('desktop: columns aligned with headings', await p.evaluate(() => {
     const h = [...document.querySelector('.project-columns').children].map(e => Math.round(e.getBoundingClientRect().left));
@@ -73,9 +73,9 @@ async function desktop(b) {
   check('desktop: leaving the list hides the thumbnail, reel still there', await p.evaluate(() => !document.querySelector('.project-hover-preview').classList.contains('is-visible') && !!document.querySelector('.page-background')));
 
   // open by click: autoplay with sound
-  await p.locator('summary').nth(2).click(); await wait(p, 1500);
+  await p.locator('summary').nth(3).click(); await wait(p, 1500);
   let s = await state(p);
-  check('desktop: click opens project', s.open === 2, s);
+  check('desktop: click opens project', s.open === 3, s);
   check('desktop: opened project autoplays with sound', s.playing && s.muted === false, s);
   check('desktop: hash follows open project', s.hash === '#adidas-return-of-the-15', s.hash);
   await wait(p, 600);
@@ -99,16 +99,16 @@ async function desktop(b) {
   check('desktop: all text is 11px', sizes.length === 1 && sizes[0] === '11px', sizes);
   await p.locator('.project-navigation-next').click(); await wait(p, 1500);
   s = await state(p);
-  check('desktop: next chevron opens next project and plays', s.open === 3 && s.playing, s);
+  check('desktop: next chevron opens next project and plays', s.open === 4 && s.playing, s);
   check('desktop: previous project unloaded', s.loaded === 1, s);
 
   // keyboard
   await p.keyboard.press('ArrowRight'); await wait(p, 1200);
   s = await state(p);
-  check('desktop: → changes project', s.open === 4 && s.playing, s);
+  check('desktop: → changes project', s.open === 5 && s.playing, s);
   await p.keyboard.press('ArrowLeft'); await wait(p, 1200);
   s = await state(p);
-  check('desktop: ← changes project back', s.open === 3 && s.playing, s);
+  check('desktop: ← changes project back', s.open === 4 && s.playing, s);
 
   // double-click skip
   const before = (await state(p)).t;
@@ -125,27 +125,27 @@ async function desktop(b) {
   // filter
   await p.locator('.project-filter[data-category="Music"]').click(); await wait(p, 600);
   const vis = await p.evaluate(() => [...document.querySelectorAll('details.project-item')].filter(d => d.offsetParent).map(d => d.querySelector('.project-number').textContent));
-  check('desktop: Music filter shows 5 music projects, numbers kept', vis.join(',') === '04,09,13,18,19', vis);
+  check('desktop: Music filter shows 6 music projects, numbers kept', vis.join(',') === '02,05,10,14,19,20', vis);
   s = await state(p);
-  check('desktop: open project stays open when it matches the filter', s.open === 3 && s.playing, s);
-  await p.locator('summary').nth(8).click(); await wait(p, 1200);
+  check('desktop: open project stays open when it matches the filter', s.open === 4 && s.playing, s);
+  await p.locator('summary').nth(9).click(); await wait(p, 1200);
   await p.locator('.project-navigation-next').click(); await wait(p, 1200);
   s = await state(p);
-  check('desktop: chevrons move within the filter', s.open === 12 && s.playing, s);
-  for (const _ of [1, 2, 3]) { await p.keyboard.press('ArrowLeft'); await wait(p, 700); }
+  check('desktop: chevrons move within the filter', s.open === 13 && s.playing, s);
+  for (const _ of [1, 2, 3, 4]) { await p.keyboard.press('ArrowLeft'); await wait(p, 700); }
   s = await state(p);
-  check('desktop: arrows wrap within the filter', s.open === 18, s);
+  check('desktop: arrows wrap within the filter', s.open === 19, s);
   await p.locator('.project-filter[data-category="Short"]').click(); await wait(p, 600);
   s = await state(p);
   check('desktop: filter closes and unloads a hidden open project', s.open === -1 && s.loaded === 0, s);
   await p.locator('.project-filter[data-category="All"]').click(); await wait(p, 400);
-  check('desktop: All shows 20 again', await p.evaluate(() => [...document.querySelectorAll('details.project-item')].filter(d => d.offsetParent).length) === 20);
+  check('desktop: All shows 21 again', await p.evaluate(() => [...document.querySelectorAll('details.project-item')].filter(d => d.offsetParent).length) === 21);
 
   // contact sheet
   await p.locator('.project-view[data-view="sheet"]').click(); await wait(p, 800);
   const sheet = await p.evaluate(() => ({ frames: [...document.querySelectorAll('.project-frame')].filter(f => f.offsetParent).length, imgs: [...document.querySelectorAll('.project-frame img')].map(i => i.getAttribute('src')), listHidden: !document.querySelector('.project-accordion').offsetParent, open: document.querySelectorAll('details[open]').length }));
-  check('desktop: contact sheet shows 20 frames, list hidden', sheet.frames === 20 && sheet.listHidden, sheet);
-  check('desktop: every frame has a 960px Vimeo thumbnail', sheet.imgs.length === 20 && sheet.imgs.every(u => /-d_960/.test(u)), sheet.imgs.filter(u => !/-d_960/.test(u)));
+  check('desktop: contact sheet shows 21 frames, list hidden', sheet.frames === 21 && sheet.listHidden, sheet);
+  check('desktop: every frame has a 960px Vimeo thumbnail', sheet.imgs.length === 21 && sheet.imgs.every(u => /-d_960/.test(u)), sheet.imgs.filter(u => !/-d_960/.test(u)));
   check('desktop: switching to sheet closes the open project', sheet.open === 0);
   const chevHidden = await p.evaluate(() => [...document.querySelectorAll('.project-navigation-link')].every(b => b.style.opacity === '0'));
   check('desktop: chevrons hidden in contact sheet', chevHidden);
@@ -154,9 +154,9 @@ async function desktop(b) {
   await p.locator('.project-frame').nth(2).hover(); await wait(p, 600);
   check('desktop: hovering a frame slides its title out', await p.evaluate(() => getComputedStyle(document.querySelectorAll('.project-frame-edge')[2]).opacity === '1' && getComputedStyle(document.querySelectorAll('.project-frame-edge')[0]).opacity === '0'));
   await p.screenshot({ path: shot('sheet') });
-  await p.locator('.project-frame').nth(8).click(); await wait(p, 1500);
+  await p.locator('.project-frame').nth(9).click(); await wait(p, 1500);
   s = await state(p);
-  check('desktop: clicking a frame opens it in the list and plays', s.open === 8 && s.playing && s.hash === '#bladee-blondie', s);
+  check('desktop: clicking a frame opens it in the list and plays', s.open === 9 && s.playing && s.hash === '#bladee-blondie', s);
 
   // light theme
   await p.locator('details[open] .video-theme-toggle').click(); await wait(p, 400);
@@ -173,7 +173,7 @@ async function desktop(b) {
   const p2 = await c2.newPage();
   await p2.goto(base + '/projects#raf-simons'); await wait(p2, 1800);
   s = await state(p2);
-  check('desktop: #raf-simons link opens and plays it', s.open === 16 && s.playing, s);
+  check('desktop: #raf-simons link opens and plays it', s.open === 17 && s.playing, s);
   await c2.close();
 
   // short laptop window
@@ -218,7 +218,7 @@ async function phone(b, name, opts, sideways) {
   const mid = await p.evaluate(() => document.querySelector('summary .project-category .cell-text').textContent);
   check(name + ': Type switch scrambles the text on the way', mid !== 'Fashion', mid);
   await wait(p, 1300);
-  const shown = await p.evaluate(() => { const s = document.querySelectorAll('summary')[3]; return { dir: getComputedStyle(s.querySelector('.project-director')).opacity, type: getComputedStyle(s.querySelector('.project-category')).opacity, text: s.querySelector('.project-category').textContent }; });
+  const shown = await p.evaluate(() => { const s = document.querySelectorAll('summary')[4]; return { dir: getComputedStyle(s.querySelector('.project-director')).opacity, type: getComputedStyle(s.querySelector('.project-category')).opacity, text: s.querySelector('.project-category').textContent }; });
   check(name + ': Type switch settles on the type', shown.dir === '0' && shown.type === '1' && shown.text === 'Music', shown);
   const gType = await leaderGap('.project-category');
   check(name + ': leader stops just short of the type, no sliding', gType.every(g => g >= 3 && g <= 12) && await p.evaluate(() => getComputedStyle(document.querySelector('summary .project-category')).transform === 'none'), gType);
@@ -228,9 +228,9 @@ async function phone(b, name, opts, sideways) {
   await p.locator('.project-detail[data-detail="director"]').tap(); await wait(p, 800);
   await p.screenshot({ path: shot(name.replace(/\W+/g, '-') + '-list') });
 
-  await p.locator('summary').nth(1).tap(); await wait(p, 1500);
+  await p.locator('summary').nth(2).tap(); await wait(p, 1500);
   let s = await state(p);
-  check(name + ': tap opens and autoplays', s.open === 1 && s.playing, s);
+  check(name + ': tap opens and autoplays', s.open === 2 && s.playing, s);
   check(name + ': no chevrons', await p.evaluate(() => [...document.querySelectorAll('.project-navigation-link')].every(b => b.style.opacity === '0')));
   const fit = await p.evaluate(() => { const w = document.querySelector('details[open] .video-wrap').getBoundingClientRect(); const c = document.querySelector('details[open] .video-controls').getBoundingClientRect(); return { w: w.width, h: c.bottom - w.top, vw: innerWidth, vh: innerHeight }; });
   if (sideways) check(name + ': video and playbar fit the screen height', fit.h <= fit.vh, fit);
@@ -273,27 +273,27 @@ async function phone(b, name, opts, sideways) {
   }
   await swipe(-160); await wait(p, 1500);
   s = await state(p);
-  check(name + ': swipe left goes to next project and plays', s.open === 2 && s.playing, s);
+  check(name + ': swipe left goes to next project and plays', s.open === 3 && s.playing, s);
   await swipe(160); await wait(p, 1500);
   s = await state(p);
-  check(name + ': swipe right goes back', s.open === 1 && s.playing, s);
+  check(name + ': swipe right goes back', s.open === 2 && s.playing, s);
 
   if (!sideways) {
     // multi-video slideshow: Playing House swipes through its videos first
-    await p.locator('summary').nth(7).tap(); await wait(p, 1500);
+    await p.locator('summary').nth(8).tap(); await wait(p, 1500);
     // CDP touches don't drive native scrolling, so scroll the carousel as a swipe would
     await p.evaluate(() => { const c = document.querySelector('details[open] .project-carousel'); c.scrollTo({ left: c.children[1].offsetLeft - c.children[0].offsetLeft, behavior: 'instant' }); });
     await wait(p, 1200);
     const slide = await p.evaluate(() => [...document.querySelectorAll('details[open] video')].findIndex(v => !v.paused));
     s = await state(p);
-    check(name + ': Playing House slides to its second video and plays it', s.open === 7 && slide === 1, { s, slide });
+    check(name + ': Playing House slides to its second video and plays it', s.open === 8 && slide === 1, { s, slide });
     await p.screenshot({ path: shot(name.replace(/\W+/g, '-') + '-open') });
   }
 
   await p.evaluate(() => window.scrollTo(0, 0));
   await p.locator('.project-view[data-view="sheet"]').tap(); await wait(p, 800);
   const sheet = await p.evaluate(() => { const f = [...document.querySelectorAll('.project-frame')].filter(x => x.offsetParent); return { n: f.length, cols: new Set(f.slice(0, 4).map(x => Math.round(x.getBoundingClientRect().left))).size, overflow: document.documentElement.scrollWidth > innerWidth + 1 }; });
-  check(name + ': contact sheet in two columns, no sideways scroll', sheet.n === 20 && sheet.cols === 2 && !sheet.overflow, sheet);
+  check(name + ': contact sheet in two columns, no sideways scroll', sheet.n === 21 && sheet.cols === 2 && !sheet.overflow, sheet);
   await p.screenshot({ path: shot(name.replace(/\W+/g, '-') + '-sheet') });
   await p.locator('.project-frame').nth(4).tap(); await wait(p, 1500);
   s = await state(p);
@@ -336,7 +336,7 @@ async function contact(b) {
         overflow: document.documentElement.scrollWidth > innerWidth + 1 };
     });
     check(name + ': same name bar as projects' + (desktop ? '' : ', Work link only'), r.built && (desktop ? /Elliot Holbrow Cinematographer, London Work Contact/ : /^Elliot Holbrow Work Cinematographer, London$|^Elliot Holbrow Cinematographer, London Work$/).test(r.text.trim()), r);
-    check(name + ': 5 numbered contact rows and 13 directors, all with dotted leaders, no sideways scroll', r.rows === 5 && r.directors === 13 && r.dotted && !r.overflow, r);
+    check(name + ': 5 numbered contact rows and 14 directors, all with dotted leaders, no sideways scroll', r.rows === 5 && r.directors === 14 && r.dotted && !r.overflow, r);
     check(name + ': actions on the right', r.actions.join('|') === (desktop ? 'Copy|Copy|Email|Open \u2197|Open \u2197' : 'Email|Call|Email|Open \u2197|Open \u2197'), r.actions);
     check(name + ': London clock', /^London \d\d:\d\d (BST|GMT)$/.test(r.clock), r.clock);
     check(name + ': project numbers link to the project', r.link === '/projects#swank-mami-mc69', r.link);
@@ -348,7 +348,7 @@ async function contact(b) {
       check(name + ': pointing at a title lights only that title, not the comma', cols.link === 'rgb(255, 255, 255)' && cols.sep !== cols.link && cols.sep === cols.other, cols);
       await p.mouse.move(1, 1);
     }
-    if (desktop) check(name + ': each director\'s project titles show and link separately', titles.shown && titles.links === '2112111112114' && titles.last.join(' ') === '/projects#joe-james-papercuts /projects#oasis-x-spotify /projects#corteiz-lundun /projects#rotator', titles);
+    if (desktop) check(name + ': each director\'s project titles show and link separately', titles.shown && titles.links === '21121111112114' && titles.last.join(' ') === '/projects#joe-james-papercuts /projects#oasis-x-spotify /projects#corteiz-lundun /projects#rotator', titles);
     if (desktop) check(name + ': a long title list wraps within its column, nothing cut off', titles.fits && !titles.wide, titles);
     else check(name + ': directors show just the name and project numbers, no titles', titles.hidden && !titles.wide, titles);
     const lineup = await p.evaluate(() => ({ name: Math.round(document.querySelector('.site-name').getBoundingClientRect().left), number: Math.round(document.querySelector('.contact-number').getBoundingClientRect().left), title: Math.round(document.querySelector('.contact-tools').getBoundingClientRect().left), sizes: [...new Set([...document.querySelectorAll('.contact-page *')].filter(e => e.offsetParent).map(e => getComputedStyle(e).fontSize))] }));
